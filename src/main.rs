@@ -1,39 +1,45 @@
-use reqwest::get;
+use reqwest::{get, ClientBuilder};
 use scraper::{Html, Selector};
-use serenity::client::ClientBuilder;
-use serenity::prelude::{EventHandler, Context};
-use serenity::model::id::ChannelId;
-use std::fs::read_to_string;
-use serenity::model::prelude::Ready;
-use serenity::async_trait;
-use serenity::model::channel::Message;
-
-async fn main() {
-
-    let token = read_to_string("/home/flareflo/CLionProjects/WT_event_handler/assets/discord_token.txt").unwrap();
-
-    let mut client = ClientBuilder::new(token).event_handler(Handler).await.unwrap();
-
-    client.start().await.unwrap();
-
-
-}
-
-struct Handler;
-
-#[async_trait]
-impl EventHandler for Handler {
-    async fn ready(&self, ctx: Context, data_about_bot: Ready) {
-        println!("{} fucked your mom", data_about_bot.user.name);
-        secondary(ctx).await;
-    }
-}
 
 #[tokio::main]
-async fn secondary(ctx: Context) {
-    let html = Html::parse_document(&get("https://warthunder.com/en/news/").await.unwrap().text().await.unwrap());
-    let top_article_selector = "#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)";
-    let top_article = html.select(&Selector::parse(top_article_selector).unwrap()).next().unwrap().text().collect::<String>();
+async fn main() {
+    println!("Fetching data");
 
-    ChannelId::from(866634236232597534).say(&ctx.http, top_article).await.unwrap();
+    let url = "https://warthunder.com/en/news/";
+    let html = Html::parse_document(&get(url)
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap());
+    println!("Fetched data");
+
+    let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
+    let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
+
+    let top_article = html.select(&top_article_selector)
+        .next()
+        .unwrap()
+        .text()
+        .collect::<String>();
+    let top_url = html.select(&top_url_selector)
+        .next()
+        .unwrap()
+        .value()
+        .attr("href")
+        .unwrap();
+
+
+    let top_article = top_article.replace("  ", "").replace("\n\n", "");
+    println!("Data fetched; {}", top_article);
+    println!("With URL; {}", top_url);
+
+    let mut keywords = vec!["devblog", "event", "maintenance", "major", "trailer", "teaser", "developers", "fixed"];
+
+    for keyword in keywords {
+        if top_url.contains(keyword) {
+            println!("URL {} matched with keyword {}", top_url, keyword);
+            break
+        }
+    }
 }
