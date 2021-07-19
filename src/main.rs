@@ -1,4 +1,6 @@
-use reqwest::{get, ClientBuilder};
+use std::fs;
+
+use reqwest::{ClientBuilder, get};
 use scraper::{Html, Selector};
 
 #[tokio::main]
@@ -31,15 +33,21 @@ async fn main() {
 
 
     let top_article = top_article.replace("  ", "").replace("\n\n", "");
+    let top_url = format!("https://warthunder.com{}", top_url);
+
     println!("Data fetched; {}", top_article);
     println!("With URL; {}", top_url);
 
-    let mut keywords = vec!["devblog", "event", "maintenance", "major", "trailer", "teaser", "developers", "fixed"];
+    check(&top_url);
 
-    for keyword in keywords {
-        if top_url.contains(keyword) {
-            println!("URL {} matched with keyword {}", top_url, keyword);
-            break
+    fn check(url: &str) {
+        let keywords = vec!["devblog", "event", "maintenance", "major", "trailer", "teaser", "developers", "fixed", "shooting"];
+        for keyword in keywords {
+            if url.contains(keyword) {
+                println!("URL {} matched with keyword {}", url, keyword);
+                fs::write("url_socket.txt", url);
+                break;
+            }
         }
     }
 }
