@@ -20,7 +20,7 @@ async fn main() {
         sleep(time::Duration::from_secs(wait))
     }
     async fn handle_webhook() {
-        let token = fs::read_to_string("discord_token.txt").unwrap();
+        let token = fs::read_to_string("assets/discord_token.txt").unwrap();
         let id = 866930727019216906;
 
         let my_http_client = Http::new_with_token(&token);
