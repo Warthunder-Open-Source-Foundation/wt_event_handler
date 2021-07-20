@@ -24,7 +24,7 @@ async fn main() {
     }
     async fn handle_webhook() {
         let token = fs::read_to_string("assets/discord_token.txt").unwrap();
-        let id = 866930727019216906;
+        let id = 867052162970288159;
 
         let my_http_client = Http::new_with_token(&token);
 
@@ -36,6 +36,15 @@ async fn main() {
             }
             Ok(hook) => hook,
         };
+
+        webhook.execute(&my_http_client, false, |w| {
+            w.content("Bot online (debugging)");
+            w.username("The WT news bot");
+            // w.embeds(vec![embed]);
+            w
+        })
+            .await
+            .unwrap();
 
         let content = html_procecss().await;
         // let embed = Embed::fake(|mut e| {
