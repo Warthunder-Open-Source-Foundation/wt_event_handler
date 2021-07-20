@@ -1,45 +1,96 @@
-use reqwest::{get, ClientBuilder};
+use std::fs;
+use std::time;
+
+use reqwest::get;
 use scraper::{Html, Selector};
+use serenity;
+use serenity::http::client::Http;
+use std::thread::sleep;
+use rand;
+use rand::Rng;
+// use serenity::client::{ClientBuilder, EventHandler};
+// use serenity::model::channel::{Message, Embed};
 
 #[tokio::main]
 async fn main() {
-    println!("Fetching data");
+    loop {
+        handle_webhook().await;
+        let wait = rand::thread_rng().gen_range(50..70);
+        println!("Waiting for {} seconds", wait);
+        sleep(time::Duration::from_secs(wait))
+    }
+    async fn handle_webhook() {
+        let token = fs::read_to_string("assets/discord_token.txt").unwrap();
+        let id = 866930727019216906;
 
-    let url = "https://warthunder.com/en/news/";
-    let html = Html::parse_document(&get(url)
-        .await
-        .unwrap()
-        .text()
-        .await
-        .unwrap());
-    println!("Fetched data");
+        let my_http_client = Http::new_with_token(&token);
 
-    let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
-    let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
+        let webhook = my_http_client.get_webhook_with_token(id, &token)
+            .await
+            .expect("valid webhook");
 
-    let top_article = html.select(&top_article_selector)
-        .next()
-        .unwrap()
-        .text()
-        .collect::<String>();
-    let top_url = html.select(&top_url_selector)
-        .next()
-        .unwrap()
-        .value()
-        .attr("href")
-        .unwrap();
+        let content = html_procecss().await;
+        // let embed = Embed::fake(|mut e| {
+        //     // e.title("Cool news and that shit");
+        //     // e.description("Very nice");
+        //     e.url(content);
+        //     e
+        // });
 
-
-    let top_article = top_article.replace("  ", "").replace("\n\n", "");
-    println!("Data fetched; {}", top_article);
-    println!("With URL; {}", top_url);
-
-    let mut keywords = vec!["devblog", "event", "maintenance", "major", "trailer", "teaser", "developers", "fixed"];
-
-    for keyword in keywords {
-        if top_url.contains(keyword) {
-            println!("URL {} matched with keyword {}", top_url, keyword);
-            break
+        if !content.contains("No match found") && !fs::read_to_string("recent.txt").unwrap().contains(&content){
+            println!("New post found, hooking now");
+            webhook.execute(&my_http_client, false, | w| {
+                w.content(&format!("[{a}]({a})", a=content));
+                w.username("The WT news bot");
+                // w.embeds(vec![embed]);
+                w
+            })
+                .await
+                .unwrap();
+        }else {
+            println!("Content was either not a match or was previously fetched")
         }
+    }
+
+    async fn html_procecss() -> String {
+        println!("Fetching data");
+
+        let url = "https://warthunder.com/en/news/";
+        let html = Html::parse_document(&get(url)
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap());
+        println!("Fetched data");
+
+        let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
+        let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
+
+        let top_article = html.select(&top_article_selector)
+            .next()
+            .unwrap()
+            .text()
+            .collect::<String>();
+        let top_url = html.select(&top_url_selector)
+            .next()
+            .unwrap()
+            .value()
+            .attr("href")
+            .unwrap();
+
+
+        let top_article = top_article.replace("  ", "").replace("\n\n", "");
+        let keywords = vec!["devblog", "event", "maintenance", "major", "trailer", "teaser", "developers", "fixed"];
+        let top_url = &*format!("https://warthunder.com{}", top_url);
+
+        for keyword in keywords {
+            if top_url.contains(keyword) {
+                println!("URL {} matched with keyword {}", top_url, keyword);
+                fs::write("recent.txt", top_url);
+                return (top_url).parse().unwrap();
+            }
+        }
+        return String::from("No match found");
     }
 }
