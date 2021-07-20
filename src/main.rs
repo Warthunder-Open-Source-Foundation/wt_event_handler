@@ -8,8 +8,8 @@ use reqwest::get;
 use scraper::{Html, Selector};
 use serenity;
 use serenity::http::client::Http;
-use serenity::model::id::{ChannelId, GuildId, WebhookId};
-use serenity::model::prelude::{User, WebhookType};
+// use serenity::model::id::{ChannelId, GuildId, WebhookId};
+// use serenity::model::prelude::{WebhookType};
 
 // use serenity::client::{ClientBuilder, EventHandler};
 // use serenity::model::channel::{Message, Embed};
@@ -23,7 +23,12 @@ async fn main() {
         sleep(time::Duration::from_secs(wait))
     }
     async fn handle_webhook() {
+        // Using environmental variable due to some compatibility issues
+        // TODO comment lower line and add variable
         let token = fs::read_to_string("assets/discord_token.txt").unwrap();
+        // TODO uncomment lower line and add variable
+        // let token= "";
+
         let id = 867052162970288159;
 
         let my_http_client = Http::new_with_token(&token);
@@ -36,15 +41,6 @@ async fn main() {
             }
             Ok(hook) => hook,
         };
-
-        webhook.execute(&my_http_client, false, |w| {
-            w.content("Bot online (debugging)");
-            w.username("The WT news bot");
-            // w.embeds(vec![embed]);
-            w
-        })
-            .await
-            .unwrap();
 
         let content = html_procecss().await;
         // let embed = Embed::fake(|mut e| {
@@ -88,14 +84,14 @@ async fn main() {
             .unwrap());
         println!("Fetched data");
 
-        let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
+        // let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
         let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
 
-        let top_article = html.select(&top_article_selector)
-            .next()
-            .unwrap()
-            .text()
-            .collect::<String>();
+        // let top_article = html.select(&top_article_selector)
+        //     .next()
+        //     .unwrap()
+        //     .text()
+        //     .collect::<String>();
         let top_url = html.select(&top_url_selector)
             .next()
             .unwrap()
@@ -104,7 +100,7 @@ async fn main() {
             .unwrap();
 
 
-        let top_article = top_article.replace("  ", "").replace("\n\n", "");
+        // let top_article = top_article.replace("  ", "").replace("\n\n", "");
         let keywords = vec![
             "devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
             "fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
