@@ -1,15 +1,16 @@
 use std::fs;
+use std::thread::sleep;
 use std::time;
 
+use rand;
+use rand::Rng;
 use reqwest::get;
 use scraper::{Html, Selector};
 use serenity;
 use serenity::http::client::Http;
-use std::thread::sleep;
-use rand;
-use rand::Rng;
-use serenity::model::id::{WebhookId, ChannelId, GuildId};
-use serenity::model::prelude::{WebhookType, User};
+use serenity::model::id::{ChannelId, GuildId, WebhookId};
+use serenity::model::prelude::{User, WebhookType};
+
 // use serenity::client::{ClientBuilder, EventHandler};
 // use serenity::model::channel::{Message, Embed};
 
@@ -29,12 +30,12 @@ async fn main() {
 
         println!("{} {}", id, &token);
         let webhook = match my_http_client.get_webhook_with_token(id, token.as_str()).await {
-            Err(why) => {println!("{}", why); panic!("")},
+            Err(why) => {
+                println!("{}", why);
+                panic!("")
+            }
             Ok(hook) => hook,
         };
-
-
-        // println!("{:?}", webhook);
 
         let content = html_procecss().await;
         // let embed = Embed::fake(|mut e| {
@@ -44,19 +45,25 @@ async fn main() {
         //     e
         // });
 
-        if !content.contains("No match found") && fs::read_to_string("recent.txt").unwrap() != content{
-            println!("New post found, hooking now");
-            webhook.execute(&my_http_client, false, | w| {
-                fs::write("recent.txt", &content);
-                w.content(&format!("[{a}]({a})", a=content));
-                w.username("The WT news bot");
-                // w.embeds(vec![embed]);
-                w
-            })
-                .await
-                .unwrap();
-        }else {
-            println!("Content was either not a match or was previously fetched")
+        let recent = fs::read_to_string("recent.txt").expect("Cannot read file");
+
+        if !content.contains("No match found") {
+            if recent != content {
+                println!("New post found, hooking now");
+                webhook.execute(&my_http_client, false, |w| {
+                    fs::write("recent.txt", &content).expect("Writing to recent file failed");
+                    w.content(&format!("[{a}]({a})", a = content));
+                    w.username("The WT news bot");
+                    // w.embeds(vec![embed]);
+                    w
+                })
+                    .await
+                    .unwrap();
+            }else {
+                println!("Content was recently fetched and is not new");
+            }
+        } else {
+            println!("Content was either not a match")
         }
     }
 
@@ -89,7 +96,11 @@ async fn main() {
 
 
         let top_article = top_article.replace("  ", "").replace("\n\n", "");
-        let keywords = vec!["devblog", "event", "maintenance", "major", "trailer", "teaser", "developers", "fixed"];
+        let keywords = vec![
+            "devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
+            "fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
+            "shop", "special"
+        ];
         let top_url = &*format!("https://warthunder.com{}", top_url);
 
         for keyword in keywords {
