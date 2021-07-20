@@ -27,6 +27,7 @@ async fn main() {
 
         let my_http_client = Http::new_with_token(&token);
 
+        println!("{} {}", id, &token);
         let webhook = match my_http_client.get_webhook_with_token(id, &token).await {
             Err(why) => {println!("{}", why); panic!("")},
             Ok(hook) => hook,
