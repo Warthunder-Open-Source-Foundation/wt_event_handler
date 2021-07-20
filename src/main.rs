@@ -8,6 +8,8 @@ use serenity::http::client::Http;
 use std::thread::sleep;
 use rand;
 use rand::Rng;
+use serenity::model::id::{WebhookId, ChannelId, GuildId};
+use serenity::model::prelude::{WebhookType, User};
 // use serenity::client::{ClientBuilder, EventHandler};
 // use serenity::model::channel::{Message, Embed};
 
@@ -25,10 +27,11 @@ async fn main() {
 
         let my_http_client = Http::new_with_token(&token);
 
-
         let webhook = my_http_client.get_webhook_with_token(id, &token)
             .await
-            .expect("valid webhook");
+            .expect("invalid webhook");
+
+        // println!("{:?}", webhook);
 
         let content = html_procecss().await;
         // let embed = Embed::fake(|mut e| {
@@ -38,9 +41,10 @@ async fn main() {
         //     e
         // });
 
-        if !content.contains("No match found") && !fs::read_to_string("recent.txt").unwrap().contains(&content){
+        if !content.contains("No match found") && fs::read_to_string("recent.txt").unwrap() != content{
             println!("New post found, hooking now");
             webhook.execute(&my_http_client, false, | w| {
+                fs::write("recent.txt", &content);
                 w.content(&format!("[{a}]({a})", a=content));
                 w.username("The WT news bot");
                 // w.embeds(vec![embed]);
@@ -88,7 +92,6 @@ async fn main() {
         for keyword in keywords {
             if top_url.contains(keyword) {
                 println!("URL {} matched with keyword {}", top_url, keyword);
-                fs::write("recent.txt", top_url);
                 return (top_url).parse().unwrap();
             }
         }
