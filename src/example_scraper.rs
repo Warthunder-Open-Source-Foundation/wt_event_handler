@@ -4,7 +4,7 @@ use std::{fs, mem};
 
 
 // todo change function name
-pub async fn html_processor_wt_() -> String {
+pub async fn html_processor_wt_(index: usize) -> String {
     #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
     pub struct Root {
         pub targets: Vec<Target>,
