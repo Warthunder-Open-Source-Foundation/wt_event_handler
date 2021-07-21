@@ -43,7 +43,7 @@ pub async fn html_processor_wt_(index: usize) -> String {
 
     //  TODO add match list if required
     let keywords = vec![];
-    let top_url = &*format!("https://warthunder.com{}", top_url);
+    let top_url = &*format!("{}", top_url);
 
     for keyword in keywords {
         if top_url.contains(keyword) {
