@@ -11,9 +11,11 @@ use serenity::http::client::Http;
 
 use crate::wt_news::html_processor_wt_news;
 use crate::coub::html_processor_coub;
+use crate::forum_news::html_processor_wt_forums;
 
 mod wt_news;
 mod coub;
+mod forum_news;
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +23,11 @@ async fn main() {
         let wt_news_content = html_processor_wt_news(0).await;
         handle_webhook(wt_news_content, 0).await;
 
-        // let coub = html_processor_coub().await;
+        // let coub = html_processor_coub(1).await;
+        // handle_webhook(coub, 1).await;
+
+        let forum_news = html_processor_wt_forums(2).await;
+        handle_webhook(forum_news, 2).await;
 
 
 
