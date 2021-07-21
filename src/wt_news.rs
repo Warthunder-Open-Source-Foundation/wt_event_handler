@@ -1,7 +1,7 @@
 use scraper::{Html, Selector};
 use reqwest::get;
 
-pub async fn html_processor() -> String {
+pub async fn html_processor_wt_news() -> String {
     println!("Fetching data");
 
     let url = "https://warthunder.com/en/news/";

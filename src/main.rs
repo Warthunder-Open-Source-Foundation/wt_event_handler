@@ -11,17 +11,18 @@ use scraper::{Html, Selector};
 use serenity;
 
 use serenity::http::client::Http;
-use crate::wt_news::html_processor;
+use crate::wt_news::html_processor_wt_news;
 
 #[tokio::main]
 async fn main() {
     loop {
-        handle_webhook().await;
+        let content = html_processor_wt_news().await;
+        handle_webhook(content).await;
         let wait = rand::thread_rng().gen_range(50..70);
         println!("Waiting for {} seconds", wait);
         sleep(time::Duration::from_secs(wait))
     }
-    async fn handle_webhook() {
+    async fn handle_webhook(content: String) {
         // Using environmental variable due to some compatibility issues
         // TODO comment lower line and add variable
         let token = fs::read_to_string("assets/discord_token.txt").unwrap();
@@ -40,7 +41,7 @@ async fn main() {
             Ok(hook) => hook,
         };
 
-        let content = html_processor().await;
+
         // let embed = Embed::fake(|mut e| {
         //     // e.title("Cool news and that shit");
         //     // e.description("Very nice");
