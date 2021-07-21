@@ -66,7 +66,6 @@ async fn main() {
 
         let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
         let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
-        println!("{}", cache.targets[index].name);
 
         if !content.contains("No match found") {
             if cache.targets[index].recent_url != content {
