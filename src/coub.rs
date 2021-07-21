@@ -30,7 +30,7 @@ pub async fn html_processor_coub() -> String {
         .text()
         .await
         .unwrap());
-    println!("Fetched data with size {} bytes", mem::size_of_val(&html));
+    println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
     // println!("{:?}", html);
 

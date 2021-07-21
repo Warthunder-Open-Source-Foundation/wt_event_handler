@@ -19,7 +19,7 @@ mod coub;
 async fn main() {
     loop {
         let wt_news_content = html_processor_wt_news().await;
-        // handle_webhook(wt_news_content, 0).await;
+        handle_webhook(wt_news_content, 0).await;
 
         // let coub = html_processor_coub().await;
 

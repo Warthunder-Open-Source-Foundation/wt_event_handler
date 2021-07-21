@@ -27,7 +27,7 @@ pub async fn html_processor_wt_news() -> String {
         .text()
         .await
         .unwrap());
-    println!("Fetched data with size {} bytes", mem::size_of_val(&html));
+    println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
     // let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
     let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
