@@ -2,7 +2,7 @@ use reqwest::get;
 use scraper::{Html, Selector};
 use std::{fs, mem};
 
-// todo change function name
+// TODO change function name
 pub async fn html_processor_wt_(index: usize) -> String {
 	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 	pub struct Root {
