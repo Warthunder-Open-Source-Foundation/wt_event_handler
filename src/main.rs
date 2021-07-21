@@ -4,9 +4,7 @@ use std::time;
 
 use rand;
 use rand::Rng;
-use reqwest::get;
-use scraper::{Html, Selector};
-use serde::{Deserialize, Serialize};
+use serde;
 use serde_json;
 use serenity;
 use serenity::http::client::Http;
@@ -19,12 +17,12 @@ mod wt_news;
 async fn main() {
     loop {
         let content = html_processor_wt_news().await;
-        handle_webhook(content).await;
+        handle_webhook(content, 0).await;
         let wait = rand::thread_rng().gen_range(50..70);
         println!("Waiting for {} seconds", wait);
         sleep(time::Duration::from_secs(wait))
     }
-    async fn handle_webhook(content: String) {
+    async fn handle_webhook(content: String, index: usize) {
         // Using environmental variable due to some compatibility issues
         // TODO comment lower line and add variable
         let token = fs::read_to_string("assets/discord_token.txt").unwrap();
@@ -63,7 +61,6 @@ async fn main() {
             pub domain: String,
         }
 
-        let index = 0;
 
         let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
         let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
@@ -73,7 +70,6 @@ async fn main() {
             if cache.targets[index].recent_url != content {
                 println!("New post found, hooking now");
                 webhook.execute(&my_http_client, false, |w| {
-                    cache.targets[index].recent_url = content;
                     w.content(&format!("[{a}]({a})", a = content));
                     w.username("The WT news bot");
                     // w.embeds(vec![embed]);
@@ -81,6 +77,9 @@ async fn main() {
                 })
                     .await
                     .unwrap();
+                cache.targets[index].recent_url = content;
+                let write = serde_json::to_string(&cache).unwrap();
+                fs::write("recent.json", write).expect("Couldn't write to file");
             } else {
                 println!("Content was recently fetched and is not new");
             }
