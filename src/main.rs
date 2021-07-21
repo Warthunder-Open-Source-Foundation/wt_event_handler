@@ -10,14 +10,20 @@ use serenity;
 use serenity::http::client::Http;
 
 use crate::wt_news::html_processor_wt_news;
+use crate::coub::html_processor_coub;
 
 mod wt_news;
+mod coub;
 
 #[tokio::main]
 async fn main() {
     loop {
         let wt_news_content = html_processor_wt_news().await;
-        handle_webhook(wt_news_content, 0).await;
+        // handle_webhook(wt_news_content, 0).await;
+
+        // let coub = html_processor_coub().await;
+
+
 
         // Cool down to prevent rate limiting and excessive performance impact
         let wait = rand::thread_rng().gen_range(50..70);

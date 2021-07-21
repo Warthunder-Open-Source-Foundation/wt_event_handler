@@ -1,17 +1,33 @@
 use scraper::{Html, Selector};
 use reqwest::get;
+use std::{fs, mem};
 
 pub async fn html_processor_wt_news() -> String {
-    println!("Fetching data");
+    #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+    pub struct Root {
+        pub targets: Vec<Target>,
+    }
 
-    let url = "https://warthunder.com/en/news/";
+    #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+    pub struct Target {
+        pub name: String,
+        pub recent_url: String,
+        pub domain: String,
+    }
+
+    let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
+    let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+
+    let url = &cache.targets[0].domain;
+
+    println!("Fetching data from {}", url);
     let html = Html::parse_document(&get(url)
         .await
         .unwrap()
         .text()
         .await
         .unwrap());
-    println!("Fetched data");
+    println!("Fetched data with size {} bytes", mem::size_of_val(&html));
 
     // let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
     let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();

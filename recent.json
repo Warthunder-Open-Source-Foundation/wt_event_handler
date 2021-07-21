@@ -6,9 +6,9 @@
       "domain": "https://warthunder.com"
     },
     {
-      "name": "Forum_news",
-      "recent_url": "",
-      "domain": ""
+      "name": "Coub",
+      "recent_url": "https://coub.com/view/2ucilq",
+      "domain": "https://coub.com/warthunder/coubs"
     }
   ]
 }
