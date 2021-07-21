@@ -32,9 +32,9 @@ async fn main() {
     }
     async fn handle_webhook(content: String, index: usize) {
         // Using environmental variable due to some compatibility issues
-        // TODO comment lower line and add variable
+        // comment lower line and add variable
         let token = fs::read_to_string("assets/discord_token.txt").unwrap();
-        // TODO uncomment lower line and add variable
+        // uncomment lower line and add variable
         // let token = "";
 
         let id = 867052162970288159;

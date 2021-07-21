@@ -34,6 +34,7 @@ pub async fn html_processor_coub() -> String {
 
     // println!("{:?}", html);
 
+    // TODO fix selector to recieve proper html element
     let top_url_selector = Selector::parse("body > div.body-container > div.logged.page-container > div.page__content > div.page__body.grid-container.gutter-gamma > div > div.coubs-list > div.coubs-list__inner.masonry > div.page > div:nth-child(1) > div.coub__inner > div > div.coub__description > div > div.description__info > h5 > a").unwrap();
 
     let top_url = html.select(&top_url_selector)
