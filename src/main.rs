@@ -10,7 +10,7 @@ use serenity;
 use serenity::http::client::Http;
 
 use crate::wt_news::html_processor_wt_news;
-use crate::coub::html_processor_coub;
+// use crate::coub::html_processor_coub;
 use crate::forum_news::html_processor_wt_forums;
 
 mod wt_news;
