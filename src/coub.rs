@@ -30,6 +30,8 @@ pub async fn html_processor_coub() -> String {
 		.text()
 		.await
 		.unwrap());
+
+	// Doesnt fucking work for some reason, always returns 56. And yes, im probably just stupid.
 	println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
 	// println!("{:?}", html);

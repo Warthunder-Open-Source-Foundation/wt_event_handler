@@ -28,6 +28,8 @@ pub async fn html_processor_wt_(index: usize) -> String {
 		.text()
 		.await
 		.unwrap());
+
+	// Doesnt fucking work for some reason, always returns 56. And yes, im probably just stupid.
 	println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
 	// todo add html selector
