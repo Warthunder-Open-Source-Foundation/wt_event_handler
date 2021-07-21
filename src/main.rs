@@ -1,5 +1,3 @@
-mod wt_news;
-
 use std::fs;
 use std::thread::sleep;
 use std::time;
@@ -8,12 +6,14 @@ use rand;
 use rand::Rng;
 use reqwest::get;
 use scraper::{Html, Selector};
-use serenity;
 use serde::{Deserialize, Serialize};
 use serde_json;
-
+use serenity;
 use serenity::http::client::Http;
+
 use crate::wt_news::html_processor_wt_news;
+
+mod wt_news;
 
 #[tokio::main]
 async fn main() {
@@ -51,34 +51,41 @@ async fn main() {
         //     e
         // });
 
-        #[derive(Serialize, Deserialize)]
-        struct Recent {
-            url: String,
+        #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+        pub struct Root {
+            pub targets: Vec<Target>,
         }
 
-        let recent = fs::read_to_string("recent.json").expect("Cannot read file");
-        let testjet: Recent = serde_json::from_str(&recent).expect("Json cannot be read");
-        println!("{}", testjet.url);
+        #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+        pub struct Target {
+            pub name: String,
+            pub recent_url: String,
+            pub domain: String,
+        }
 
-        // if !content.contains("No match found") {
-        //     if recent != content {
-        //         println!("New post found, hooking now");
-        //         webhook.execute(&my_http_client, false, |w| {
-        //             fs::write("recent.txt", &content).expect("Writing to recent file failed");
-        //             w.content(&format!("[{a}]({a})", a = content));
-        //             w.username("The WT news bot");
-        //             // w.embeds(vec![embed]);
-        //             w
-        //         })
-        //             .await
-        //             .unwrap();
-        //     }else {
-        //         println!("Content was recently fetched and is not new");
-        //     }
-        // } else {
-        //     println!("Content was either not a match")
-        // }
+        let index = 0;
+
+        let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
+        let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+        println!("{}", cache.targets[index].name);
+
+        if !content.contains("No match found") {
+            if cache.targets[index].recent_url != content {
+                println!("New post found, hooking now");
+                webhook.execute(&my_http_client, false, |w| {
+                    cache.targets[index].recent_url = content;
+                    w.content(&format!("[{a}]({a})", a = content));
+                    w.username("The WT news bot");
+                    // w.embeds(vec![embed]);
+                    w
+                })
+                    .await
+                    .unwrap();
+            } else {
+                println!("Content was recently fetched and is not new");
+            }
+        } else {
+            println!("Content was either not a match")
+        }
     }
-
-
 }

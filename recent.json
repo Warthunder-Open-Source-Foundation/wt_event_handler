@@ -1,3 +1,14 @@
 {
-  "url": "https://warthunder.com/en/news/7246-development-battle-pass-vehicles-sd-kfz-251-22-en"
+  "targets": [
+    {
+      "name": "Warthunder_news",
+      "recent_url": "https://warthunder.com/en/news/7246-development-battle-pass-vehicles-sd-kfz-251-22-en",
+      "domain": "https://warthunder.com"
+    },
+    {
+      "name": "Forum_news",
+      "recent_url": "",
+      "domain": ""
+    }
+  ]
 }
