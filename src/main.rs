@@ -27,7 +27,7 @@ async fn main() {
         // TODO comment lower line and add variable
         let token = fs::read_to_string("assets/discord_token.txt").unwrap();
         // TODO uncomment lower line and add variable
-        // let token= "";
+        // let token = "";
 
         let id = 867052162970288159;
 
