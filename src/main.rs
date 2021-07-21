@@ -37,17 +37,20 @@ async fn main() {
         sleep(time::Duration::from_secs(wait))
     }
     async fn handle_webhook(content: String, index: usize) {
-        // Using environmental variable due to some compatibility issues
-        // comment lower line and add variable
-        let token = fs::read_to_string("assets/discord_token.txt").unwrap();
-        // uncomment lower line and add variable
-        // let token = "";
+
+        #[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+        pub struct Token {
+            token: String,
+        }
+
+        let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+        let token: Token = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
         let id = 867052162970288159;
 
-        let my_http_client = Http::new_with_token(&token);
+        let my_http_client = Http::new_with_token(&token.token);
 
-        let webhook = match my_http_client.get_webhook_with_token(id, &token).await {
+        let webhook = match my_http_client.get_webhook_with_token(id, &token.token).await {
             Err(why) => {
                 println!("{}", why);
                 panic!("")
