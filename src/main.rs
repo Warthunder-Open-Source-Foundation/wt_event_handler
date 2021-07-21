@@ -16,8 +16,10 @@ mod wt_news;
 #[tokio::main]
 async fn main() {
     loop {
-        let content = html_processor_wt_news().await;
-        handle_webhook(content, 0).await;
+        let wt_news_content = html_processor_wt_news().await;
+        handle_webhook(wt_news_content, 0).await;
+
+        // Cool down to prevent rate limiting and excessive performance impact
         let wait = rand::thread_rng().gen_range(50..70);
         println!("Waiting for {} seconds", wait);
         sleep(time::Duration::from_secs(wait))
