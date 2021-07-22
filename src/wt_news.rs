@@ -22,6 +22,12 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	let url = &cache.targets[index].domain;
 
 	println!("Fetching data from {}", url);
+
+	if get(url).await.is_err() {
+		println!("Cannot fetch data");
+		return "fetch_failed".to_string()
+	}
+
 	let html = Html::parse_document(&get(url)
 		.await
 		.unwrap()
