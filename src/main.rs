@@ -1,21 +1,18 @@
-use std::fs;
 use std::thread::sleep;
 use std::time;
 
 use rand;
 use rand::Rng;
-use serde;
-use serde_json;
-use serenity;
-use serenity::http::client::Http;
 
 use crate::coub::html_processor_coub;
 use crate::forum_news::html_processor_wt_forums;
+use crate::webhook_handler::handle_webhook;
 use crate::wt_news::html_processor_wt_news;
 
 mod wt_news;
 mod coub;
 mod forum_news;
+mod webhook_handler;
 
 #[tokio::main]
 async fn main() {
@@ -36,70 +33,5 @@ async fn main() {
 		let wait = rand::thread_rng().gen_range(50..70);
 		println!("Waiting for {} seconds", wait);
 		sleep(time::Duration::from_secs(wait))
-	}
-	async fn handle_webhook(content: String, index: usize) {
-		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-		pub struct Token {
-			token: String,
-		}
-
-		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-		let token: Token = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
-		let id = 867052162970288159;
-
-		let my_http_client = Http::new_with_token(&token.token);
-
-		let webhook = match my_http_client.get_webhook_with_token(id, &token.token).await {
-			Err(why) => {
-				println!("{}", why);
-				panic!("")
-			}
-			Ok(hook) => hook,
-		};
-
-
-		// let embed = Embed::fake(|mut e| {
-		//     // e.title("Cool news and that shit");
-		//     // e.description("Very nice");
-		//     e.url(content);
-		//     e
-		// });
-
-		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-		pub struct Root {
-			pub targets: Vec<Target>,
-		}
-
-		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-		pub struct Target {
-			pub name: String,
-			pub recent_url: String,
-			pub domain: String,
-		}
-
-		let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
-		let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
-
-		if !content.contains("No match found") {
-			if cache.targets[index].recent_url != content {
-				println!("New post found, hooking now");
-				webhook.execute(&my_http_client, false, |w| {
-					w.content(&format!("[{a}]({a})", a = content));
-					w.username("The WT news bot");
-					// w.embeds(vec![embed]);
-					w
-				})
-					.await
-					.unwrap();
-				cache.targets[index].recent_url = content;
-				let write = serde_json::to_string(&cache).unwrap();
-				fs::write("recent.json", write).expect("Couldn't write to file");
-			} else {
-				println!("Content was recently fetched and is not new");
-			}
-		} else {
-			println!("Content was either not a match")
-		}
 	}
 }
