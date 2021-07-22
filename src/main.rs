@@ -35,20 +35,33 @@ async fn main() {
 		println!("Waiting for {} seconds", wait);
 		sleep(time::Duration::from_secs(wait))
 	}
+
 	async fn handle_webhook(content: String, index: usize) {
 		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-		pub struct Token {
-			token: String,
+		pub struct WebhookAuth {
+			pub hooks: Vec<Hooks>,
+		}
+
+		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+		pub struct Hooks {
+			pub name: String,
+			pub token: String,
+			pub uid: u64,
 		}
 
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-		let token: Token = serde_json::from_str(&token_raw).expect("Json cannot be read");
+		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
-		let id = 867052162970288159;
+		for index in webhook_auth.hooks.len()-1 {
 
-		let my_http_client = Http::new_with_token(&token.token);
+		}
 
-		let webhook = match my_http_client.get_webhook_with_token(id, &token.token).await {
+		let uid = webhook_auth.hooks[0].uid;
+		let token= &webhook_auth.hooks[0].token;
+
+		let my_http_client = Http::new_with_token(&token);
+
+		let webhook = match my_http_client.get_webhook_with_token(uid, &token).await {
 			Err(why) => {
 				println!("{}", why);
 				panic!("")
