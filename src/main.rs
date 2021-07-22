@@ -1,18 +1,13 @@
-use std::fs;
 use std::thread::sleep;
 use std::time;
 
 use rand;
 use rand::Rng;
-use serde;
-use serde_json;
-use serenity;
-use serenity::http::client::Http;
 
 use crate::coub::html_processor_coub;
 use crate::forum_news::html_processor_wt_forums;
-use crate::wt_news::html_processor_wt_news;
 use crate::webhook_handler::handle_webhook;
+use crate::wt_news::html_processor_wt_news;
 
 mod wt_news;
 mod coub;
