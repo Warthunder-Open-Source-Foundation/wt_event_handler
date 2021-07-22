@@ -29,6 +29,7 @@ async fn main() {
 		if forum_news != "fetch_failed" {
 			handle_webhook(forum_news, 2).await;
 		}
+
 		// Cool down to prevent rate limiting and excessive performance impact
 		let wait = rand::thread_rng().gen_range(50..70);
 		println!("Waiting for {} seconds", wait);
