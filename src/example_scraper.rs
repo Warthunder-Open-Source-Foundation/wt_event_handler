@@ -2,7 +2,7 @@ use reqwest::get;
 use scraper::{Html, Selector};
 use std::{fs, mem};
 
-// todo change function name
+// TODO change function name
 pub async fn html_processor_wt_(index: usize) -> String {
 	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 	pub struct Root {
@@ -22,12 +22,20 @@ pub async fn html_processor_wt_(index: usize) -> String {
 	let url = &cache.targets[index].domain;
 
 	println!("Fetching data from {}", url);
+
+	if get(url).await.is_err() {
+		println!("Cannot fetch data");
+		return "fetch_failed".to_string()
+	}
+
 	let html = Html::parse_document(&get(url)
 		.await
 		.unwrap()
 		.text()
 		.await
 		.unwrap());
+
+	// Doesnt fucking work for some reason, always returns 56. And yes, im probably just stupid.
 	println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
 	// todo add html selector

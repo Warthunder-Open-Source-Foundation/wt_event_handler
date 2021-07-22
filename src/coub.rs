@@ -18,7 +18,7 @@ pub async fn html_processor_coub() -> String {
 	}
 
 	let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
-	let cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+	let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
 	let url = &cache.targets[1].domain;
 
@@ -30,6 +30,8 @@ pub async fn html_processor_coub() -> String {
 		.text()
 		.await
 		.unwrap());
+
+	// Doesnt fucking work for some reason, always returns 56. And yes, im probably just stupid.
 	println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
 	// println!("{:?}", html);
