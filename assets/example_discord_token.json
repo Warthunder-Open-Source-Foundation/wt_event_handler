@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "name": "Name of the channel for identifying the token later",
+      "token": "",
+      "uid": 0
+    }
+  ]
+}
