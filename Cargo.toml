@@ -1,5 +1,5 @@
 [package]
-name = "WT_event_handler"
+name = "wt_event_handler"
 version = "0.1.1"
 edition = "2018"
 
