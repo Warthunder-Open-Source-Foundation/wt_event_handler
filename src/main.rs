@@ -4,15 +4,14 @@ use std::time;
 use rand;
 use rand::Rng;
 
-use crate::forum_news::html_processor_wt_forums;
+use crate::scrapers::wt_news::html_processor_wt_news;
+use crate::scrapers::forum_news::html_processor_wt_forums;
 use crate::webhook_handler::handle_webhook;
-use crate::wt_news::html_processor_wt_news;
 use crate::recent_name_to_index::convert;
 
-mod wt_news;
-mod forum_news;
 mod webhook_handler;
 mod recent_name_to_index;
+mod scrapers;
 
 #[tokio::main]
 async fn main() {
