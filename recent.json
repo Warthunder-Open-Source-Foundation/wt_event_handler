@@ -1,12 +1,12 @@
 {
   "targets": [
     {
-      "name": "Warthunder_news",
+      "name": "warthunder_news",
       "recent_url": "https://warthunder.com/en/news/7247-development-battle-pass-vehicles-a6m6c-en",
       "domain": "https://warthunder.com/en/news"
     },
     {
-      "name": "Coub",
+      "name": "coub",
       "recent_url": "https://coub.com/view/2ucilq",
       "domain": "https://coub.com/warthunder/coubs"
     },
