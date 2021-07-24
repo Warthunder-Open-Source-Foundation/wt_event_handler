@@ -2,15 +2,9 @@ use std::fs;
 
 use serenity::http::Http;
 use serenity::model::prelude::Webhook;
+use serenity::model::channel::Embed;
 
 pub async fn handle_webhook(content: String, index: usize) {
-
-	// let embed = Embed::fake(|mut e| {
-	//     // e.title("Cool news and that shit");
-	//     // e.description("Very nice");
-	//     e.url(content);
-	//     e
-	// });
 
 	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 	pub struct Root {
@@ -71,8 +65,14 @@ pub async fn handle_webhook(content: String, index: usize) {
 				}
 				Ok(hook) => hook,
 			};
+			let embed = Embed::fake(|mut e| {
+				e.title(content);
+				e.url(content);
+				e
+			});
+
 			webhook.execute(my_http_client, false, |w| {
-				w.content(&format!("[{a}]({a})", a = content));
+				w.content(&format!("[{a}]()", a = content));
 				w.username("The WT news bot");
 				// w.embeds(vec![embed]);
 				w
