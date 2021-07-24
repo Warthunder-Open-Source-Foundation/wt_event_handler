@@ -75,6 +75,7 @@ pub async fn handle_webhook(content: String, index: usize) {
 				w.content(&format!("[{a}]()", a = content));
 				w.username("The WT news bot");
 				// w.embeds(vec![embed]);
+				w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
 				w
 			})
 				.await
