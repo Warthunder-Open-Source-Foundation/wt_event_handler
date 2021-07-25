@@ -1,7 +1,14 @@
 use std::{fs, mem};
 
+use log::*;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::encode::pattern::PatternEncoder;
+use log4rs::config::{Appender, Config, Logger, Root};
+
 use reqwest::get;
 use scraper::{Html, Selector};
+use serenity::futures::future::err;
 
 pub async fn html_processor_wt_forums(index: usize) -> String {
 	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -22,13 +29,20 @@ pub async fn html_processor_wt_forums(index: usize) -> String {
 	let url = &cache.targets[index].domain;
 
 	println!("Fetching data from {}", url);
+	info!("Fetching data from {}", url);
+
+	if get(url).await.is_err() {
+		println!("Cannot fetch data");
+		error!("Cannot fetch data from {}", url);
+		return "fetch_failed".to_string()
+	}
+
 	let html = Html::parse_document(&get(url)
 		.await
 		.unwrap()
 		.text()
 		.await
 		.unwrap());
-	println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
 	let top_url_selector = Selector::parse("body > main > div > div > div > div:nth-child(2) > div > ol > li:nth-child(2) > div > h4 > div > a").unwrap();
 
