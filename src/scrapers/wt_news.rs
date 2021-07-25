@@ -1,5 +1,12 @@
 use std::{fs, mem};
 
+use log::*;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::encode::pattern::PatternEncoder;
+use log4rs::config::{Appender, Config, Logger, Root};
+
+
 use reqwest::get;
 use scraper::{Html, Selector};
 
@@ -25,6 +32,7 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 
 	if get(url).await.is_err() {
 		println!("Cannot fetch data");
+		error!("Cannot fetch data from {}", url);
 		return "fetch_failed".to_string()
 	}
 
@@ -34,9 +42,6 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 		.text()
 		.await
 		.unwrap());
-
-	// Doesnt fucking work for some reason, always returns 56. And yes, im probably just stupid.
-	println!("Fetched data with size of {} bytes", mem::size_of_val(&html));
 
 	// let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
 	let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
@@ -65,6 +70,7 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	for keyword in keywords {
 		if top_url.contains(keyword) {
 			println!("URL {} matched with keyword {}", top_url, keyword);
+			warn!("URL {} matched with keyword {}", top_url, keyword);
 			return (top_url).parse().unwrap();
 		}
 	}
