@@ -3,20 +3,9 @@ use std::{fs};
 use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
+use crate::recent::*;
 
 pub async fn html_processor_wt_news(index: usize) -> String {
-	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-	pub struct Root {
-		pub targets: Vec<Target>,
-	}
-
-	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-	pub struct Target {
-		pub name: String,
-		pub recent_url: String,
-		pub domain: String,
-	}
-
 	let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
 	let cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
@@ -53,20 +42,20 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 		.unwrap();
 
 
-	// let top_article = top_article.replace("  ", "").replace("\n\n", "");
-	let keywords = vec![
+	let default_keywords = vec![
 		"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 		"fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
 		"shop", "pass", "season", "operation", "pass", "summer", "2021"
 	];
 	let top_url = &*format!("https://warthunder.com{}", top_url);
 
-	for keyword in keywords {
+	for keyword in default_keywords {
 		if top_url.contains(keyword) {
 			println!("URL {} matched with keyword {}", top_url, keyword);
 			warn!("URL {} matched with keyword {}", top_url, keyword);
 			return (top_url).parse().unwrap();
 		}
 	}
-	return String::from("No match found");
+	let result = &cache.targets[index].recent_url;
+	return result.to_string();
 }

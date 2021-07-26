@@ -2,26 +2,14 @@ use std::fs;
 
 use log::*;
 use serenity::http::Http;
+use crate::recent::*;
+use crate::webhooks::*;
 // use serenity::model::channel::Embed;
 
 pub async fn handle_webhook(content: String, index: usize) {
-
-	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-	pub struct Root {
-		pub targets: Vec<Target>,
-	}
-
-	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-	pub struct Target {
-		pub name: String,
-		pub recent_url: String,
-		pub domain: String,
-	}
-
 	let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
 	let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
-	if !content.contains("No match found") {
 		if cache.targets[index].recent_url != content {
 			println!("New post found, hooking now");
 			warn!("New post found, hooking now");
@@ -30,27 +18,11 @@ pub async fn handle_webhook(content: String, index: usize) {
 			let write = serde_json::to_string(&cache).unwrap();
 			fs::write("recent.json", write).expect("Couldn't write to file");
 		} else {
-			println!("Content was recently fetched and is not new");
-			info!("Content was recently fetched and is not new");
+			println!("Content was recently fetched and is not , or is excluded from the filter");
+			info!("Content was recently fetched and is not new, or is excluded from the filter");
 		}
-	} else {
-		println!("Content was either not a match");
-		info!("Content was either not a match");
-	}
 
 	async fn execute_webhooks(content: &String) {
-		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-		pub struct WebhookAuth {
-			pub hooks: Vec<Hooks>,
-		}
-
-		#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-		pub struct Hooks {
-			pub name: String,
-			pub token: String,
-			pub uid: u64,
-		}
-
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
