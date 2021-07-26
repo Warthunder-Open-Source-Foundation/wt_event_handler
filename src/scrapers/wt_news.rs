@@ -4,12 +4,18 @@ use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
 use crate::recent::*;
+use crate::webhooks::*;
+use serenity::model::prelude::Webhook;
+use crate::webhooks::FilterType::*;
 
 pub async fn html_processor_wt_news(index: usize) -> String {
-	let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
-	let cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
+	let recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
-	let url = &cache.targets[index].domain;
+	let cache_raw_recent = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+	let webhook: WebhookAuth = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
+
+	let url = &recent.targets[index].domain;
 
 	println!("Fetching data from {}", url);
 
@@ -26,14 +32,8 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 		.await
 		.unwrap());
 
-	// let top_article_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1)").unwrap();
 	let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
 
-	// let top_article = html.select(&top_article_selector)
-	//     .next()
-	//     .unwrap()
-	//     .text()
-	//     .collect::<String>();
 	let top_url = html.select(&top_url_selector)
 		.next()
 		.unwrap()
@@ -49,13 +49,33 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	];
 	let top_url = &*format!("https://warthunder.com{}", top_url);
 
-	for keyword in default_keywords {
-		if top_url.contains(keyword) {
-			println!("URL {} matched with keyword {}", top_url, keyword);
-			warn!("URL {} matched with keyword {}", top_url, keyword);
-			return (top_url).parse().unwrap();
-		}
+	match &webhook.hooks[index].filter {
+		Default => for keyword in default_keywords {
+			if top_url.contains(keyword) {
+				println!("URL {} matched with default keyword {}", top_url, keyword);
+				warn!("URL {} matched with default keyword {}", top_url, keyword);
+				return (top_url).parse().unwrap();
+			}
+		},
+		Blacklist => for keyword in default_keywords {
+			if !top_url.contains(keyword) {
+				println!("No blacklisted items found in {}", top_url);
+				warn!("No blacklisted items found in {}", top_url);
+				return (top_url).parse().unwrap();
+			}
+		},
+		Whitelist => {
+			let whitelist = &webhook.hooks[index].keywords;
+			for keyword in whitelist {
+				if top_url.contains(keyword) {
+					println!("URL {} matched with whitelisted keyword {}", top_url, keyword);
+					warn!("URL {} matched with whitelisted keyword {}", top_url, keyword);
+					return (top_url).parse().unwrap();
+				}
+			}
+		},
 	}
-	let result = &cache.targets[index].recent_url;
+
+	let result = &recent.targets[index].recent_url;
 	return result.to_string();
 }

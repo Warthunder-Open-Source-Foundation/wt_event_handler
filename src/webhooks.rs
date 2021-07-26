@@ -8,6 +8,7 @@ pub struct Hooks {
 	pub name: String,
 	pub token: String,
 	pub uid: u64,
+	pub filter: FilterType,
 	pub keywords: Vec<String>,
 }
 
