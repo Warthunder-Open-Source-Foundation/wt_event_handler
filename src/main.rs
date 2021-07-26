@@ -1,5 +1,5 @@
 use std::thread::sleep;
-use std::time;
+use std::{time};
 
 use log::*;
 use log4rs::append::file::FileAppender;
@@ -16,6 +16,8 @@ use crate::webhook_handler::handle_webhook;
 mod webhook_handler;
 mod recent_name_to_index;
 mod scrapers;
+pub mod recent;
+pub mod webhooks;
 
 #[tokio::main]
 async fn main() {
