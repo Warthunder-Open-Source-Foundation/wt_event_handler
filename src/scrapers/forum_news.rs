@@ -1,14 +1,8 @@
-use std::{fs, mem};
+use std::{fs};
 
 use log::*;
-use log4rs::append::console::ConsoleAppender;
-use log4rs::append::file::FileAppender;
-use log4rs::encode::pattern::PatternEncoder;
-use log4rs::config::{Appender, Config, Logger, Root};
-
 use reqwest::get;
 use scraper::{Html, Selector};
-use serenity::futures::future::err;
 
 pub async fn html_processor_wt_forums(index: usize) -> String {
 	#[derive(Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]

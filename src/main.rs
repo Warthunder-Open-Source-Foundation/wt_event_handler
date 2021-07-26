@@ -1,18 +1,17 @@
 use std::thread::sleep;
 use std::time;
 
+use log::*;
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 use rand;
 use rand::Rng;
-use log::*;
-use log4rs::append::console::ConsoleAppender;
-use log4rs::append::file::FileAppender;
-use log4rs::encode::pattern::PatternEncoder;
-use log4rs::config::{Appender, Config, Logger, Root};
 
-use crate::scrapers::wt_news::html_processor_wt_news;
-use crate::scrapers::forum_news::html_processor_wt_forums;
-use crate::webhook_handler::handle_webhook;
 use crate::recent_name_to_index::convert;
+use crate::scrapers::forum_news::html_processor_wt_forums;
+use crate::scrapers::wt_news::html_processor_wt_news;
+use crate::webhook_handler::handle_webhook;
 
 mod webhook_handler;
 mod recent_name_to_index;
