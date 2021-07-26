@@ -63,7 +63,7 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	let keywords = vec![
 		"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 		"fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-		"shop", "pass", "season", "operation", "pass", "summer"
+		"shop", "pass", "season", "operation", "pass", "summer", "2021"
 	];
 	let top_url = &*format!("https://warthunder.com{}", top_url);
 
