@@ -43,11 +43,11 @@ async fn main() {
 			handle_webhook(wt_news_content, index).await;
 		};
 
-		let index = convert("forums");
-		let forum_news = html_processor_wt_forums(index).await;
-		if forum_news != "fetch_failed" {
-			handle_webhook(forum_news, index).await;
-		};
+		// let index = convert("forums");
+		// let forum_news = html_processor_wt_forums(index).await;
+		// if forum_news != "fetch_failed" {
+		// 	handle_webhook(forum_news, index).await;
+		// };
 
 		// Cool down to prevent rate limiting and excessive performance impact
 		let wait = rand::thread_rng().gen_range(50..70);

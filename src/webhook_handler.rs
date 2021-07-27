@@ -10,10 +10,6 @@ pub async fn handle_webhook(content: String, index: usize) {
 	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
 	let mut recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
-	recent.targets[index].recent_url = content.clone();
-	let write = serde_json::to_string(&recent).unwrap();
-	fs::write("recent.json", write).expect("Couldn't write to recent file");
-
 	if recent.targets[index].recent_url != content {
 		println!("New post found, hooking now");
 		warn!("New post found, hooking now");
@@ -23,6 +19,11 @@ pub async fn handle_webhook(content: String, index: usize) {
 		info!("Content was recently fetched and is not new");
 	}
 
+	// recent.targets[index].recent_url = content.clone();
+	// let write = serde_json::to_string(&recent).unwrap();
+	// fs::write("recent.json", write).expect("Couldn't write to recent file");
+
+
 	async fn execute_webhooks(content: &String, index: usize) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
@@ -31,9 +32,8 @@ pub async fn handle_webhook(content: String, index: usize) {
 			let default_keywords = vec![
 				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 				"fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-				"shop", "pass", "season", "operation", "pass", "summer", "2021"
+				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned"
 			];
-
 
 			let filter = &webhook_auth.hooks[index].filter;
 			match filter {
@@ -41,20 +41,25 @@ pub async fn handle_webhook(content: String, index: usize) {
 					if content.contains(keyword) {
 						println!("URL {} matched with default keyword {}", content, keyword);
 						warn!("URL {} matched with default keyword {}", content, keyword);
-						send_hook(content.to_string(), &hook);
+						send_hook(content.to_string(), &hook).await;
+						return;
 					}
-					return
 				},
 				FilterType::Blacklist => {
 					let blacklist = &webhook_auth.hooks[index].keywords;
-					for keyword in blacklist {
-						if !content.contains(keyword) {
-							println!("No blacklisted items found in {}", content);
-							warn!("No blacklisted items found in {}", content);
-							send_hook(content.to_string(), &hook);
+					if blacklist.is_empty() {
+						send_hook(content.to_string(), &hook).await;
+						return;
+					} else {
+						for keyword in blacklist {
+							if !content.contains(keyword) {
+								println!("No blacklisted items found in {}", content);
+								warn!("No blacklisted items found in {}", content);
+								send_hook(content.to_string(), &hook).await;
+								return;
+							}
 						}
 					}
-					return
 				}
 				FilterType::Whitelist => {
 					let whitelist = &webhook_auth.hooks[index].keywords;
@@ -62,10 +67,10 @@ pub async fn handle_webhook(content: String, index: usize) {
 						if content.contains(keyword) {
 							println!("URL {} matched with whitelisted keyword {}", content, keyword);
 							warn!("URL {} matched with whitelisted keyword {}", content, keyword);
-							send_hook(content.to_string(), hook);
+							send_hook(content.to_string(), hook).await;
+							return;
 						}
 					}
-					return
 				}
 			}
 			async fn send_hook(content: String, hook: &Hooks) {
@@ -94,8 +99,10 @@ pub async fn handle_webhook(content: String, index: usize) {
 					.await
 					.unwrap();
 			}
-			error!("Enum could not be matched to a value");
-			panic!("Enum could not be matched to a value")
+			// panics when Enum couldn't be matched ( if this occurs, check discord_token.json for "filter"
+			// error!("Enum could not be matched to a value");
+			// panic!("Enum could not be matched to a value")
+			println!("All hooks are served");
 		}
 	}
 }
