@@ -115,7 +115,7 @@ pub async fn handle_forums_webhook(content: String, index: usize) {
 	if recent.targets[index].recent_url != content {
 		println!("New post found, hooking now");
 		warn!("New post found, hooking now");
-		execute_forum_webhooks(&content, index).await;
+		execute_forum_webhooks(&content).await;
 	} else {
 		println!("Content was recently fetched and is not new");
 		info!("Content was recently fetched and is not new");
@@ -125,7 +125,7 @@ pub async fn handle_forums_webhook(content: String, index: usize) {
 	let write = serde_json::to_string(&recent).unwrap();
 	fs::write("recent.json", write).expect("Couldn't write to recent file");
 
-	async fn execute_forum_webhooks(content: &String, index: usize) {
+	async fn execute_forum_webhooks(content: &String) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
