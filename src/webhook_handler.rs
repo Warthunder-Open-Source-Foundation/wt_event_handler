@@ -6,14 +6,14 @@ use serenity::http::Http;
 use crate::json_to_structs::recent::*;
 use crate::json_to_structs::webhooks::*;
 
-pub async fn handle_webhook(content: String, index: usize) {
+pub async fn handle_wt_news_webhook(content: String, index: usize) {
 	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
 	let mut recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
 	if recent.targets[index].recent_url != content {
 		println!("New post found, hooking now");
 		warn!("New post found, hooking now");
-		execute_webhooks(&content, index).await;
+		execute_wt_news_webhooks(&content, index).await;
 	} else {
 		println!("Content was recently fetched and is not new");
 		info!("Content was recently fetched and is not new");
@@ -24,7 +24,7 @@ pub async fn handle_webhook(content: String, index: usize) {
 	fs::write("recent.json", write).expect("Couldn't write to recent file");
 
 
-	async fn execute_webhooks(content: &String, index: usize) {
+	async fn execute_wt_news_webhooks(content: &String, index: usize) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
@@ -102,7 +102,60 @@ pub async fn handle_webhook(content: String, index: usize) {
 			// panics when Enum couldn't be matched ( if this occurs, check discord_token.json for "filter"
 			// error!("Enum could not be matched to a value");
 			// panic!("Enum could not be matched to a value")
-			println!("All hooks are served");
+			println!("All WT news hooks are served");
+			info!("All WT news hooks are served");
 		}
+	}
+}
+
+pub async fn handle_forums_webhook(content: String, index: usize) {
+	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
+	let mut recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
+
+	if recent.targets[index].recent_url != content {
+		println!("New post found, hooking now");
+		warn!("New post found, hooking now");
+		execute_forum_webhooks(&content, index).await;
+	} else {
+		println!("Content was recently fetched and is not new");
+		info!("Content was recently fetched and is not new");
+	}
+
+	recent.targets[index].recent_url = content.clone();
+	let write = serde_json::to_string(&recent).unwrap();
+	fs::write("recent.json", write).expect("Couldn't write to recent file");
+
+	async fn execute_forum_webhooks(content: &String, index: usize) {
+		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+		for hook in webhook_auth.hooks {
+			let uid = hook.uid;
+			let token = hook.token;
+
+			let my_http_client = Http::new_with_token(&token);
+
+			let webhook = match my_http_client.get_webhook_with_token(uid, &token).await {
+				Err(why) => {
+					println!("{}", why);
+					error!("{}", why);
+					panic!("")
+				}
+				Ok(hook) => hook,
+			};
+
+
+			webhook.execute(my_http_client, false, |w| {
+				w.content(&format!("[{a}]()", a = content));
+				w.username("The WT news bot");
+				// w.embeds(vec![embed]);
+				w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
+				w
+			})
+				.await
+				.unwrap();
+		}
+		println!("All forum hooks are served");
+		info!("All forum hooks are served");
 	}
 }

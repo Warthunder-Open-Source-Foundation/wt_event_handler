@@ -4,7 +4,6 @@ use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
 use crate::json_to_structs::recent::*;
-use crate::json_to_structs::webhooks::*;
 
 pub async fn html_processor_wt_news(index: usize) -> String {
 	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
