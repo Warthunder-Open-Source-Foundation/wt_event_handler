@@ -11,7 +11,7 @@ use rand::Rng;
 use crate::recent_name_to_index::convert;
 use crate::scrapers::forum_news::html_processor_wt_forums;
 use crate::scrapers::wt_news::html_processor_wt_news;
-use crate::webhook_handler::handle_webhook;
+use crate::webhook_handler::{handle_wt_news_webhook, handle_forums_webhook};
 
 mod webhook_handler;
 mod recent_name_to_index;
@@ -40,13 +40,13 @@ async fn main() {
 		let index = convert("warthunder_news");
 		let wt_news_content = html_processor_wt_news(index).await;
 		if wt_news_content != "fetch_failed" {
-			handle_webhook(wt_news_content, index).await;
+			handle_wt_news_webhook(wt_news_content, index).await;
 		};
 
 		let index = convert("forums");
 		let forum_news = html_processor_wt_forums(index).await;
 		if forum_news != "fetch_failed" {
-			handle_webhook(forum_news, index).await;
+			handle_forums_webhook(forum_news, index).await;
 		};
 
 		// Cool down to prevent rate limiting and excessive performance impact
