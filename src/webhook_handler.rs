@@ -19,9 +19,9 @@ pub async fn handle_webhook(content: String, index: usize) {
 		info!("Content was recently fetched and is not new");
 	}
 
-	// recent.targets[index].recent_url = content.clone();
-	// let write = serde_json::to_string(&recent).unwrap();
-	// fs::write("recent.json", write).expect("Couldn't write to recent file");
+	recent.targets[index].recent_url = content.clone();
+	let write = serde_json::to_string(&recent).unwrap();
+	fs::write("recent.json", write).expect("Couldn't write to recent file");
 
 
 	async fn execute_webhooks(content: &String, index: usize) {
