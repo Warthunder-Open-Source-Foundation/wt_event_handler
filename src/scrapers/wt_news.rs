@@ -55,11 +55,14 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 				return (top_url).parse().unwrap();
 			}
 		},
-		FilterType::Blacklist => for keyword in default_keywords {
-			if !top_url.contains(keyword) {
-				println!("No blacklisted items found in {}", top_url);
-				warn!("No blacklisted items found in {}", top_url);
-				return (top_url).parse().unwrap();
+		FilterType::Blacklist => {
+			let blacklist = &webhook.hooks[index].keywords;
+			for keyword in blacklist {
+				if !top_url.contains(keyword) {
+					println!("No blacklisted items found in {}", top_url);
+					warn!("No blacklisted items found in {}", top_url);
+					return (top_url).parse().unwrap();
+				}
 			}
 		},
 		FilterType::Whitelist => {
