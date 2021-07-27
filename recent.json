@@ -1,1 +1,19 @@
-{"targets":[{"name":"warthunder_news","recent_url":"https://warthunder.com/en/news/7253-battle-pass-season-fearless-voltigeur-en","domain":"https://warthunder.com/en/news"},{"name":"forums","recent_url":"https://forum.warthunder.com/index.php?/topic/530587-update-270146/","domain":"https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238"}]}
+{
+  "targets": [
+    {
+      "name": "warthunder_news",
+      "recent_url": "https://warthunder.com/en/news/7253-battle-pass-season-fearless-voltigeur-en",
+      "domain": "https://warthunder.com/en/news"
+    },
+    {
+      "name": "warthunder_changelog",
+      "recent_url": "https://warthunder.com/en/game/changelog/current/1274",
+      "domain": "https://warthunder.com/en/game/changelog/"
+    },
+    {
+      "name": "forums",
+      "recent_url": "https://forum.warthunder.com/index.php?/topic/530587-update-270146/",
+      "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238"
+    }
+  ]
+}

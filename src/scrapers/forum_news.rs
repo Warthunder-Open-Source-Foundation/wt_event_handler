@@ -34,6 +34,8 @@ pub async fn html_processor_wt_forums(index: usize) -> String {
 		let top_url = top_url.value().attr("href").unwrap();
 		top_url.to_string()
 	} else {
+		println!("Fetch failed");
+		error!("Fetch failed");
 		"fetch_failed".to_string()
 	}
 }

@@ -108,7 +108,7 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 	}
 }
 
-pub async fn handle_forums_webhook(content: String, index: usize) {
+pub async fn handle_simple_webhook(content: String, index: usize) {
 	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
 	let mut recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
