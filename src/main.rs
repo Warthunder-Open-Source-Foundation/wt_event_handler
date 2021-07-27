@@ -5,7 +5,6 @@ use log::*;
 use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
-use rand;
 use rand::Rng;
 
 use crate::recent_name_to_index::convert;
@@ -37,23 +36,24 @@ async fn main() {
 	println!("Started client");
 	info!("Started client");
 
+	let news_index = convert("warthunder_news");
+	let changelog_index = convert("warthunder_changelog");
+	let forum_index = convert("forums");
+
 	loop {
-		let index = convert("warthunder_news");
-		let wt_news_content = html_processor_wt_news(index).await;
+		let wt_news_content = html_processor_wt_news(news_index).await;
 		if wt_news_content != "fetch_failed" {
-			handle_wt_news_webhook(wt_news_content, index).await;
+			handle_wt_news_webhook(wt_news_content, news_index).await;
 		};
 
-		let index = convert("warthunder_changelog");
-		let wt_changelog = html_processor_wt_changelog(index).await;
+		let wt_changelog = html_processor_wt_changelog(changelog_index).await;
 		if wt_changelog != "fetch_failed" {
-			handle_simple_webhook(wt_changelog, index).await;
+			handle_simple_webhook(wt_changelog, changelog_index).await;
 		};
 
-		let index = convert("forums");
-		let forum_news = html_processor_wt_forums(index).await;
+		let forum_news = html_processor_wt_forums(forum_index).await;
 		if forum_news != "fetch_failed" {
-			handle_simple_webhook(forum_news, index).await;
+			handle_simple_webhook(forum_news, forum_index).await;
 		};
 
 		// Cool down to prevent rate limiting and excessive performance impact
