@@ -28,13 +28,10 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 
 	let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
 
-	let top_url = html.select(&top_url_selector)
-		.next()
-		.unwrap()
-		.value()
-		.attr("href")
-		.unwrap();
-
-	let top_url = &*format!("https://warthunder.com{}", top_url);
-	return top_url.to_string();
+	return if let Some(top_url) = html.select(&top_url_selector).next() {
+		let top_url = &*format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
+		top_url.to_string()
+	} else {
+		"fetch_failed".to_string()
+	}
 }
