@@ -16,8 +16,8 @@ use crate::webhook_handler::handle_webhook;
 mod webhook_handler;
 mod recent_name_to_index;
 mod scrapers;
-pub mod recent;
-pub mod webhooks;
+mod json_to_structs;
+
 
 #[tokio::main]
 async fn main() {

@@ -2,8 +2,8 @@ use std::fs;
 
 use log::*;
 use serenity::http::Http;
-use crate::recent::*;
-use crate::webhooks::*;
+use crate::json_to_structs::recent::*;
+use crate::json_to_structs::webhooks::*;
 // use serenity::model::channel::Embed;
 
 pub async fn handle_webhook(content: String, index: usize) {
@@ -18,7 +18,7 @@ pub async fn handle_webhook(content: String, index: usize) {
 			let write = serde_json::to_string(&cache).unwrap();
 			fs::write("recent.json", write).expect("Couldn't write to file");
 		} else {
-			println!("Content was recently fetched and is not , or is excluded from the filter");
+			println!("Content was recently fetched and is not new, or is excluded from the filter");
 			info!("Content was recently fetched and is not new, or is excluded from the filter");
 		}
 
