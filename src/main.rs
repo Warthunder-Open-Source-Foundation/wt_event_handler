@@ -1,5 +1,5 @@
+use std::time;
 use std::thread::sleep;
-use std::{time};
 
 use log::*;
 use log4rs::append::file::FileAppender;
@@ -16,8 +16,8 @@ use crate::webhook_handler::handle_webhook;
 mod webhook_handler;
 mod recent_name_to_index;
 mod scrapers;
-pub mod recent;
-pub mod webhooks;
+mod json_to_structs;
+
 
 #[tokio::main]
 async fn main() {
@@ -33,6 +33,7 @@ async fn main() {
 
 	log4rs::init_config(config).unwrap();
 
+	println!("Started client");
 	info!("Started client");
 
 	loop {

@@ -3,7 +3,7 @@ use std::{fs};
 use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
-use crate::recent::*;
+use crate::json_to_structs::recent::*;
 
 pub async fn html_processor_wt_forums(index: usize) -> String {
 

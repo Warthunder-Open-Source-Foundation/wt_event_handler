@@ -1,7 +1,7 @@
 use std::fs;
 
 use log::*;
-use crate::recent::*;
+use crate::json_to_structs::recent::*;
 
 pub fn convert(name: &str) -> usize {
 	let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");

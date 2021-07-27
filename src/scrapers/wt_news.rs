@@ -3,17 +3,12 @@ use std::{fs};
 use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
-use crate::recent::*;
-use crate::webhooks::*;
-use serenity::model::prelude::Webhook;
-use crate::webhooks::FilterType::*;
+use crate::json_to_structs::recent::*;
+use crate::json_to_structs::webhooks::*;
 
 pub async fn html_processor_wt_news(index: usize) -> String {
 	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
 	let recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
-
-	let cache_raw_recent = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-	let webhook: WebhookAuth = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
 	let url = &recent.targets[index].domain;
 
@@ -41,41 +36,6 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 		.attr("href")
 		.unwrap();
 
-
-	let default_keywords = vec![
-		"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
-		"fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-		"shop", "pass", "season", "operation", "pass", "summer", "2021"
-	];
 	let top_url = &*format!("https://warthunder.com{}", top_url);
-
-	match &webhook.hooks[index].filter {
-		Default => for keyword in default_keywords {
-			if top_url.contains(keyword) {
-				println!("URL {} matched with default keyword {}", top_url, keyword);
-				warn!("URL {} matched with default keyword {}", top_url, keyword);
-				return (top_url).parse().unwrap();
-			}
-		},
-		Blacklist => for keyword in default_keywords {
-			if !top_url.contains(keyword) {
-				println!("No blacklisted items found in {}", top_url);
-				warn!("No blacklisted items found in {}", top_url);
-				return (top_url).parse().unwrap();
-			}
-		},
-		Whitelist => {
-			let whitelist = &webhook.hooks[index].keywords;
-			for keyword in whitelist {
-				if top_url.contains(keyword) {
-					println!("URL {} matched with whitelisted keyword {}", top_url, keyword);
-					warn!("URL {} matched with whitelisted keyword {}", top_url, keyword);
-					return (top_url).parse().unwrap();
-				}
-			}
-		},
-	}
-
-	let result = &recent.targets[index].recent_url;
-	return result.to_string();
+	return top_url.to_string();
 }
