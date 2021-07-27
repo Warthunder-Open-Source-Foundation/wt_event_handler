@@ -48,26 +48,26 @@ async fn main() {
 	let changelog_index = convert("warthunder_changelog");
 	let forum_index = convert("forums");
 
-	// loop {
-	// 	let wt_news_content = html_processor_wt_news(news_index).await;
-	// 	if wt_news_content != "fetch_failed" {
-	// 		handle_wt_news_webhook(wt_news_content, news_index).await;
-	// 	};
-	//
-	// 	let wt_changelog = html_processor_wt_changelog(changelog_index).await;
-	// 	if wt_changelog != "fetch_failed" {
-	// 		handle_simple_webhook(wt_changelog, changelog_index).await;
-	// 	};
-	//
-	// 	let forum_news = html_processor_wt_forums(forum_index).await;
-	// 	if forum_news != "fetch_failed" {
-	// 		handle_simple_webhook(forum_news, forum_index).await;
-	// 	};
-	//
-	// 	// Cool down to prevent rate limiting and excessive performance impact
-	// 	let wait = rand::thread_rng().gen_range(50..70);
-	// 	println!("Waiting for {} seconds", wait);
-	// 	info!("Waiting for {} seconds", wait);
-	// 	sleep(time::Duration::from_secs(wait))
-	// }
+	loop {
+		let wt_news_content = html_processor_wt_news(news_index).await;
+		if wt_news_content != "fetch_failed" {
+			handle_wt_news_webhook(wt_news_content, news_index).await;
+		};
+
+		let wt_changelog = html_processor_wt_changelog(changelog_index).await;
+		if wt_changelog != "fetch_failed" {
+			handle_simple_webhook(wt_changelog, changelog_index).await;
+		};
+
+		let forum_news = html_processor_wt_forums(forum_index).await;
+		if forum_news != "fetch_failed" {
+			handle_simple_webhook(forum_news, forum_index).await;
+		};
+
+		// Cool down to prevent rate limiting and excessive performance impact
+		let wait = rand::thread_rng().gen_range(50..70);
+		println!("Waiting for {} seconds", wait);
+		info!("Waiting for {} seconds", wait);
+		sleep(time::Duration::from_secs(wait))
+	}
 }
