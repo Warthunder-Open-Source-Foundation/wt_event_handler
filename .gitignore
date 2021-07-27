@@ -1,7 +1,10 @@
 /target
 Cargo.lock
 .idea
-/home/flareflo/CLionProjects/WT_event_handler/assets/discord_token.txt
+
+
 /assets/discord_token.json
-/recent.txt
-output.log
+
+
+latest.log
+log/old/*.log

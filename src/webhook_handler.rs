@@ -7,7 +7,7 @@ use crate::json_to_structs::recent::*;
 use crate::json_to_structs::webhooks::*;
 
 pub async fn handle_wt_news_webhook(content: String, index: usize) {
-	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
+	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let mut recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
 	if recent.targets[index].recent_url != content {
@@ -21,7 +21,7 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 
 	recent.targets[index].recent_url = content.clone();
 	let write = serde_json::to_string(&recent).unwrap();
-	fs::write("recent.json", write).expect("Couldn't write to recent file");
+	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 
 
 	async fn execute_wt_news_webhooks(content: &String, index: usize) {
@@ -108,14 +108,14 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 	}
 }
 
-pub async fn handle_forums_webhook(content: String, index: usize) {
-	let cache_raw_recent = fs::read_to_string("recent.json").expect("Cannot read file");
+pub async fn handle_simple_webhook(content: String, index: usize) {
+	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let mut recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
 	if recent.targets[index].recent_url != content {
 		println!("New post found, hooking now");
 		warn!("New post found, hooking now");
-		execute_forum_webhooks(&content, index).await;
+		execute_forum_webhooks(&content).await;
 	} else {
 		println!("Content was recently fetched and is not new");
 		info!("Content was recently fetched and is not new");
@@ -123,9 +123,9 @@ pub async fn handle_forums_webhook(content: String, index: usize) {
 
 	recent.targets[index].recent_url = content.clone();
 	let write = serde_json::to_string(&recent).unwrap();
-	fs::write("recent.json", write).expect("Couldn't write to recent file");
+	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 
-	async fn execute_forum_webhooks(content: &String, index: usize) {
+	async fn execute_forum_webhooks(content: &String) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
