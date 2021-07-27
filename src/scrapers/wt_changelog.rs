@@ -30,7 +30,6 @@ pub async fn html_processor_wt_changelog(index: usize) -> String {
 
 	 if let Some(top_url) = html.select(&top_url_selector).next() {
 		let top_url = &*format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
-		 println!("{}", top_url);
 		 top_url.to_string()
 	} else {
 		println!("Fetch failed");
