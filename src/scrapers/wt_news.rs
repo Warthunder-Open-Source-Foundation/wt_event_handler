@@ -48,21 +48,21 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	let top_url = &*format!("https://warthunder.com{}", top_url);
 
 	match &webhook.hooks[index].filter {
-		Default => for keyword in default_keywords {
+		FilterType::Default => for keyword in default_keywords {
 			if top_url.contains(keyword) {
 				println!("URL {} matched with default keyword {}", top_url, keyword);
 				warn!("URL {} matched with default keyword {}", top_url, keyword);
 				return (top_url).parse().unwrap();
 			}
 		},
-		Blacklist => for keyword in default_keywords {
+		FilterType::Blacklist => for keyword in default_keywords {
 			if !top_url.contains(keyword) {
 				println!("No blacklisted items found in {}", top_url);
 				warn!("No blacklisted items found in {}", top_url);
 				return (top_url).parse().unwrap();
 			}
 		},
-		Whitelist => {
+		FilterType::Whitelist => {
 			let whitelist = &webhook.hooks[index].keywords;
 			for keyword in whitelist {
 				if top_url.contains(keyword) {
@@ -71,7 +71,7 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 					return (top_url).parse().unwrap();
 				}
 			}
-		},
+		}
 	}
 
 	let result = &recent.targets[index].recent_url;
