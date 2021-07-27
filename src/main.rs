@@ -1,5 +1,5 @@
+use std::time;
 use std::thread::sleep;
-use std::{time};
 
 use log::*;
 use log4rs::append::file::FileAppender;
@@ -33,6 +33,7 @@ async fn main() {
 
 	log4rs::init_config(config).unwrap();
 
+	println!("Started client");
 	info!("Started client");
 
 	loop {
