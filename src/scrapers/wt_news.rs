@@ -12,6 +12,7 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	let url = &recent.targets[index].domain;
 
 	println!("Fetching data from {}", url);
+	info!("Fetching data from {}", url);
 
 	if get(url).await.is_err() {
 		println!("Cannot fetch data");

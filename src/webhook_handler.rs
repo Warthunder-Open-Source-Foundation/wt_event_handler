@@ -13,15 +13,21 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 	if recent.targets[index].recent_url != content {
 		println!("New post found, hooking now");
 		warn!("New post found, hooking now");
+
+		recent.targets[index].recent_url = content.clone();
+		let write = serde_json::to_string(&recent).unwrap();
+		fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+		println!("Written {} to file at index {}", content, index);
+		warn!("Written {} to file at index {}", content, index);
+
 		execute_wt_news_webhooks(&content, index).await;
 	} else {
 		println!("Content was recently fetched and is not new");
 		info!("Content was recently fetched and is not new");
 	}
 
-	recent.targets[index].recent_url = content.clone();
-	let write = serde_json::to_string(&recent).unwrap();
-	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+
+
 
 
 	async fn execute_wt_news_webhooks(content: &String, index: usize) {
@@ -32,7 +38,7 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 			let default_keywords = vec![
 				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 				"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned"
+				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds"
 			];
 
 			let filter = &webhook_auth.hooks[index].filter;
@@ -115,15 +121,20 @@ pub async fn handle_simple_webhook(content: String, index: usize) {
 	if recent.targets[index].recent_url != content {
 		println!("New post found, hooking now");
 		warn!("New post found, hooking now");
+
+		recent.targets[index].recent_url = content.clone();
+		let write = serde_json::to_string(&recent).unwrap();
+		fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+		println!("Written {} to file at index {}", content, index);
+		warn!("Written {} to file at index {}", content, index);
+
 		execute_forum_webhooks(&content).await;
 	} else {
 		println!("Content was recently fetched and is not new");
 		info!("Content was recently fetched and is not new");
 	}
 
-	recent.targets[index].recent_url = content.clone();
-	let write = serde_json::to_string(&recent).unwrap();
-	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+
 
 	async fn execute_forum_webhooks(content: &String) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
