@@ -31,7 +31,7 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 		for hook in &webhook_auth.hooks {
 			let default_keywords = vec![
 				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
-				"fixed", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
+				"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
 				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned"
 			];
 
