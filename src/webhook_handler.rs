@@ -1,7 +1,6 @@
-use std::collections::HashMap;
 use std::fs;
 
-use log::{error, info, warn};
+use log::{error, warn};
 use serenity::http::Http;
 
 use crate::json_to_structs::recent::*;
@@ -97,15 +96,4 @@ async fn deliver_webhooks(content: &String, pos: usize) {
 	})
 		.await
 		.unwrap();
-}
-
-fn write_latest(content: &String, index: String) {
-	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let mut recent: Recent = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
-
-	// let cum = recent.get(index.as_str()).unwrap().recent_url.insert(0, content);
-	let write = serde_json::to_string_pretty(&recent).unwrap();
-	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
-	println!("Written {} to file at index {}", content, index);
-	warn!("Written {} to file at index {}", content, index);
 }

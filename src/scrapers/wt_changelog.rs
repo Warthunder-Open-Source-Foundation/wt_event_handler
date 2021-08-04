@@ -5,7 +5,7 @@ use reqwest::get;
 use scraper::{Html, Selector};
 use crate::json_to_structs::recent::*;
 
-pub async fn html_processor_wt_changelog() -> String {
+pub async fn html_processor_wt_changelog() -> Option<String> {
 	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let recent: Recent = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
@@ -16,7 +16,7 @@ pub async fn html_processor_wt_changelog() -> String {
 	if get(url).await.is_err() {
 		println!("Cannot fetch data");
 		error!("Cannot fetch data from {}", url);
-		return "fetch_failed".to_string()
+		return None
 	}
 
 	let html = Html::parse_document(&get(url)
@@ -30,10 +30,10 @@ pub async fn html_processor_wt_changelog() -> String {
 
 	 if let Some(top_url) = html.select(&top_url_selector).next() {
 		let top_url = &*format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
-		 top_url.to_string()
+		 Some(top_url.to_string())
 	} else {
 		println!("Fetch failed");
 		error!("Fetch failed");
-		"fetch_failed".to_string()
+		None
 	}
 }

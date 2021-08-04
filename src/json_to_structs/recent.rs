@@ -16,7 +16,7 @@ pub struct Target {
 
 impl Target {
 	pub fn is_outdated(&self, value: &String) -> bool {
-		if self.recent_url.last().unwrap() != value {
+		if !self.recent_url.contains(value) {
 			println!("New post found, hooking now");
 			warn!("New post found, hooking now");
 			true
@@ -43,7 +43,7 @@ impl Recent {
 	}
 	pub fn read_latest() -> Self {
 		let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-		let mut recent: Self = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
+		let recent: Self = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 		return recent;
 	}
 	fn write_latest(&self, value: &String) {

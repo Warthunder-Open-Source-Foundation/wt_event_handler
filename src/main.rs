@@ -1,8 +1,8 @@
 use std::{fs, time};
+use std::option::Option::Some;
 use std::path::Path;
 use std::thread::sleep;
 
-use chrono::{Datelike, Timelike};
 use chrono::offset::Local;
 use log::*;
 use log4rs::append::file::FileAppender;
@@ -45,8 +45,7 @@ async fn main() {
 	let mut recent_data = Recent::read_latest();
 
 	loop {
-		let wt_news_content = html_processor_wt_news().await;
-		if wt_news_content != "fetch_failed" {
+		if let Some(wt_news_content) = html_processor_wt_news().await{
 			if recent_data.warthunder_news.is_outdated(&wt_news_content) {
 				recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
 				recent_data.append_latest_warthunder_news(&wt_news_content);
@@ -55,8 +54,7 @@ async fn main() {
 			}
 		};
 
-		let wt_changelog = html_processor_wt_changelog().await;
-		if wt_changelog != "fetch_failed" {
+		if let Some(wt_changelog) = html_processor_wt_changelog().await {
 			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) {
 				recent_data.warthunder_changelog.handle_simple_webhook(&wt_changelog).await;
 				recent_data.append_latest_warthunder_changelog(&wt_changelog);
@@ -65,8 +63,7 @@ async fn main() {
 			}
 		};
 
-		let forum_news = html_processor_wt_forums().await;
-		if forum_news != "fetch_failed" {
+		if let Some(forum_news) = html_processor_wt_forums().await {
 			if recent_data.forums.is_outdated(&forum_news) {
 				recent_data.forums.handle_simple_webhook(&forum_news).await;
 				recent_data.append_latest_warthunder_forums(&forum_news);
