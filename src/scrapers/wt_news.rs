@@ -1,13 +1,14 @@
-use std::{fs};
+use std::fs;
 
 use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
+
 use crate::json_to_structs::recent::*;
 
 pub async fn html_processor_wt_news(index: usize) -> String {
 	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let recent: Root = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
+	let recent: Recent = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
 	let url = &recent.targets[index].domain;
 
@@ -17,7 +18,7 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 	if get(url).await.is_err() {
 		println!("Cannot fetch data");
 		error!("Cannot fetch data from {}", url);
-		return "fetch_failed".to_string()
+		return "fetch_failed".to_string();
 	}
 
 	let html = Html::parse_document(&get(url)
@@ -27,14 +28,48 @@ pub async fn html_processor_wt_news(index: usize) -> String {
 		.await
 		.unwrap());
 
-	let top_url_selector = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap();
+	// Too lazy to make !format macro
+	let selectors = [
+		Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap(),
+		Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(2) > a").unwrap()
+	];
+	let pin = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > div.widget__pin").unwrap();
 
-	return if let Some(top_url) = html.select(&top_url_selector).next() {
-		let top_url = &*format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
-		top_url.to_string()
+	let mut top_url: Vec<String> = vec!["".to_string(), "".to_string()];
+	if let Some(x) = html.select(&selectors[0]).next() {
+		top_url[0] = (&*format!("https://warthunder.com{}", x.value().attr("href").unwrap())).parse().unwrap();
+	}else {
+		return fetch_failed()
+	};
+	if let Some(x) = html.select(&selectors[1]).next() {
+		top_url[1] = (&*format!("https://warthunder.com{}", x.value().attr("href").unwrap())).parse().unwrap();
 	} else {
+		return fetch_failed()
+	};
+
+	if let Some(pin_url) = html.select(&pin).next() {
+		let pin_url = pin_url.value().attr("class").unwrap();
+		if pin_url == "widget__pin" {
+			return pinned(recent, index, &top_url).clone()
+		}else {
+			return top_url[0].clone()
+		}
+	}else {
+		return fetch_failed()
+	}
+
+fn pinned(recent: Recent, index: usize, top_url: &Vec<String>) -> &String {
+	let recents = &recent.targets[index].recent_url;
+	if !recents.contains(&top_url[0]) {
+		return &top_url[0]
+	}else {
+		return &top_url[1]
+	}
+}
+
+	fn fetch_failed() -> String {
 		println!("Fetch failed");
 		error!("Fetch failed");
-		"fetch_failed".to_string()
+		return "fetch_failed".to_string();
 	}
 }
