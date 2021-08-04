@@ -1,4 +1,5 @@
-use std::{fs, time};
+use std::{fs, io, time};
+use std::io::Read;
 use std::option::Option::Some;
 use std::path::Path;
 use std::thread::sleep;
@@ -10,7 +11,8 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use rand::Rng;
 
-use crate::json_to_structs::recent::*;
+use crate::json_to_structs::recent::Recent;
+use crate::json_to_structs::webhooks::WebhookAuth;
 use crate::scrapers::forum_news::html_processor_wt_forums;
 use crate::scrapers::wt_changelog::html_processor_wt_changelog;
 use crate::scrapers::wt_news::html_processor_wt_news;
@@ -22,6 +24,73 @@ mod json_to_structs;
 
 #[tokio::main]
 async fn main() {
+	let mut line = String::new();
+	let mut no_hooks = false;
+
+	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client (wip) \n");
+	io::stdin()
+		.read_line(&mut line)
+		.expect("failed to read from stdin");
+
+	let trimmed = line.trim();
+
+	match trimmed {
+		"1" => {
+			verify_json()
+		}
+		"2" => {}
+		"3" => {
+			verify_json();
+			no_hooks = true;
+		}
+		_ => {
+			println!("No option specified")
+		}
+	}
+
+	init_log();
+	println!("Started client");
+	info!("Started client");
+
+	let mut recent_data = Recent::read_latest();
+
+	loop {
+		if let Some(wt_news_content) = html_processor_wt_news().await {
+			if recent_data.warthunder_news.is_outdated(&wt_news_content) && !no_hooks {
+				recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
+				recent_data.append_latest_warthunder_news(&wt_news_content);
+				println!("All wt news hooks are served");
+				info!("All wt news hooks are served");
+			}
+		};
+
+		if let Some(wt_changelog) = html_processor_wt_changelog().await {
+			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) && !no_hooks {
+				recent_data.warthunder_changelog.handle_simple_webhook(&wt_changelog).await;
+				recent_data.append_latest_warthunder_changelog(&wt_changelog);
+				println!("All wt changelog hooks are served");
+				info!("All wt changelog hooks are served");
+			}
+		};
+
+		if let Some(forum_news) = html_processor_wt_forums().await {
+			if recent_data.forums.is_outdated(&forum_news) && !no_hooks {
+				recent_data.forums.handle_simple_webhook(&forum_news).await;
+				recent_data.append_latest_warthunder_forums(&forum_news);
+				println!("All forum hooks are served");
+				info!("All forum hooks are served");
+			}
+		};
+
+		// Cool down to prevent rate limiting and excessive performance impact
+		let wait = rand::thread_rng().gen_range(50..70);
+		println!("Waiting for {} seconds", wait);
+		info!("Waiting for {} seconds", wait);
+		sleep(time::Duration::from_secs(wait))
+	}
+}
+
+fn init_log() {
 	if Path::new("log/latest.log").exists() {
 		let now = Local::now().format("%Y_%m_%d_%H-%M-%S").to_string();
 		fs::rename("log/latest.log", format!("log/old/{}.log", now)).expect("Could not rename latest log file");
@@ -38,44 +107,13 @@ async fn main() {
 			.build(LevelFilter::Info)).unwrap();
 
 	log4rs::init_config(config).unwrap();
+}
 
-	println!("Started client");
-	info!("Started client");
-
-	let mut recent_data = Recent::read_latest();
-
-	loop {
-		if let Some(wt_news_content) = html_processor_wt_news().await{
-			if recent_data.warthunder_news.is_outdated(&wt_news_content) {
-				recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
-				recent_data.append_latest_warthunder_news(&wt_news_content);
-				println!("All wt news hooks are served");
-				info!("All wt news hooks are served");
-			}
-		};
-
-		if let Some(wt_changelog) = html_processor_wt_changelog().await {
-			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) {
-				recent_data.warthunder_changelog.handle_simple_webhook(&wt_changelog).await;
-				recent_data.append_latest_warthunder_changelog(&wt_changelog);
-				println!("All wt changelog hooks are served");
-				info!("All wt changelog hooks are served");
-			}
-		};
-
-		if let Some(forum_news) = html_processor_wt_forums().await {
-			if recent_data.forums.is_outdated(&forum_news) {
-				recent_data.forums.handle_simple_webhook(&forum_news).await;
-				recent_data.append_latest_warthunder_forums(&forum_news);
-				println!("All forum hooks are served");
-				info!("All forum hooks are served");
-			}
-		};
-
-		// Cool down to prevent rate limiting and excessive performance impact
-		let wait = rand::thread_rng().gen_range(50..70);
-		println!("Waiting for {} seconds", wait);
-		info!("Waiting for {} seconds", wait);
-		sleep(time::Duration::from_secs(wait))
-	}
+fn verify_json() {
+	println!("Verifying Json files...");
+	let recent_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+	let recent: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+	println!("Json files complete");
 }
