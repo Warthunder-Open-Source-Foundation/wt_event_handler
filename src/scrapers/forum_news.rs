@@ -5,12 +5,12 @@ use reqwest::get;
 use scraper::{Html, Selector};
 use crate::json_to_structs::recent::*;
 
-pub async fn html_processor_wt_forums(index: usize) -> String {
+pub async fn html_processor_wt_forums() -> String {
 
 	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
-	let url = &cache.targets[index].domain;
+	let url = &cache.forums.domain;
 
 	println!("Fetching data from {}", url);
 	info!("Fetching data from {}", url);

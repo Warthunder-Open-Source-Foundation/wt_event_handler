@@ -5,11 +5,11 @@ use reqwest::get;
 use scraper::{Html, Selector};
 use crate::json_to_structs::recent::*;
 
-pub async fn html_processor_wt_changelog(index: usize) -> String {
+pub async fn html_processor_wt_changelog() -> String {
 	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let recent: Recent = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
-	let url = &recent.targets[index].domain;
+	let url = &recent.warthunder_changelog.domain;
 
 	println!("Fetching data from {}", url);
 

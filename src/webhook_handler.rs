@@ -1,22 +1,19 @@
+use std::collections::HashMap;
 use std::fs;
 
-use log::*;
+use log::{error, info, warn};
 use serenity::http::Http;
 
 use crate::json_to_structs::recent::*;
 use crate::json_to_structs::webhooks::*;
 
-//Receives latest content and index in recent array (for WT news)
-pub async fn handle_wt_news_webhook(content: String, index: usize) {
-	if handle_recent(content.clone(), index) {
-		execute_wt_news_webhooks(&content).await
-	}
-
-	async fn execute_wt_news_webhooks(content: &String) {
+impl Target {
+	//Receives latest content and index in recent array (for WT news)
+	pub async fn handle_wt_news_webhook(&self, content: &String) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
-		for (i, hook) in webhook_auth.hooks.iter().enumerate() { ;
+		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
 			let default_keywords = vec![
 				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 				"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
@@ -59,24 +56,16 @@ pub async fn handle_wt_news_webhook(content: String, index: usize) {
 			}
 			// panics when Enum couldn't be matched ( if this occurs, check discord_token.json for "filter"
 		}
-		println!("All forum hooks are served");
-		info!("All forum hooks are served");
-		write_latest(&content, index);
 	}
-}
 
-//Receives latest content and index in recent array
-pub async fn handle_simple_webhook(content: String, index: usize) {
-	if handle_recent(content.clone(), index) {
+	//Receives latest content and index in recent array
+	pub async fn handle_simple_webhook(&self, content: &String) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for i in 0..webhook_auth.hooks.len() {
 			deliver_webhooks(&content, i).await;
 		}
-		println!("All forum hooks are served");
-		info!("All forum hooks are served");
-		write_latest(&content, index);
 	}
 }
 
@@ -110,27 +99,11 @@ async fn deliver_webhooks(content: &String, pos: usize) {
 		.unwrap();
 }
 
-//Checks if the given content is new, and sends webhook if yes
-fn handle_recent(content: String, index: usize) -> bool {
+fn write_latest(content: &String, index: String) {
 	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let mut recent: Recent = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 
-	if recent.targets[index].recent_url[0] != content {
-		println!("New post found, hooking now");
-		warn!("New post found, hooking now");
-		true
-	} else {
-		println!("Content was recently fetched and is not new");
-		info!("Content was recently fetched and is not new");
-		false
-	}
-}
-
-fn write_latest(content: &String, index: usize) {
-	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let mut recent: Recent = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
-
-	recent.targets[index].recent_url.insert(0, content.clone());
+	// let cum = recent.get(index.as_str()).unwrap().recent_url.insert(0, content);
 	let write = serde_json::to_string_pretty(&recent).unwrap();
 	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 	println!("Written {} to file at index {}", content, index);
