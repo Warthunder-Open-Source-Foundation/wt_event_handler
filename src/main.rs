@@ -2,6 +2,7 @@ use std::{fs, io, time};
 use std::io::Read;
 use std::option::Option::Some;
 use std::path::Path;
+use std::process::exit;
 use std::thread::sleep;
 
 use chrono::offset::Local;
@@ -12,7 +13,8 @@ use log4rs::encode::pattern::PatternEncoder;
 use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
-use crate::json_to_structs::webhooks::WebhookAuth;
+use crate::json_to_structs::webhooks::{FilterType, Hooks, WebhookAuth};
+use crate::json_to_structs::webhooks::FilterType::{Blacklist, Default, Whitelist};
 use crate::scrapers::forum_news::html_processor_wt_forums;
 use crate::scrapers::wt_changelog::html_processor_wt_changelog;
 use crate::scrapers::wt_news::html_processor_wt_news;
@@ -26,8 +28,9 @@ mod json_to_structs;
 async fn main() {
 	let mut line = String::new();
 	let mut no_hooks = false;
+	let mut no_json_verification = true;
 
-	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client (wip) \n");
+	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client \n");
 	io::stdin()
 		.read_line(&mut line)
 		.expect("failed to read from stdin");
@@ -35,17 +38,23 @@ async fn main() {
 	let trimmed = line.trim();
 
 	match trimmed {
-		"1" => {
-			verify_json()
+		"1" => {}
+		"2" => {
+			no_json_verification = false;
 		}
-		"2" => {}
 		"3" => {
-			verify_json();
 			no_hooks = true;
+		}
+		"4" => {
+			add_webhook();
 		}
 		_ => {
 			println!("No option specified")
 		}
+	}
+
+	if no_json_verification {
+		verify_json();
 	}
 
 	init_log();
@@ -114,6 +123,19 @@ fn verify_json() {
 	let recent_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
 	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-	let recent: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+	let entry: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 	println!("Json files complete");
+}
+
+fn add_webhook() {
+	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+	let mut webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+	webhook_auth.hooks.push(Hooks::from_user());
+
+	let write = serde_json::to_string_pretty(&webhook_auth).unwrap();
+	fs::write("assets/discord_token.json", write).expect("Couldn't write to recent file");
+	verify_json();
+	println!("Entry created successfully");
+	exit(0);
 }
