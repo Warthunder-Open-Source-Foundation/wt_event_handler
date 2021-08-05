@@ -1,5 +1,4 @@
 use std::{fs, io, time};
-use std::io::Read;
 use std::option::Option::Some;
 use std::path::Path;
 use std::process::exit;
@@ -13,8 +12,7 @@ use log4rs::encode::pattern::PatternEncoder;
 use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
-use crate::json_to_structs::webhooks::{FilterType, Hooks, WebhookAuth};
-use crate::json_to_structs::webhooks::FilterType::{Blacklist, Default, Whitelist};
+use crate::json_to_structs::webhooks::*;
 use crate::scrapers::forum_news::html_processor_wt_forums;
 use crate::scrapers::wt_changelog::html_processor_wt_changelog;
 use crate::scrapers::wt_news::html_processor_wt_news;
@@ -46,7 +44,7 @@ async fn main() {
 			no_hooks = true;
 		}
 		"4" => {
-			add_webhook();
+			add_webhook().await;
 		}
 		_ => {
 			println!("No option specified")
@@ -121,21 +119,23 @@ fn init_log() {
 fn verify_json() {
 	println!("Verifying Json files...");
 	let recent_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+	let mut recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+	//Just for removing warning
+	recent.warthunder_changelog.recent_url.pop();
 	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-	let entry: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+	let mut entry: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+	//Just for removing warning
+	entry.hooks.pop();
 	println!("Json files complete");
 }
 
-fn add_webhook() {
+async fn add_webhook() {
 	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 	let mut webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
-	webhook_auth.hooks.push(Hooks::from_user());
+	webhook_auth.hooks.push(Hooks::from_user().await);
 
 	let write = serde_json::to_string_pretty(&webhook_auth).unwrap();
 	fs::write("assets/discord_token.json", write).expect("Couldn't write to recent file");
-	verify_json();
-	println!("Entry created successfully");
 	exit(0);
 }
