@@ -28,7 +28,7 @@ async fn main() {
 	let mut no_hooks = false;
 	let mut no_json_verification = true;
 
-	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client \n");
+	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client \n 5. Remove a webhook \n");
 	io::stdin()
 		.read_line(&mut line)
 		.expect("failed to read from stdin");
@@ -45,6 +45,9 @@ async fn main() {
 		}
 		"4" => {
 			add_webhook().await;
+		}
+		"5" => {
+			remove_webhook();
 		}
 		_ => {
 			println!("No option specified")
@@ -137,5 +140,26 @@ async fn add_webhook() {
 
 	let write = serde_json::to_string_pretty(&webhook_auth).unwrap();
 	fs::write("assets/discord_token.json", write).expect("Couldn't write to recent file");
+	exit(0);
+}
+
+fn remove_webhook() {
+	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+	let mut webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+	let mut line = String::new();
+
+	println!("These are the following available webhooks");
+	for (i, hook) in webhook_auth.hooks.iter().enumerate() {
+		println!("{} {}", i, hook.name);
+	}
+	println!("Choose the webhook to remove \n");
+	line.clear();
+	io::stdin().read_line(&mut line).unwrap();
+	let index = line.trim().parse().unwrap();
+	webhook_auth.hooks.remove(index);
+	let write = serde_json::to_string_pretty(&webhook_auth).unwrap();
+	fs::write("assets/discord_token.json", write).expect("Couldn't write to recent file");
+	verify_json();
+	println!("Webhook {} successfully removed", index);
 	exit(0);
 }
