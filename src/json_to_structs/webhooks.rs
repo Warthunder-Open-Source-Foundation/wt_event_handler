@@ -1,3 +1,8 @@
+use std::io;
+use serenity::http::Http;
+use log::error;
+use std::process::exit;
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
@@ -12,14 +17,116 @@ pub struct Hooks {
 	pub keywords: Vec<String>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 pub enum FilterType {
 	Default = 0,
 	Blacklist = 1,
 	Whitelist = 2,
 }
+
+impl FilterType {
+	pub fn from_user(option: &str) -> Self {
+		println!("{}", option);
+		match option {
+			"1" => {
+				Self::Default
+			}
+			"2" => {
+				Self::Blacklist
+			}
+			"3" => {
+				Self::Whitelist
+			}
+			_ => {
+				panic!("No option specified")
+			}
+		}
+	}
+}
+
 impl Default for FilterType {
 	fn default() -> Self {
 		Self::Default
+	}
+}
+
+impl Hooks {
+	pub async fn from_user() -> Self {
+		let mut val = Self {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Default::default(),
+			keywords: vec![]
+		};
+		let mut line = String::new();
+
+		println!("Enter the Name for the webhook \n");
+		io::stdin().read_line(&mut line).unwrap();
+		val.name = line.clone();
+		val.name.pop();
+
+		println!("Enter the URL for the webhook \n");
+		line.clear();
+		io::stdin().read_line(&mut line).unwrap();
+		line.pop();
+		let uid_token: Vec<String> = line.split("/").map(|e| e.to_string()).collect();
+		val.uid = uid_token[5].parse().unwrap();
+		val.token = uid_token[6].clone();
+
+		println!("Choose a filter option: \n 1. Default \n 2. Blacklist \n 3. Whitelist  \n");
+		line.clear();
+		io::stdin().read_line(&mut line).unwrap();
+		let mut option = line.clone();
+		option.pop();
+		val.filter = FilterType::from_user(option.as_str());
+
+		if val.filter != FilterType::Default {
+			let mut line = String::new();
+			println!("Enter the listing parameters, seperated by spaces all lowercase");
+			line.clear();
+			io::stdin().read_line(&mut line).unwrap();
+			val.keywords = line.split_whitespace().map(|e| e.to_string()).collect();
+		}
+		println!("Entry created successfully, do you want to send a test-message to test the hook? y/n \n");
+		line.clear();
+		io::stdin().read_line(&mut line).unwrap();
+		match line.trim() {
+			"y" => {
+				send_test_hook(&val).await;
+			}
+			"n" => {
+			}
+			_ => {
+				println!("No option specified");
+				exit(1);
+			}
+		};
+		async fn send_test_hook(hook: &Hooks) {
+			let token = &hook.token;
+			let uid = &hook.uid;
+
+			let my_http_client = Http::new_with_token(&token);
+
+			let webhook = match my_http_client.get_webhook_with_token(*uid, &token).await {
+				Err(why) => {
+					println!("{}", why);
+					error!("{}", why);
+					panic!("")
+				}
+				Ok(hook) => hook,
+			};
+
+
+			webhook.execute(my_http_client, false, |w| {
+				w.content(&format!("Webhook {} was successfully created", &hook.name));
+				w.username("The WT news bot");
+				w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
+				w
+			})
+				.await
+				.unwrap();
+		}
+		return val
 	}
 }
