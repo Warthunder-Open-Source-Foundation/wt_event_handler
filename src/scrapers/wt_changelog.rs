@@ -15,18 +15,17 @@ pub async fn html_processor_wt_changelog() -> Option<String> {
 	println!("Fetching data from {}", url);
 	info!("Fetching data from {}", url);
 
-	if get(url).await.is_err() {
-		println!("Cannot fetch data");
-		error!("Cannot fetch data from {}", url);
+	let html;
+
+	if let Ok(raw_html) = get(url).await {
+		if let Ok(text) = raw_html.text().await {
+			html = Html::parse_document(text.as_str());
+		}else {
+			return None
+		}
+	}else {
 		return None
 	}
-
-	let html = Html::parse_document(&get(url)
-		.await
-		.unwrap()
-		.text()
-		.await
-		.unwrap());
 
 	// Too lazy to make !format macro
 	let selectors = [
