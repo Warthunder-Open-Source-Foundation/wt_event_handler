@@ -59,7 +59,7 @@ async fn main() {
 
 	loop {
 		if let Some(wt_news_content) = html_processor_wt_news().await {
-			if recent_data.warthunder_news.is_outdated(&wt_news_content) && !hooks {
+			if recent_data.warthunder_news.is_outdated(&wt_news_content) && hooks {
 				recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
 				recent_data.append_latest_warthunder_news(&wt_news_content);
 				println!("All wt news hooks are served");
@@ -77,7 +77,7 @@ async fn main() {
 		};
 
 		if let Some(forum_news) = html_processor_wt_forums().await {
-			if recent_data.forums.is_outdated(&forum_news) && !hooks {
+			if recent_data.forums.is_outdated(&forum_news) && hooks {
 				recent_data.forums.handle_simple_webhook(&forum_news).await;
 				recent_data.append_latest_warthunder_forums(&forum_news);
 				println!("All forum hooks are served");
