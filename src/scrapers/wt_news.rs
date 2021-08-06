@@ -1,11 +1,11 @@
 use std::fs;
+use std::option::Option::Some;
 
 use log::*;
 use reqwest::get;
 use scraper::{Html, Selector};
 
 use crate::json_to_structs::recent::*;
-use std::option::Option::Some;
 
 pub async fn html_processor_wt_news() -> Option<String> {
 	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
@@ -21,11 +21,11 @@ pub async fn html_processor_wt_news() -> Option<String> {
 	if let Ok(raw_html) = get(url).await {
 		if let Ok(text) = raw_html.text().await {
 			html = Html::parse_document(text.as_str());
-		}else {
-			return None
+		} else {
+			return None;
 		}
-	}else {
-		return None
+	} else {
+		return None;
 	}
 
 
