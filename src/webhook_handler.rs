@@ -26,6 +26,7 @@ impl Target {
 						println!("URL {} matched with default keyword {}", content, keyword);
 						warn!("URL {} matched with default keyword {}", content, keyword);
 						deliver_webhooks(&content, i).await;
+						break
 					}
 				},
 				FilterType::Blacklist => {
@@ -38,6 +39,7 @@ impl Target {
 								println!("No blacklisted items found in {}", content);
 								warn!("No blacklisted items found in {}", content);
 								deliver_webhooks(&content, i).await;
+								break
 							}
 						}
 					}
@@ -49,6 +51,7 @@ impl Target {
 							println!("URL {} matched with whitelisted keyword {}", content, keyword);
 							warn!("URL {} matched with whitelisted keyword {}", content, keyword);
 							deliver_webhooks(&content, i).await;
+							break
 						}
 					}
 				}
