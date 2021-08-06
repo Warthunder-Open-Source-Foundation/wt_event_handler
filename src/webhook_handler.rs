@@ -16,7 +16,7 @@ impl Target {
 			let default_keywords = vec![
 				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 				"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds"
+				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers"
 			];
 			let filter = &hook.filter;
 

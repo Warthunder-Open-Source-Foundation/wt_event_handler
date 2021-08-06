@@ -1,4 +1,5 @@
 use std::fs;
+use std::option::Option::Some;
 
 use log::*;
 use reqwest::get;
@@ -15,18 +16,18 @@ pub async fn html_processor_wt_news() -> Option<String> {
 	println!("Fetching data from {}", url);
 	info!("Fetching data from {}", url);
 
-	if get(url).await.is_err() {
-		println!("Cannot fetch data");
-		error!("Cannot fetch data from {}", url);
-		return None
+	let html;
+
+	if let Ok(raw_html) = get(url).await {
+		if let Ok(text) = raw_html.text().await {
+			html = Html::parse_document(text.as_str());
+		} else {
+			return None;
+		}
+	} else {
+		return None;
 	}
 
-	let html = Html::parse_document(&get(url)
-		.await
-		.unwrap()
-		.text()
-		.await
-		.unwrap());
 
 	// Too lazy to make !format macro
 	let selectors = [
@@ -50,13 +51,13 @@ pub async fn html_processor_wt_news() -> Option<String> {
 
 	if let Some(pin_url) = html.select(&pin).next() {
 		let pin_url = pin_url.value().attr("class").unwrap();
-		if pin_url == "widget__pin"  {
-			return Some(pinned(recent, &top_url).clone())
+		if pin_url == "widget__pin" {
+			return Some(pinned(recent, &top_url).clone());
 		} else {
-			return Some(top_url[0].clone())
+			return Some(top_url[0].clone());
 		}
 	} else {
-		return fetch_failed()
+		return fetch_failed();
 	}
 
 	fn pinned(recent: Recent, top_url: &Vec<String>) -> &String {

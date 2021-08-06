@@ -1,11 +1,11 @@
 use reqwest::get;
 use scraper::{Html, Selector};
 use std::{fs, mem};
+
 use crate::recent::*;
 
 // TODO change function name
 pub async fn html_processor_wt_(index: usize) -> String {
-
 	let cache_raw = fs::read_to_string("recent.json").expect("Cannot read file");
 	let mut cache: Root = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
@@ -15,7 +15,7 @@ pub async fn html_processor_wt_(index: usize) -> String {
 
 	if get(url).await.is_err() {
 		println!("Cannot fetch data");
-		return "fetch_failed".to_string()
+		return "fetch_failed".to_string();
 	}
 
 	let html = Html::parse_document(&get(url)

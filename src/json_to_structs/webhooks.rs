@@ -1,7 +1,8 @@
 use std::io;
-use serenity::http::Http;
-use log::error;
 use std::process::exit;
+
+use log::error;
+use serenity::http::Http;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct WebhookAuth {
@@ -57,7 +58,7 @@ impl Hooks {
 			token: "".to_string(),
 			uid: 0,
 			filter: Default::default(),
-			keywords: vec![]
+			keywords: vec![],
 		};
 		let mut line = String::new();
 
@@ -95,8 +96,7 @@ impl Hooks {
 			"y" => {
 				send_test_hook(&val).await;
 			}
-			"n" => {
-			}
+			"n" => {}
 			_ => {
 				println!("No option specified");
 				exit(1);
@@ -127,6 +127,6 @@ impl Hooks {
 				.await
 				.unwrap();
 		}
-		return val
+		return val;
 	}
 }
