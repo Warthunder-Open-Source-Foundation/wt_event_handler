@@ -1,10 +1,10 @@
 use std::fs;
 
-use log::*;
+use log::{error, info};
 use reqwest::get;
 use scraper::{Html, Selector};
 
-use crate::json_to_structs::recent::*;
+use crate::json_to_structs::recent::Recent;
 
 pub async fn html_processor_wt_forums() -> Option<String> {
 	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");

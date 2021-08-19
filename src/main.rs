@@ -2,7 +2,7 @@ use std::{io, time};
 use std::option::Option::Some;
 use std::thread::sleep;
 
-use log::*;
+use log::info;
 use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
