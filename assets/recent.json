@@ -1,22 +1,25 @@
 {
   "warthunder_news": {
-    "domain": "https://warthunder.com/en/news",
     "recent_url": [
       "https://warthunder.com/en/news/7274-video-battle-pass-fearless-voltigeur-vehicles-en",
-      "https://warthunder.com/en/news/7267-event-summer-landing-en"
-    ]
+      "https://warthunder.com/en/news/7267-event-summer-landing-en",
+      "https://warthunder.com/en/news/7286-video-special-bmp-ifv-en"
+    ],
+    "domain": "https://warthunder.com/en/news"
   },
   "warthunder_changelog": {
-    "domain": "https://warthunder.com/en/game/changelog/",
     "recent_url": [
       "https://warthunder.com/en/game/changelog/current/1278",
-      "https://warthunder.com/en/game/changelog/current/1246"
-    ]
+      "https://warthunder.com/en/game/changelog/current/1246",
+      "https://warthunder.com/en/game/changelog/current/1283"
+    ],
+    "domain": "https://warthunder.com/en/game/changelog/"
   },
   "forums": {
-    "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/531260-update-270171-270167-xbox-playstation/"
-    ]
+      "https://forum.warthunder.com/index.php?/topic/531260-update-270171-270167-xbox-playstation/",
+      "https://forum.warthunder.com/index.php?/topic/532248-update-270204-270201-%E2%80%94-xbox-playstation/"
+    ],
+    "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238"
   }
 }

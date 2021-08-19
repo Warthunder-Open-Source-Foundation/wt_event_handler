@@ -56,7 +56,7 @@ impl Target {
 					}
 				}
 			}
-			// panics when Enum couldn't be matched ( if this occurs, check discord_token.json for "filter"
+			// panics when Enum couldn't be matched ( if this occurs, check discord_token.json for "filter" )
 		}
 	}
 

@@ -64,6 +64,7 @@ async fn main() {
 				recent_data.append_latest_warthunder_news(&wt_news_content);
 				println!("All wt news hooks are served");
 				info!("All wt news hooks are served");
+				continue
 			}
 		};
 
@@ -73,6 +74,7 @@ async fn main() {
 				recent_data.append_latest_warthunder_changelog(&wt_changelog);
 				println!("All wt changelog hooks are served");
 				info!("All wt changelog hooks are served");
+				continue
 			}
 		};
 
@@ -82,6 +84,7 @@ async fn main() {
 				recent_data.append_latest_warthunder_forums(&forum_news);
 				println!("All forum hooks are served");
 				info!("All forum hooks are served");
+				continue
 			}
 		};
 
