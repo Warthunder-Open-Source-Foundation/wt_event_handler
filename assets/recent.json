@@ -3,7 +3,9 @@
     "recent_url": [
       "https://warthunder.com/en/news/7274-video-battle-pass-fearless-voltigeur-vehicles-en",
       "https://warthunder.com/en/news/7267-event-summer-landing-en",
-      "https://warthunder.com/en/news/7286-video-special-bmp-ifv-en"
+      "https://warthunder.com/en/news/7286-video-special-bmp-ifv-en",
+      "https://warthunder.com/en/news/7284-development-new-top-tier-ztz99-iii-and-pre-order-for-a-5c-en",
+      "https://warthunder.com/en/news/7297-video-direct-hit-update-teaser-en"
     ],
     "domain": "https://warthunder.com/en/news"
   },
@@ -11,14 +13,18 @@
     "recent_url": [
       "https://warthunder.com/en/game/changelog/current/1278",
       "https://warthunder.com/en/game/changelog/current/1246",
-      "https://warthunder.com/en/game/changelog/current/1283"
+      "https://warthunder.com/en/game/changelog/current/1283",
+      "https://warthunder.com/en/game/changelog/current/1284",
+      "https://warthunder.com/en/game/changelog/current/1285"
     ],
     "domain": "https://warthunder.com/en/game/changelog/"
   },
   "forums": {
     "recent_url": [
       "https://forum.warthunder.com/index.php?/topic/531260-update-270171-270167-xbox-playstation/",
-      "https://forum.warthunder.com/index.php?/topic/532248-update-270204-270201-%E2%80%94-xbox-playstation/"
+      "https://forum.warthunder.com/index.php?/topic/532248-update-270204-270201-%E2%80%94-xbox-playstation/",
+      "https://forum.warthunder.com/index.php?/topic/532396-planned-economy-changes-for-august/",
+      "https://forum.warthunder.com/index.php?/topic/532651-server-update-23082020-economy-update/"
     ],
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238"
   }

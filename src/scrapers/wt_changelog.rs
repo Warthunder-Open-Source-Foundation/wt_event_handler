@@ -1,10 +1,10 @@
 use std::fs;
 
-use log::*;
+use log::{error, info};
 use reqwest::get;
 use scraper::{Html, Selector};
 
-use crate::json_to_structs::recent::*;
+use crate::json_to_structs::recent::Recent;
 
 pub async fn html_processor_wt_changelog() -> Option<String> {
 	let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
@@ -50,26 +50,24 @@ pub async fn html_processor_wt_changelog() -> Option<String> {
 	if let Some(pin_url) = html.select(&pin).next() {
 		let pin_url = pin_url.value().attr("class").unwrap();
 		if pin_url == "widget__pin" {
-			return Some(pinned(recent, &top_url).clone());
-		} else {
-			return Some(top_url[0].clone());
+			return Some(pinned(&recent, &top_url).clone());
 		}
+		return Some(top_url[0].clone());
+	}
+	return fetch_failed();
+}
+
+fn pinned<'a>(recent: &'a Recent, top_url: &'a [String]) -> &'a String {
+	let recents = &recent.warthunder_changelog.recent_url;
+	if recents.contains(&top_url[0]) {
+		&top_url[1]
 	} else {
-		return fetch_failed();
+		&top_url[0]
 	}
+}
 
-	fn pinned(recent: Recent, top_url: &Vec<String>) -> &String {
-		let recents = &recent.warthunder_changelog.recent_url;
-		if !recents.contains(&top_url[0]) {
-			&top_url[0]
-		} else {
-			&top_url[1]
-		}
-	}
-
-	fn fetch_failed() -> Option<String> {
-		println!("Fetch failed");
-		error!("Fetch failed");
-		None
-	}
+fn fetch_failed() -> Option<String> {
+	println!("Fetch failed");
+	error!("Fetch failed");
+	None
 }

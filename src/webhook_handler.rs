@@ -3,12 +3,12 @@ use std::fs;
 use log::{error, warn};
 use serenity::http::Http;
 
-use crate::json_to_structs::recent::*;
-use crate::json_to_structs::webhooks::*;
+use crate::json_to_structs::recent::Target;
+use crate::json_to_structs::webhooks::{FilterType, WebhookAuth};
 
 impl Target {
 	//Receives latest content and index in recent array (for WT news)
-	pub async fn handle_wt_news_webhook(&self, content: &String) {
+	pub async fn handle_wt_news_webhook(&self, content: &str) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
@@ -61,7 +61,7 @@ impl Target {
 	}
 
 	//Receives latest content and index in recent array
-	pub async fn handle_simple_webhook(&self, content: &String) {
+	pub async fn handle_simple_webhook(&self, content: &str) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
@@ -72,7 +72,7 @@ impl Target {
 }
 
 //Finally sends the webhook to the servers
-async fn deliver_webhooks(content: &String, pos: usize) {
+async fn deliver_webhooks(content: &str, pos: usize) {
 	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
 	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
