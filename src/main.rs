@@ -59,32 +59,38 @@ async fn main() {
 
 	loop {
 		if let Some(wt_news_content) = html_processor_wt_news().await {
-			if recent_data.warthunder_news.is_outdated(&wt_news_content) && hooks {
-				recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
+			if recent_data.warthunder_news.is_outdated(&wt_news_content) {
+				if hooks {
+					recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
+				}
 				recent_data.append_latest_warthunder_news(&wt_news_content);
 				println!("All wt news hooks are served");
 				info!("All wt news hooks are served");
-				continue
+				continue;
 			}
 		};
 
 		if let Some(wt_changelog) = html_processor_wt_changelog().await {
-			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) && hooks {
-				recent_data.warthunder_changelog.handle_simple_webhook(&wt_changelog).await;
+			if recent_data.warthunder_changelog.is_outdated(&wt_changelog){
+				if hooks {
+					recent_data.warthunder_changelog.handle_wt_news_webhook(&wt_changelog).await;
+				}
 				recent_data.append_latest_warthunder_changelog(&wt_changelog);
 				println!("All wt changelog hooks are served");
 				info!("All wt changelog hooks are served");
-				continue
+				continue;
 			}
 		};
 
 		if let Some(forum_news) = html_processor_wt_forums().await {
-			if recent_data.forums.is_outdated(&forum_news) && hooks {
-				recent_data.forums.handle_simple_webhook(&forum_news).await;
+			if recent_data.forums.is_outdated(&forum_news){
+				if hooks {
+					recent_data.forums.handle_simple_webhook(&forum_news).await;
+				}
 				recent_data.append_latest_warthunder_forums(&forum_news);
 				println!("All forum hooks are served");
 				info!("All forum hooks are served");
-				continue
+				continue;
 			}
 		};
 
