@@ -35,11 +35,10 @@ pub fn fetch_failed() -> Option<String> {
 	None
 }
 
-pub fn pinned<'a>(recent: &'a Recent, top_url: &'a [String]) -> &'a String {
-	let recents = &recent.warthunder_changelog.recent_url;
-	if recents.contains(&top_url[0]) {
-		&top_url[1]
+pub fn pinned<'a>(recent: &'a Vec<String>, latest: &'a [String]) -> &'a String {
+	if recent.contains(&latest[0]) {
+		&latest[1]
 	} else {
-		&top_url[0]
+		&latest[0]
 	}
 }

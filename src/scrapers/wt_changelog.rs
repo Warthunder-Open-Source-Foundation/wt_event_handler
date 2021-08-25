@@ -38,7 +38,7 @@ pub async fn html_processor_wt_changelog() -> Option<String> {
 	if let Some(pin_url) = html.select(&pin).next() {
 		let pin_url = pin_url.value().attr("class").unwrap();
 		if pin_url == "widget__pin" {
-			return Some(pinned(&recent, &top_url).clone());
+			return Some(pinned(&recent.warthunder_changelog.recent_url, &top_url).clone());
 		}
 		return Some(top_url[0].clone());
 	}
