@@ -48,7 +48,8 @@ async fn main() {
 			clean_recent();
 		}
 		_ => {
-			println!("No option specified")
+			println!("No option specified");
+			exit(1);
 		}
 	}
 
