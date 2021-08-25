@@ -1,8 +1,8 @@
 use std::fs;
 
-use scraper::Html;
+use log::{error, info};
 use reqwest::get;
-use log::{info, error};
+use scraper::Html;
 
 use crate::json_to_structs::recent::Recent;
 

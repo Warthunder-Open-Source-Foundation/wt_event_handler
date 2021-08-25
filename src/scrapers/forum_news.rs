@@ -1,10 +1,6 @@
-use std::fs;
+use log::{error};
+use scraper::{Selector};
 
-use log::{error, info};
-use reqwest::get;
-use scraper::{Html, Selector};
-
-use crate::json_to_structs::recent::Recent;
 use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, request_html};
 
 pub async fn html_processor_wt_forums() -> Option<String> {

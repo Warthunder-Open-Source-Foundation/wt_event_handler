@@ -1,8 +1,7 @@
-use log::{error, info};
-use scraper::{Selector};
+use scraper::Selector;
 
-use crate::json_to_structs::recent::Recent;
-use crate::scrapers::scraper_resources::resources::{get_local, request_html, fetch_failed, pinned};
+
+use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, pinned, request_html};
 
 pub async fn html_processor_wt_changelog() -> Option<String> {
 	let recent = get_local();
