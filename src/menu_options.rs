@@ -79,3 +79,16 @@ pub fn remove_webhook() {
 	println!("Webhook {} successfully removed", index);
 	exit(0);
 }
+
+pub fn clean_recent() {
+	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+
+	cache.forums.recent_url.clear();
+	cache.warthunder_news.recent_url.clear();
+	cache.warthunder_changelog.recent_url.clear();
+
+	let write = serde_json::to_string_pretty(&cache).unwrap();
+	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+	println!("Cleared recent file");
+}

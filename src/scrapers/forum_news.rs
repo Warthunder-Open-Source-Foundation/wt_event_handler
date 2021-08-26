@@ -1,30 +1,18 @@
-use std::fs;
+use log::{error};
+use scraper::{Selector};
 
-use log::{error, info};
-use reqwest::get;
-use scraper::{Html, Selector};
-
-use crate::json_to_structs::recent::Recent;
+use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, request_html};
 
 pub async fn html_processor_wt_forums() -> Option<String> {
-	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+	let recent = get_local();
 
-	let url = &cache.forums.domain;
-
-	println!("Fetching data from {}", url);
-	info!("Fetching data from {}", url);
+	let url = &recent.forums.domain;
 
 	let html;
-
-	if let Ok(raw_html) = get(url).await {
-		if let Ok(text) = raw_html.text().await {
-			html = Html::parse_document(text.as_str());
-		} else {
-			return None;
-		}
+	if let Some(value) = request_html(&url).await {
+		html = value;
 	} else {
-		return None;
+		return fetch_failed()
 	}
 
 	let top_url_selector = Selector::parse("body > main > div > div > div > div:nth-child(2) > div > ol > li:nth-child(2) > div > h4 > div > a").unwrap();
