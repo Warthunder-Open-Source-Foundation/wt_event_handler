@@ -22,7 +22,9 @@
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238"
   },
   "forums_project_news": {
-    "recent_url": [],
+    "recent_url": [
+      "https://forum.warthunder.com/index.php?/topic/533470-discussing-the-changes-in-aircraft-sb/"
+    ],
     "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851"
   }
 }

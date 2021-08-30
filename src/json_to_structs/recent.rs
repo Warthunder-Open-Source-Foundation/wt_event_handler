@@ -44,7 +44,7 @@ impl Recent {
 		self.write_latest(&value);
 	}
 	pub fn append_latest_warthunder_forums_project_news(&mut self, value: &str) {
-		self.forums_updates_information.recent_url.push(value.to_owned());
+		self.forums_project_news.recent_url.push(value.to_owned());
 		self.write_latest(&value);
 	}
 	pub fn read_latest() -> Self {

@@ -11,6 +11,7 @@ use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, v
 use crate::scrapers::forum_news_updates_information::html_processor_wt_forums_updates_information;
 use crate::scrapers::wt_changelog::html_processor_wt_changelog;
 use crate::scrapers::wt_news::html_processor_wt_news;
+use crate::scrapers::forum_news_project_news::html_processor_wt_forums_project_news;
 
 mod webhook_handler;
 mod scrapers;
@@ -88,17 +89,30 @@ async fn main() {
 		// 	}
 		// };
 
-		if let Some(forum_news) = html_processor_wt_forums_updates_information().await {
-			if recent_data.forums_updates_information.is_outdated(&forum_news) {
+		if let Some(forum_news_updates_information) = html_processor_wt_forums_updates_information().await {
+			if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information) {
 				if hooks {
-					recent_data.forums_updates_information.handle_simple_webhook(&forum_news).await;
+					recent_data.forums_updates_information.handle_simple_webhook(&forum_news_updates_information).await;
 				}
-				recent_data.append_latest_warthunder_forums_updates_information(&forum_news);
-				println!("All forum hooks are served");
-				info!("All forum hooks are served");
+				recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information);
+				println!("All forum_updates_information hooks are served");
+				info!("All forum_updates_information hooks are served");
 				continue;
 			}
 		};
+
+		if let Some(forum_news_project_news) = html_processor_wt_forums_project_news().await {
+			if recent_data.forums_project_news.is_outdated(&forum_news_project_news) {
+				if hooks {
+					recent_data.forums_project_news.handle_simple_webhook(&forum_news_project_news).await;
+				}
+				recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news);
+				println!("All forum_project_news hooks are served");
+				info!("All forum_project_news hooks are served");
+				continue;
+			}
+		};
+
 
 		//Aborts program after running without hooks
 		if !hooks {
