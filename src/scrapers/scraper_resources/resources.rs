@@ -32,11 +32,3 @@ pub fn fetch_failed() -> Option<String> {
 	error!("Fetch failed");
 	None
 }
-
-pub fn pinned<'a>(recent: &'a [String], latest: &'a [String]) -> &'a String {
-	if recent.contains(&latest[0]) {
-		&latest[1]
-	} else {
-		&latest[0]
-	}
-}

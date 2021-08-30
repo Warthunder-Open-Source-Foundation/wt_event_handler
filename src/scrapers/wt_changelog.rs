@@ -25,7 +25,7 @@ pub async fn html_processor_wt_changelog() -> Option<String> {
 	loop {
 		pin = Selector::parse(&*format!("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child({}) > div.widget__pin", post)).unwrap();
 
-		if let Some(top_url) = html.select(&pin).next() {
+		if let Some(_top_url) = html.select(&pin).next() {
 			post += 1;
 		} else {
 			break;
