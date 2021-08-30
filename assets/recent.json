@@ -13,10 +13,16 @@
     ],
     "domain": "https://warthunder.com/en/game/changelog/"
   },
-  "forums": {
+  "forums_updates_information": {
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/532818-update-270218-270215-%E2%80%94-xbox-playstation/"
+      "https://forum.warthunder.com/index.php?/topic/532818-update-270218-270215-%E2%80%94-xbox-playstation/",
+      "https://forum.warthunder.com/index.php?/topic/533474-update-270223/",
+      "https://forum.warthunder.com/index.php?/topic/525861-war-thunder-red-skies-changelog/"
     ],
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238"
+  },
+  "forums_project_news": {
+    "recent_url": [],
+    "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851"
   }
 }
