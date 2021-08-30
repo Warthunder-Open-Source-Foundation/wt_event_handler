@@ -20,13 +20,11 @@ pub async fn request_html(url: &str) -> Option<Html> {
 	if let Ok(raw_html) = get(url).await {
 		if let Ok(text) = raw_html.text().await {
 			html = Html::parse_document(text.as_str());
-			return Some(html)
-		} else {
-			return None;
+			return Some(html);
 		}
-	} else {
 		return None;
 	}
+	return None;
 }
 
 pub fn fetch_failed() -> Option<String> {
@@ -35,7 +33,7 @@ pub fn fetch_failed() -> Option<String> {
 	None
 }
 
-pub fn pinned<'a>(recent: &'a Vec<String>, latest: &'a [String]) -> &'a String {
+pub fn pinned<'a>(recent: &'a [String], latest: &'a [String]) -> &'a String {
 	if recent.contains(&latest[0]) {
 		&latest[1]
 	} else {
