@@ -1,8 +1,10 @@
 use std::option::Option::Some;
+use std::process::exit;
 
+use log::error;
 use scraper::Selector;
 
-use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, pinned, request_html};
+use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, request_html};
 
 pub async fn html_processor_wt_news() -> Option<String> {
 	let recent = get_local();
@@ -16,38 +18,32 @@ pub async fn html_processor_wt_news() -> Option<String> {
 		return fetch_failed();
 	}
 
+	let mut post: u32 = 1;
 
-	let selectors = [
-		Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > a").unwrap(),
-		Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(2) > a").unwrap()
-	];
-	let pin = Selector::parse("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child(1) > div.widget__pin").unwrap();
+	let mut pin: Selector;
 
-	let mut top_url: Vec<String> = vec![String::new(), String::new()];
+	loop {
+		pin = Selector::parse(&*format!("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child({}) > div.widget__pin", post)).unwrap();
 
-	//Assigns 1st URL to 1st post
-	if let Some(x) = html.select(&selectors[0]).next() {
-		top_url[0] = (&*format!("https://warthunder.com{}", x.value().attr("href").unwrap())).parse().unwrap();
-	} else {
-		return fetch_failed();
-	};
-
-	//Assigns 2nd URL top 2nd post
-	if let Some(x) = html.select(&selectors[1]).next() {
-		top_url[1] = (&*format!("https://warthunder.com{}", x.value().attr("href").unwrap())).parse().unwrap();
-	} else {
-		return fetch_failed();
-	};
-
-
-	if let Some(pin_url) = html.select(&pin).next() {
-		//Checks if a "widget__pin" exists on 1st post
-		let pin_url = pin_url.value().attr("class").unwrap();
-		if pin_url == "widget__pin" {
-			//verifies if latest post is already known, and then cho
-			return Some(pinned(&recent.warthunder_news.recent_url, &top_url).clone());
+		if let Some(top_url) = html.select(&pin).next() {
+			post += 1;
+		} else {
+			break;
 		}
-		return Some(top_url[0].clone());
+		if post > 20 {
+			println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+			exit(-1);
+		}
 	}
-	return fetch_failed();
+
+	let top_url_selector = Selector::parse(&*format!("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child({}) > a.widget__link", post)).unwrap();
+
+	return if let Some(top_url) = html.select(&top_url_selector).next() {
+		let top_url = format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
+		Some(top_url)
+	} else {
+		println!("Fetch failed");
+		error!("Fetch failed");
+		None
+	};
 }
