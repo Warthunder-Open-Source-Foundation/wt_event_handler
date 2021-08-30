@@ -84,7 +84,7 @@ pub fn clean_recent() {
 	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
-	cache.forums.recent_url.clear();
+	cache.forums_updates_information.recent_url.clear();
 	cache.warthunder_news.recent_url.clear();
 	cache.warthunder_changelog.recent_url.clear();
 

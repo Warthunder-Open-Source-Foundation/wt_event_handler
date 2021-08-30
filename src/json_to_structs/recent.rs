@@ -6,7 +6,8 @@ use log::{info, warn};
 pub struct Recent {
 	pub warthunder_news: Target,
 	pub warthunder_changelog: Target,
-	pub forums: Target,
+	pub forums_updates_information: Target,
+	pub forums_project_news: Target,
 }
 
 #[derive(Default, serde::Serialize, serde::Deserialize)]
@@ -38,8 +39,12 @@ impl Recent {
 		self.warthunder_changelog.recent_url.push(value.to_owned());
 		self.write_latest(&value);
 	}
-	pub fn append_latest_warthunder_forums(&mut self, value: &str) {
-		self.forums.recent_url.push(value.to_owned());
+	pub fn append_latest_warthunder_forums_updates_information(&mut self, value: &str) {
+		self.forums_updates_information.recent_url.push(value.to_owned());
+		self.write_latest(&value);
+	}
+	pub fn append_latest_warthunder_forums_project_news(&mut self, value: &str) {
+		self.forums_project_news.recent_url.push(value.to_owned());
 		self.write_latest(&value);
 	}
 	pub fn read_latest() -> Self {
