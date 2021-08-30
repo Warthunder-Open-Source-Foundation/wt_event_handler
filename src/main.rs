@@ -65,29 +65,29 @@ async fn main() {
 	let mut recent_data = Recent::read_latest();
 
 	loop {
-		// if let Some(wt_news_content) = html_processor_wt_news().await {
-		// 	if recent_data.warthunder_news.is_outdated(&wt_news_content) {
-		// 		if hooks {
-		// 			recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
-		// 		}
-		// 		recent_data.append_latest_warthunder_news(&wt_news_content);
-		// 		println!("All wt news hooks are served");
-		// 		info!("All wt news hooks are served");
-		// 		continue;
-		// 	}
-		// };
-		//
-		// if let Some(wt_changelog) = html_processor_wt_changelog().await {
-		// 	if recent_data.warthunder_changelog.is_outdated(&wt_changelog) {
-		// 		if hooks {
-		// 			recent_data.warthunder_changelog.handle_wt_news_webhook(&wt_changelog).await;
-		// 		}
-		// 		recent_data.append_latest_warthunder_changelog(&wt_changelog);
-		// 		println!("All wt changelog hooks are served");
-		// 		info!("All wt changelog hooks are served");
-		// 		continue;
-		// 	}
-		// };
+		if let Some(wt_news_content) = html_processor_wt_news().await {
+			if recent_data.warthunder_news.is_outdated(&wt_news_content) {
+				if hooks {
+					recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
+				}
+				recent_data.append_latest_warthunder_news(&wt_news_content);
+				println!("All wt news hooks are served");
+				info!("All wt news hooks are served");
+				continue;
+			}
+		};
+
+		if let Some(wt_changelog) = html_processor_wt_changelog().await {
+			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) {
+				if hooks {
+					recent_data.warthunder_changelog.handle_wt_news_webhook(&wt_changelog).await;
+				}
+				recent_data.append_latest_warthunder_changelog(&wt_changelog);
+				println!("All wt changelog hooks are served");
+				info!("All wt changelog hooks are served");
+				continue;
+			}
+		};
 
 		if let Some(forum_news_updates_information) = html_processor_wt_forums_updates_information().await {
 			if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information) {
@@ -112,7 +112,6 @@ async fn main() {
 				continue;
 			}
 		};
-
 
 		//Aborts program after running without hooks
 		if !hooks {

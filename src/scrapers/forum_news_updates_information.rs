@@ -20,12 +20,12 @@ pub async fn html_processor_wt_forums_updates_information() -> Option<String> {
 
 	let mut post: u32 = 1;
 
-	let mut pin = Selector::parse(&*format!("body > main > div > div > div > div:nth-child(2) > div > ol > li:nth-child({})", post)).unwrap();
+	let mut pin: Selector;
 
 	loop {
 		pin = Selector::parse(&*format!("body > main > div > div > div > div:nth-child(2) > div > ol > li:nth-child({})", post)).unwrap();
 
-		if let Some(top_url) = html.select((&pin)).next() {
+		if let Some(top_url) = html.select(&pin).next() {
 			let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
 			if !is_pinned {
 				break;
