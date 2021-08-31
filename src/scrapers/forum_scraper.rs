@@ -5,11 +5,12 @@ use log::error;
 use scraper::Selector;
 
 use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, request_html};
+use crate::json_to_structs::recent::{RecentValue, format_selector};
 
-pub async fn html_processor_wt_changelog() -> Option<String> {
+pub async fn html_processor_wt_forums(recent_value: &RecentValue) -> Option<String> {
 	let recent = get_local();
 
-	let url = &recent.warthunder_changelog.domain;
+	let url = &recent_value.domain;
 
 	let html;
 	if let Some(value) = request_html(&url).await {
@@ -23,12 +24,13 @@ pub async fn html_processor_wt_changelog() -> Option<String> {
 	let mut pin: Selector;
 
 	loop {
-		pin = Selector::parse(&*format!("#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child({})>div.widget__pin", post)).unwrap();
-
-		if let Some(_top_url) = html.select(&pin).next() {
+		pin = format_selector(&recent_value, "pin", &post);
+		if let Some(top_url) = html.select(&pin).next() {
+			let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
+			if !is_pinned {
+				break;
+			}
 			post += 1;
-		} else {
-			break;
 		}
 		if post > 20 {
 			println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
@@ -36,11 +38,11 @@ pub async fn html_processor_wt_changelog() -> Option<String> {
 		}
 	}
 
-	let top_url_selector = Selector::parse(&*format!("#bodyRoot > div.content > div:nth-child(2) > div > div > section > div > div.showcase__content-wrapper > div:nth-child({}) > a.widget__link", post)).unwrap();
+	let top_url_selector = format_selector(&recent_value, "selector", &post);
 
 	return if let Some(top_url) = html.select(&top_url_selector).next() {
-		let top_url = format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
-		Some(top_url)
+		let top_url = top_url.value().attr("href").unwrap();
+		Some(top_url.to_string())
 	} else {
 		println!("Fetch failed");
 		error!("Fetch failed");
