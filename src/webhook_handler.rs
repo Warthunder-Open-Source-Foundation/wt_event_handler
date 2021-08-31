@@ -3,10 +3,10 @@ use std::fs;
 use log::{error, warn};
 use serenity::http::Http;
 
-use crate::json_to_structs::recent::RecentValue;
+use crate::json_to_structs::recent::Value;
 use crate::json_to_structs::webhooks::{FilterType, WebhookAuth};
 
-impl RecentValue {
+impl Value {
 	//Receives latest content and index in recent array (for WT news)
 	pub async fn handle_wt_news_webhook(&self, content: &str) {
 		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");

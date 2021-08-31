@@ -4,10 +4,10 @@ use std::process::exit;
 use log::error;
 use scraper::Selector;
 
+use crate::json_to_structs::recent::{format_selector, Value};
 use crate::scrapers::scraper_resources::resources::{fetch_failed, request_html};
-use crate::json_to_structs::recent::{RecentValue, format_selector};
 
-pub async fn html_processor_main_news(recent_value: &RecentValue) -> Option<String> {
+pub async fn html_processor_warthunderdotcom(recent_value: &Value) -> Option<String> {
 	let url = &recent_value.domain;
 
 	let html;
@@ -22,7 +22,7 @@ pub async fn html_processor_main_news(recent_value: &RecentValue) -> Option<Stri
 	let mut pin: Selector;
 
 	loop {
-		pin = format_selector(&recent_value, "pin", &post);
+		pin = format_selector(&recent_value, "pin", post);
 
 		if let Some(_top_url) = html.select(&pin).next() {
 			post += 1;
@@ -35,7 +35,7 @@ pub async fn html_processor_main_news(recent_value: &RecentValue) -> Option<Stri
 		}
 	}
 
-	let top_url_selector = format_selector(&recent_value, "selector", &post);
+	let top_url_selector = format_selector(&recent_value, "selector", post);
 
 	return if let Some(top_url) = html.select(&top_url_selector).next() {
 		let top_url = format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
