@@ -4,12 +4,10 @@ use std::process::exit;
 use log::error;
 use scraper::Selector;
 
-use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, request_html};
+use crate::scrapers::scraper_resources::resources::{fetch_failed, request_html};
 use crate::json_to_structs::recent::{RecentValue, format_selector};
 
 pub async fn html_processor_wt_forums(recent_value: &RecentValue) -> Option<String> {
-	let recent = get_local();
-
 	let url = &recent_value.domain;
 
 	let html;

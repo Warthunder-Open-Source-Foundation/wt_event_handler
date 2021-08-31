@@ -8,10 +8,6 @@ use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, verify_json};
-use crate::scrapers::forum_news_updates_information::html_processor_wt_forums_updates_information;
-use crate::scrapers::wt_changelog::html_processor_wt_changelog;
-use crate::scrapers::wt_news::html_processor_wt_news;
-use crate::scrapers::forum_news_project_news::html_processor_wt_forums_project_news;
 use crate::scrapers::forum_scraper::html_processor_wt_forums;
 use crate::scrapers::main_news::html_processor_main_news;
 
