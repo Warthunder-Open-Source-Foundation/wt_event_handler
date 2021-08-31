@@ -4,12 +4,11 @@ use std::process::exit;
 use log::error;
 use scraper::Selector;
 
-use crate::scrapers::scraper_resources::resources::{fetch_failed, get_local, request_html};
+use crate::json_to_structs::recent::{format_selector, Value};
+use crate::scrapers::scraper_resources::resources::{fetch_failed, request_html};
 
-pub async fn html_processor_wt_forums_updates_information() -> Option<String> {
-	let recent = get_local();
-
-	let url = &recent.forums_updates_information.domain;
+pub async fn html_processor_wt_forums(recent_value: &Value) -> Option<String> {
+	let url = &recent_value.domain;
 
 	let html;
 	if let Some(value) = request_html(&url).await {
@@ -23,8 +22,7 @@ pub async fn html_processor_wt_forums_updates_information() -> Option<String> {
 	let mut pin: Selector;
 
 	loop {
-		pin = Selector::parse(&*format!("body > main > div > div > div > div:nth-child(2) > div > ol > li:nth-child({})", post)).unwrap();
-
+		pin = format_selector(&recent_value, "pin", post);
 		if let Some(top_url) = html.select(&pin).next() {
 			let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
 			if !is_pinned {
@@ -38,7 +36,7 @@ pub async fn html_processor_wt_forums_updates_information() -> Option<String> {
 		}
 	}
 
-	let top_url_selector = Selector::parse(&*format!("body > main > div > div > div > div:nth-child(2) > div > ol > li:nth-child({}) > div > h4 > div > a", post)).unwrap();
+	let top_url_selector = format_selector(&recent_value, "selector", post);
 
 	return if let Some(top_url) = html.select(&top_url_selector).next() {
 		let top_url = top_url.value().attr("href").unwrap();

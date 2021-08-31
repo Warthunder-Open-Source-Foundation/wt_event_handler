@@ -8,10 +8,8 @@ use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, verify_json};
-use crate::scrapers::forum_news_updates_information::html_processor_wt_forums_updates_information;
-use crate::scrapers::wt_changelog::html_processor_wt_changelog;
-use crate::scrapers::wt_news::html_processor_wt_news;
-use crate::scrapers::forum_news_project_news::html_processor_wt_forums_project_news;
+use crate::scrapers::forum_scraper::html_processor_wt_forums;
+use crate::scrapers::main_news::html_processor_warthunderdotcom;
 
 mod webhook_handler;
 mod scrapers;
@@ -65,7 +63,7 @@ async fn main() {
 	let mut recent_data = Recent::read_latest();
 
 	loop {
-		if let Some(wt_news_content) = html_processor_wt_news().await {
+		if let Some(wt_news_content) = html_processor_warthunderdotcom(&recent_data.warthunder_news).await {
 			if recent_data.warthunder_news.is_outdated(&wt_news_content) {
 				if hooks {
 					recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
@@ -77,7 +75,7 @@ async fn main() {
 			}
 		};
 
-		if let Some(wt_changelog) = html_processor_wt_changelog().await {
+		if let Some(wt_changelog) = html_processor_warthunderdotcom(&recent_data.warthunder_changelog).await {
 			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) {
 				if hooks {
 					recent_data.warthunder_changelog.handle_wt_news_webhook(&wt_changelog).await;
@@ -89,7 +87,7 @@ async fn main() {
 			}
 		};
 
-		if let Some(forum_news_updates_information) = html_processor_wt_forums_updates_information().await {
+		if let Some(forum_news_updates_information) = html_processor_wt_forums(&recent_data.forums_updates_information).await {
 			if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information) {
 				if hooks {
 					recent_data.forums_updates_information.handle_simple_webhook(&forum_news_updates_information).await;
@@ -101,7 +99,7 @@ async fn main() {
 			}
 		};
 
-		if let Some(forum_news_project_news) = html_processor_wt_forums_project_news().await {
+		if let Some(forum_news_project_news) = html_processor_wt_forums(&recent_data.forums_project_news).await {
 			if recent_data.forums_project_news.is_outdated(&forum_news_project_news) {
 				if hooks {
 					recent_data.forums_project_news.handle_simple_webhook(&forum_news_project_news).await;
