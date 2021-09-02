@@ -1,8 +1,14 @@
 use log::{error, info};
 use reqwest::get;
 use scraper::{Html, Selector, ElementRef};
-use crate::json_to_structs::recent::format_selector;
+use crate::json_to_structs::recent::{format_selector, Value};
 use std::process::exit;
+
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
+pub enum ScrapeType {
+	Forum,
+	Main,
+}
 
 pub async fn request_html(url: &str) -> Option<Html> {
 	println!("Fetching data from {}", &url);
@@ -25,35 +31,51 @@ pub fn fetch_failed() -> Option<String> {
 	None
 }
 
-pub fn pin_loop_main_news(mut post: u32) -> u32 {
+pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;
 
-	loop {
-		pin = format_selector(&recent_value, "pin", post);
-
-		if let Some(_top_url) = html.select(&pin).next() {
-			post += 1;
-		} else {
-			return post;
+	match selection {
+		ScrapeType::Main => {
+			loop {
+				pin = format_selector(&recent_value, "pin", post);
+				if let Some(_top_url) = html.select(&pin).next() {
+					post += 1;
+				} else {
+					return post;
+				}
+				if post > 20 {
+					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+					exit(-1);
+				}
+			}
 		}
-		if post > 20 {
-			println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
-			exit(-1);
+		ScrapeType::Forum => {
+			loop {
+				pin = format_selector(&recent_value, "pin", post);
+				if let Some(top_url) = html.select(&pin).next() {
+					let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
+					if !is_pinned {
+						return post
+					}
+					post += 1;
+				}
+				if post > 20 {
+					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+					exit(-1);
+				}
+			}
 		}
 	}
+
 }
 
-pub fn format_result(top_url: ElementRef, selection: &str)  -> String{
-	match selection {
-		"main" => {
-			return format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
+pub fn format_result(top_url: ElementRef, selection: ScrapeType)  -> String{
+	return match selection {
+		ScrapeType::Main => {
+			format!("https://warthunder.com{}", top_url.value().attr("href").unwrap())
 		}
-		"forum" => {
-		return top_url.value().attr("href").unwrap().to_string();
-		}
-		_ => {
-			exit(-1);
+		ScrapeType::Forum => {
+			top_url.value().attr("href").unwrap().to_string()
 		}
 	}
-
 }

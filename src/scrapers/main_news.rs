@@ -1,13 +1,11 @@
 use std::option::Option::Some;
-use std::process::exit;
 
 use log::error;
-use scraper::{Selector, ElementRef};
 
 use crate::json_to_structs::recent::{format_selector, Value};
-use crate::scrapers::scraper_resources::resources::{fetch_failed, request_html, pin_loop_main_news, format_main_news, format_result};
+use crate::scrapers::scraper_resources::resources::{fetch_failed, request_html, format_result, ScrapeType, pin_loop};
 
-pub async fn html_processor_warthunderdotcom(recent_value: &Value) -> Option<String> {
+pub async fn html_processor(recent_value: &Value, scrape_type: ScrapeType) -> Option<String> {
 	let url = &recent_value.domain;
 
 	let html;
@@ -19,14 +17,14 @@ pub async fn html_processor_warthunderdotcom(recent_value: &Value) -> Option<Str
 
 	let mut post: u32 = 1;
 
-	post = pin_loop_main_news(post);
+	post = pin_loop(post, &html, &recent_value, scrape_type);
 
 	let top_url_selector = format_selector(&recent_value, "selector", post);
-	return if let Some(top_url) = html.select(&top_url_selector).next() {
-		return Some(format_result(top_url, "main"));
+	if let Some(top_url) = html.select(&top_url_selector).next() {
+		return Some(format_result(top_url, scrape_type));
 	} else {
 		println!("Fetch failed");
 		error!("Fetch failed");
-		None
+		return None
 	};
 }
