@@ -87,8 +87,31 @@ pub fn clean_recent() {
 	cache.forums_updates_information.recent_url.clear();
 	cache.warthunder_news.recent_url.clear();
 	cache.warthunder_changelog.recent_url.clear();
+	cache.forums_project_news.recent_url.clear();
 
 	let write = serde_json::to_string_pretty(&cache).unwrap();
 	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 	println!("Cleared recent file");
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_clean_recent() {
+		let pre_test = fs::read("assets/recent.json").expect("Cannot read file");
+
+		clean_recent();
+		let post_test = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+		let post_test_struct: Recent = serde_json::from_str(&post_test).expect("Json cannot be read");
+
+		assert!(post_test_struct.forums_updates_information.recent_url.is_empty() &&
+			post_test_struct.warthunder_news.recent_url.is_empty() &&
+			post_test_struct.warthunder_changelog.recent_url.is_empty() &&
+			post_test_struct.forums_project_news.recent_url.is_empty()
+		);
+
+		fs::write("assets/recent.json", pre_test).expect("Couldn't write to recent file");
+	}
 }
