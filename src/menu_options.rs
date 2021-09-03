@@ -34,14 +34,20 @@ pub fn init_log() {
 
 pub fn verify_json() {
 	println!("Verifying Json files...");
+
 	let recent_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let mut recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
-	//Just for removing warning
-	recent.warthunder_changelog.recent_url.pop();
+	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+
 	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-	let mut entry: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-	//Just for removing warning
-	entry.hooks.pop();
+	let token: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+
+	let write_recent = serde_json::to_string_pretty(&recent).unwrap();
+	fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
+
+	let write_token = serde_json::to_string_pretty(&token).unwrap();
+	fs::write("assets/discord_token.json", write_token).expect("Couldn't write to recent file");
+
 	println!("Json files complete");
 }
 
@@ -113,5 +119,21 @@ mod tests {
 		);
 
 		fs::write("assets/recent.json", pre_test).expect("Couldn't write to recent file");
+	}
+
+	#[test]
+	fn test_verify_json() {
+		let pre_test_recent = fs::read("assets/recent.json").expect("Cannot read file");
+		let pre_test_token = fs::read("assets/discord_token.json").expect("Cannot read file");
+
+		verify_json();
+
+		let post_test_recent = fs::read("assets/recent.json").expect("Cannot read file");
+		let post_test_token = fs::read("assets/discord_token.json").expect("Cannot read file");
+
+		assert!(pre_test_token == post_test_token && pre_test_recent == post_test_recent);
+
+		fs::write("assets/recent.json", pre_test_recent).expect("Couldn't write to recent file");
+		fs::write("assets/discord_token.json", pre_test_token).expect("Couldn't write to recent file");
 	}
 }

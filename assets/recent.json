@@ -4,7 +4,8 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/news/7312-development-uss-pittsburgh-the-longest-ship-in-the-world-en"
+      "https://warthunder.com/en/news/7312-development-uss-pittsburgh-the-longest-ship-in-the-world-en",
+      "https://warthunder.com/en/news/7324-video-thunder-show-the-soviet-way-en"
     ]
   },
   "warthunder_changelog": {
@@ -12,7 +13,8 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1289"
+      "https://warthunder.com/en/game/changelog/current/1289",
+      "https://warthunder.com/en/game/changelog/current/1291"
     ]
   },
   "forums_updates_information": {
@@ -20,7 +22,8 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/533505-server-update-31082021/"
+      "https://forum.warthunder.com/index.php?/topic/533505-server-update-31082021/",
+      "https://forum.warthunder.com/index.php?/topic/533865-update-270235/"
     ]
   },
   "forums_project_news": {
@@ -29,7 +32,8 @@
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
       "https://forum.warthunder.com/index.php?/topic/533470-discussing-the-changes-in-aircraft-sb/",
-      "https://forum.warthunder.com/index.php?/topic/533504-forum-maintenance/"
+      "https://forum.warthunder.com/index.php?/topic/533504-forum-maintenance/",
+      "https://forum.warthunder.com/index.php?/topic/533895-video-thunder-show-the-soviet-way/"
     ]
   }
 }
