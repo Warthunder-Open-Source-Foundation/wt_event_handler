@@ -31,6 +31,11 @@ pub fn fetch_failed() -> Option<String> {
 	None
 }
 
+#[cfg(test)]
+mod tests {
+	use super::*;
+}
+
 pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;
 
