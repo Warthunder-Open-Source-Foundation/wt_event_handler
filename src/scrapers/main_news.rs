@@ -3,7 +3,7 @@ use std::option::Option::Some;
 use log::error;
 
 use crate::json_to_structs::recent::{format_selector, Value};
-use crate::scrapers::scraper_resources::resources::{fetch_failed, format_result, pin_loop, request_html, ScrapeType, RecentHtmlTarget};
+use crate::scrapers::scraper_resources::resources::{fetch_failed, format_result, find_unpinned_post, request_html, ScrapeType, RecentHtmlTarget};
 
 pub async fn html_processor(recent_value: &Value, scrape_type: ScrapeType) -> Option<String> {
 	let url = &recent_value.domain;
@@ -15,11 +15,11 @@ pub async fn html_processor(recent_value: &Value, scrape_type: ScrapeType) -> Op
 		return fetch_failed();
 	}
 
-	let mut post: u32 = 1;
+	let mut post_enumerator: u32 = 1;
 
-	post = pin_loop(post, &html, &recent_value, scrape_type);
+	post_enumerator = find_unpinned_post(post_enumerator, &html, &recent_value, scrape_type);
 
-	let top_url_selector = format_selector(&recent_value, &RecentHtmlTarget::Post, post);
+	let top_url_selector = format_selector(&recent_value, &RecentHtmlTarget::Post, post_enumerator);
 	if let Some(top_url) = html.select(&top_url_selector).next() {
 		return Some(format_result(top_url, scrape_type));
 	}

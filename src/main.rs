@@ -7,7 +7,7 @@ use log::info;
 use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
-use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, verify_json};
+use crate::menu_options::{add_webhook, clean_recent_file, init_log, remove_webhook, verify_json};
 use crate::scrapers::main_news::{html_processor};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
@@ -44,7 +44,7 @@ async fn main() {
 		}
 		"6" => {
 			hooks = false;
-			clean_recent();
+			clean_recent_file();
 		}
 		_ => {
 			println!("No option specified");

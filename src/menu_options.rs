@@ -88,19 +88,19 @@ pub fn remove_webhook() {
 	exit(0);
 }
 
-pub fn clean_recent() {
-	let mut cache_raw = OpenOptions::new().write(true).truncate(true).create(true).open("./assets/recent.json").expect("Could not open recent.json");
-	let mut cache: Recent = serde_json::from_reader(&cache_raw).expect("Json cannot be read");
+pub fn clean_recent_file() {
+	let mut recent_file = OpenOptions::new().write(true).truncate(true).create(true).open("./assets/recent.json").expect("Could not open recent.json");
+	let mut recent: Recent = serde_json::from_reader(&recent_file).expect("Json cannot be read");
 
-	cache.forums_updates_information.recent_url.clear();
-	cache.warthunder_news.recent_url.clear();
-	cache.warthunder_changelog.recent_url.clear();
-	cache.forums_project_news.recent_url.clear();
+	recent.forums_updates_information.recent_url.clear();
+	recent.warthunder_news.recent_url.clear();
+	recent.warthunder_changelog.recent_url.clear();
+	recent.forums_project_news.recent_url.clear();
 
 
-	let write = serde_json::to_string_pretty(&cache).unwrap();
+	let write = serde_json::to_string_pretty(&recent).unwrap();
 	println!("{:?}", write);
-	cache_raw.write_all(write.as_bytes()).expect("Could not write recent.json");
+	recent_file.write_all(write.as_bytes()).expect("Could not write recent.json");
 
 	println!("Cleared recent file");
 }

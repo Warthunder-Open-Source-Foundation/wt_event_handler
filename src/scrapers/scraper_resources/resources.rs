@@ -19,10 +19,9 @@ pub async fn request_html(url: &str) -> Option<Html> {
 	println!("Fetching data from {}", &url);
 	info!("Fetching data from {}", &url);
 
-	let html;
 	if let Ok(raw_html) = get(url).await {
 		if let Ok(text) = raw_html.text().await {
-			html = Html::parse_document(text.as_str());
+			let html = Html::parse_document(text.as_str());
 			return Some(html);
 		}
 		return None;
@@ -41,19 +40,19 @@ mod tests {
 	use super::*;
 }
 
-pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: ScrapeType) -> u32 {
+pub fn find_unpinned_post(mut post_eunmerator: u32, html: &Html, recent_value: &Value, scrape_type: ScrapeType) -> u32 {
 	let mut pin: Selector;
 
-	match selection {
+	match scrape_type {
 		ScrapeType::Main => {
 			loop {
-				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post);
+				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post_eunmerator);
 				if let Some(_top_url) = html.select(&pin).next() {
-					post += 1;
+					post_eunmerator += 1;
 				} else {
-					return post;
+					return post_eunmerator;
 				}
-				if post > 20 {
+				if post_eunmerator > 20 {
 					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
 					exit(-1);
 				}
@@ -61,15 +60,15 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 		}
 		ScrapeType::Forum => {
 			loop {
-				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post);
+				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post_eunmerator);
 				if let Some(top_url) = html.select(&pin).next() {
 					let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
 					if !is_pinned {
-						return post
+						return post_eunmerator
 					}
-					post += 1;
+					post_eunmerator += 1;
 				}
-				if post > 20 {
+				if post_eunmerator > 20 {
 					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
 					exit(-1);
 				}
@@ -79,13 +78,13 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 
 }
 
-pub fn format_result(top_url: ElementRef, selection: ScrapeType)  -> String{
-	return match selection {
+pub fn format_result(post_element: ElementRef, scrape_type: ScrapeType) -> String{
+	return match scrape_type {
 		ScrapeType::Main => {
-			format!("https://warthunder.com{}", top_url.value().attr("href").unwrap())
+			format!("https://warthunder.com{}", post_element.value().attr("href").unwrap())
 		}
 		ScrapeType::Forum => {
-			top_url.value().attr("href").unwrap().to_string()
+			post_element.value().attr("href").unwrap().to_string()
 		}
 	}
 }
