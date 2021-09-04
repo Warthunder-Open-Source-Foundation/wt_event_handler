@@ -4,12 +4,12 @@ use std::process::exit;
 use log::error;
 use serenity::http::Http;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Hooks {
 	pub name: String,
 	pub token: String,
@@ -18,7 +18,7 @@ pub struct Hooks {
 	pub keywords: Vec<String>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
 pub enum FilterType {
 	Default = 0,
 	Blacklist = 1,

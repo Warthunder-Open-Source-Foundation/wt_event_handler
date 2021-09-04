@@ -4,7 +4,7 @@ use std::process::exit;
 use log::{info, warn};
 use scraper::Selector;
 
-#[derive(Default, serde::Serialize, serde::Deserialize)]
+#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
 	pub warthunder_news: Value,
 	pub warthunder_changelog: Value,
@@ -12,7 +12,7 @@ pub struct Recent {
 	pub forums_project_news: Value,
 }
 
-#[derive(Default, serde::Serialize, serde::Deserialize)]
+#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Value {
 	pub domain: String,
 	pub selector: String,
