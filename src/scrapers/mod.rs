@@ -1,3 +1,2 @@
-mod scraper_resources;
-pub mod forum_scraper;
+pub mod scraper_resources;
 pub mod main_news;
