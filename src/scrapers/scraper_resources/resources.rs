@@ -10,6 +10,11 @@ pub enum ScrapeType {
 	Main,
 }
 
+pub enum RecentHtmlTarget {
+	Pin,
+	Post,
+}
+
 pub async fn request_html(url: &str) -> Option<Html> {
 	println!("Fetching data from {}", &url);
 	info!("Fetching data from {}", &url);
@@ -42,7 +47,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 	match selection {
 		ScrapeType::Main => {
 			loop {
-				pin = format_selector(&recent_value, "pin", post);
+				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post);
 				if let Some(_top_url) = html.select(&pin).next() {
 					post += 1;
 				} else {
@@ -56,7 +61,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 		}
 		ScrapeType::Forum => {
 			loop {
-				pin = format_selector(&recent_value, "pin", post);
+				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post);
 				if let Some(top_url) = html.select(&pin).next() {
 					let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
 					if !is_pinned {

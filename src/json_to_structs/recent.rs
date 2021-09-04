@@ -1,8 +1,8 @@
 use std::fs;
-use std::process::exit;
 
 use log::{info, warn};
 use scraper::Selector;
+use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
@@ -64,17 +64,13 @@ impl Recent {
 	}
 }
 
-pub fn format_selector(main: &Value, which: &str, index: u32) -> Selector {
-	match which {
-		"pin" => {
-			return Selector::parse(&*format!("{}{}{}", &*main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap();
+pub fn format_selector(main: &Value, which: &RecentHtmlTarget, index: u32) -> Selector {
+	return match which {
+		RecentHtmlTarget::Pin => {
+			Selector::parse(&*format!("{}{}{}", &*main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
 		}
-		"selector" => {
-			return Selector::parse(&*format!("{}{}{}", &*main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap();
-		}
-		_ => {
-			println!("Failed to detect option for selector");
-			exit(-1);
+		RecentHtmlTarget::Post => {
+			Selector::parse(&*format!("{}{}{}", &*main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
 		}
 	}
 }
