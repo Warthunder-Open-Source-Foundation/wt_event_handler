@@ -137,7 +137,7 @@ mod tests {
 		verify_json();
 
 		let post_test_recent = fs::read("assets/recent.json").expect("Cannot read file");
-		let post_test_token = fs::read("assets/discord_token.json").expect("Cannot read file");
+		let _post_test_token = fs::read("assets/discord_token.json").expect("Cannot read file");
 
 		assert_eq!(pre_test_token, pre_test_token);
 		assert_eq!(pre_test_recent, post_test_recent);

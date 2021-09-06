@@ -104,3 +104,80 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 		w
 	}).await.unwrap();
 }
+
+mod tests {
+	use crate::json_to_structs::webhooks::FilterType::{Whitelist, Blacklist};
+
+	#[allow(unused_imports)]
+	use super::*;
+	use log4rs::encode::Color::Black;
+
+	#[test]
+	fn test_filter_default_pass() {
+		assert_eq!(match_filter("pass", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Default::default(),
+			keywords: vec![],
+		}).unwrap(), "pass")
+	}
+
+	#[test]
+	#[should_panic]
+	fn test_filter_default_no_match() {
+		match_filter("xyz", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Default::default(),
+			keywords: vec![],
+		}).unwrap();
+	}
+
+	#[test]
+	fn test_filter_whitelist_match() {
+		assert_eq!(match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Whitelist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap(), "C");
+	}
+
+	#[test]
+	#[should_panic]
+	fn test_filter_whitelist_miss() {
+		match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Whitelist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap();
+	}
+
+	#[test]
+	#[should_panic]
+	fn test_filter_blacklist_match() {
+		match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Blacklist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap();
+	}
+
+	#[test]
+	fn test_filter_blacklist_miss() {
+		match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Blacklist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap();
+	}
+}
