@@ -1,7 +1,5 @@
 use std::fs;
-use std::fs::OpenOptions;
 use std::io;
-use std::io::Write;
 use std::path::Path;
 use std::process::exit;
 
@@ -73,15 +71,9 @@ pub fn remove_webhook() {
 	for (i, hook) in webhook_auth.hooks.iter().enumerate() {
 		println!("{} {}", i, hook.name);
 	}
-	println!("Choose the webhook to remove or abort with n \n");
+	println!("Choose the webhook to remove \n");
 
 	io::stdin().read_line(&mut line).unwrap();
-
-	if let "n" = line.trim() {
-		println!("Aborting webhook removal");
-		exit(0);
-	}
-
 	let index = line.trim().parse().unwrap();
 
 	webhook_auth.hooks.remove(index);
@@ -94,19 +86,18 @@ pub fn remove_webhook() {
 	exit(0);
 }
 
-pub fn clean_recent_file() {
-	let mut recent_file = OpenOptions::new().write(true).truncate(true).create(true).open("./assets/recent.json").expect("Could not open recent.json");
-	let mut recent: Recent = serde_json::from_reader(&recent_file).expect("Json cannot be read");
+pub fn clean_recent() {
+	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
-	recent.forums_updates_information.recent_url.clear();
-	recent.warthunder_news.recent_url.clear();
-	recent.warthunder_changelog.recent_url.clear();
-	recent.forums_project_news.recent_url.clear();
+	cache.forums_updates_information.recent_url.clear();
+	cache.warthunder_news.recent_url.clear();
+	cache.warthunder_changelog.recent_url.clear();
+	cache.forums_project_news.recent_url.clear();
 
-
-	let write = serde_json::to_string_pretty(&recent).unwrap();
-	println!("{:?}", write);
-	recent_file.write_all(write.as_bytes()).expect("Could not write recent.json");
+	// let write = serde_json::to_string_pretty(&cache).unwrap();
+	let write = serde_json::to_string_pretty(&cache).unwrap();
+	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 
 	println!("Cleared recent file");
 }
