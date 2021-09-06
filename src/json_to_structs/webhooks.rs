@@ -102,7 +102,7 @@ impl Hooks {
 				exit(1);
 			}
 		};
-		return val;
+		val
 	}
 }
 
@@ -110,9 +110,9 @@ async fn send_test_hook(hook: &Hooks) {
 	let token = &hook.token;
 	let uid = &hook.uid;
 
-	let my_http_client = Http::new_with_token(&token);
+	let my_http_client = Http::new_with_token(token);
 
-	let webhook = match my_http_client.get_webhook_with_token(*uid, &token).await {
+	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
 			println!("{}", why);
 			error!("{}", why);

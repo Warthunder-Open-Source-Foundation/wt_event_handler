@@ -16,47 +16,13 @@ impl Value {
 			let default_keywords = vec![
 				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 				"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers"
+				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers",
 			];
 			let filter = &hook.filter;
 
-			match filter {
-				FilterType::Default => for keyword in default_keywords {
-					if content.contains(keyword) {
-						println!("URL {} matched with default keyword {}", content, keyword);
-						warn!("URL {} matched with default keyword {}", content, keyword);
-						deliver_webhooks(&content, i).await;
-						break
-					}
-				},
-				FilterType::Blacklist => {
-					let blacklist = &webhook_auth.hooks[i].keywords;
-					if blacklist.is_empty() {
-						deliver_webhooks(&content, i).await;
-					} else {
-						for keyword in blacklist {
-							if !content.contains(keyword) {
-								println!("No blacklisted items found in {}", content);
-								warn!("No blacklisted items found in {}", content);
-								deliver_webhooks(&content, i).await;
-								break
-							}
-						}
-					}
-				}
-				FilterType::Whitelist => {
-					let whitelist = &webhook_auth.hooks[i].keywords;
-					for keyword in whitelist {
-						if content.contains(keyword) {
-							println!("URL {} matched with whitelisted keyword {}", content, keyword);
-							warn!("URL {} matched with whitelisted keyword {}", content, keyword);
-							deliver_webhooks(&content, i).await;
-							break
-						}
-					}
-				}
+			if let Some(result) = match_filter(content, &default_keywords, &webhook_auth, filter, i) {
+				deliver_webhooks(result, i).await;
 			}
-			// panics when Enum couldn't be matched ( if this occurs, check discord_token.json for "filter" )
 		}
 	}
 
@@ -66,7 +32,47 @@ impl Value {
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for i in 0..webhook_auth.hooks.len() {
-			deliver_webhooks(&content, i).await;
+			deliver_webhooks(content, i).await;
+		}
+	}
+}
+
+fn match_filter<'a>(content: &'a str, default_keywords: &[&str], webhook_auth: &'a WebhookAuth, filter: &'a FilterType, i: usize) -> Option<&'a str> {
+	return match filter {
+		FilterType::Default => {
+			for keyword in default_keywords {
+				if content.contains(keyword) {
+					println!("URL {} matched with default keyword {}", content, keyword);
+					warn!("URL {} matched with default keyword {}", content, keyword);
+					return Some(content);
+				}
+			}
+			None
+		}
+		FilterType::Blacklist => {
+			let blacklist = &webhook_auth.hooks[i].keywords;
+			if blacklist.is_empty() {
+				return Some(content);
+			}
+			for keyword in blacklist {
+				if !content.contains(keyword) {
+					println!("No blacklisted items found in {}", content);
+					warn!("No blacklisted items found in {}", content);
+					return Some(content);
+				}
+			}
+			None
+		}
+		FilterType::Whitelist => {
+			let whitelist = &webhook_auth.hooks[i].keywords;
+			for keyword in whitelist {
+				if content.contains(keyword) {
+					println!("URL {} matched with whitelisted keyword {}", content, keyword);
+					warn!("URL {} matched with whitelisted keyword {}", content, keyword);
+					return Some(content);
+				}
+			}
+			None
 		}
 	}
 }
@@ -79,9 +85,9 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 	let uid = webhook_auth.hooks[pos].uid;
 	let token = &webhook_auth.hooks[pos].token;
 
-	let my_http_client = Http::new_with_token(&token);
+	let my_http_client = Http::new_with_token(token);
 
-	let webhook = match my_http_client.get_webhook_with_token(uid, &token).await {
+	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
 		Err(why) => {
 			println!("{}", why);
 			error!("{}", why);

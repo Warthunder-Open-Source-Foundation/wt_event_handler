@@ -1,5 +1,7 @@
 use std::fs;
+use std::fs::OpenOptions;
 use std::io;
+use std::io::Write;
 use std::path::Path;
 use std::process::exit;
 
@@ -12,8 +14,6 @@ use log::LevelFilter;
 
 use crate::json_to_structs::recent::Recent;
 use crate::json_to_structs::webhooks::{Hooks, WebhookAuth};
-use std::fs::OpenOptions;
-use std::io::Write;
 
 pub fn init_log() {
 	if Path::new("log/latest.log").exists() {
@@ -109,7 +109,7 @@ pub fn clean_recent() {
 mod tests {
 	use super::*;
 
-	// #[test]
+// #[test]
 	// fn test_clean_recent() {
 	// 	let pre_test_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	// 	let pre_test_struct: Recent = serde_json::from_str(&pre_test_raw).expect("Json cannot be read");
