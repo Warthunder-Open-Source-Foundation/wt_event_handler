@@ -87,7 +87,7 @@ pub fn remove_webhook() {
 }
 
 pub fn clean_recent() {
-	let cache_raw = fs::read_to_string("assets/recent.json.json").expect("Cannot read file");
+	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
 	cache.forums_updates_information.recent_url.clear();
@@ -96,9 +96,8 @@ pub fn clean_recent() {
 	cache.forums_project_news.recent_url.clear();
 
 	let write = serde_json::to_string_pretty(&cache).unwrap();
-	println!("{:?}", write);
 	let write = serde_json::to_string_pretty(&cache).unwrap();
-	fs::write("assets/recent.json.json", write).expect("Couldn't write to recent file");
+	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 
 	println!("Cleared recent file");
 }
