@@ -95,7 +95,7 @@ pub fn clean_recent() {
 	cache.warthunder_changelog.recent_url.clear();
 	cache.forums_project_news.recent_url.clear();
 
-	let write = serde_json::to_string_pretty(&cache).unwrap();
+	// let write = serde_json::to_string_pretty(&cache).unwrap();
 	let write = serde_json::to_string_pretty(&cache).unwrap();
 	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 
