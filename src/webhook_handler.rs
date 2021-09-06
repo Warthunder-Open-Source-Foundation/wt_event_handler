@@ -4,7 +4,7 @@ use log::{error, warn};
 use serenity::http::Http;
 
 use crate::json_to_structs::recent::Value;
-use crate::json_to_structs::webhooks::{FilterType, WebhookAuth};
+use crate::json_to_structs::webhooks::{FilterType, Hooks, WebhookAuth};
 
 impl Value {
 	//Receives latest content and index in recent array (for WT news)
@@ -13,14 +13,7 @@ impl Value {
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
-			let default_keywords = vec![
-				"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
-				"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-				"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers",
-			];
-			let filter = &hook.filter;
-
-			if let Some(result) = match_filter(content, &default_keywords, &webhook_auth, filter, i) {
+			if let Some(result) = match_filter(content, hook) {
 				deliver_webhooks(result, i).await;
 			}
 		}
@@ -37,7 +30,15 @@ impl Value {
 	}
 }
 
-fn match_filter<'a>(content: &'a str, default_keywords: &[&str], webhook_auth: &'a WebhookAuth, filter: &'a FilterType, i: usize) -> Option<&'a str> {
+fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
+	let default_keywords = vec![
+		"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
+		"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
+		"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers",
+	];
+
+	let filter = &hook.filter;
+
 	return match filter {
 		FilterType::Default => {
 			for keyword in default_keywords {
@@ -50,7 +51,7 @@ fn match_filter<'a>(content: &'a str, default_keywords: &[&str], webhook_auth: &
 			None
 		}
 		FilterType::Blacklist => {
-			let blacklist = &webhook_auth.hooks[i].keywords;
+			let blacklist = &hook.keywords;
 			if blacklist.is_empty() {
 				return Some(content);
 			}
@@ -64,7 +65,7 @@ fn match_filter<'a>(content: &'a str, default_keywords: &[&str], webhook_auth: &
 			None
 		}
 		FilterType::Whitelist => {
-			let whitelist = &webhook_auth.hooks[i].keywords;
+			let whitelist = &hook.keywords;
 			for keyword in whitelist {
 				if content.contains(keyword) {
 					println!("URL {} matched with whitelisted keyword {}", content, keyword);
@@ -74,7 +75,7 @@ fn match_filter<'a>(content: &'a str, default_keywords: &[&str], webhook_auth: &
 			}
 			None
 		}
-	}
+	};
 }
 
 //Finally sends the webhook to the servers
