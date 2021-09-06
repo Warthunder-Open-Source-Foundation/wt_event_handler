@@ -39,7 +39,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 
 	let filter = &hook.filter;
 
-	return match filter {
+	match filter {
 		FilterType::Default => {
 			for keyword in default_keywords {
 				if content.contains(keyword) {
@@ -56,13 +56,13 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 				return Some(content);
 			}
 			for keyword in blacklist {
-				if !content.contains(keyword) {
-					println!("No blacklisted items found in {}", content);
-					warn!("No blacklisted items found in {}", content);
-					return Some(content);
+				if content.contains(keyword) {
+					return None;
 				}
 			}
-			None
+			println!("No blacklisted items found in {}", content);
+			warn!("No blacklisted items found in {}", content);
+			Some(content)
 		}
 		FilterType::Whitelist => {
 			let whitelist = &hook.keywords;
@@ -75,7 +75,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 			}
 			None
 		}
-	};
+	}
 }
 
 //Finally sends the webhook to the servers
@@ -97,13 +97,10 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 		Ok(hook) => hook,
 	};
 
-
 	webhook.execute(my_http_client, false, |w| {
 		w.content(&format!("[{a}]()", a = content));
 		w.username("The WT news bot");
 		w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
 		w
-	})
-		.await
-		.unwrap();
+	}).await.unwrap();
 }
