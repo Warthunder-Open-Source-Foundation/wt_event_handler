@@ -1,7 +1,5 @@
 use std::fs;
-use std::fs::OpenOptions;
 use std::io;
-use std::io::Write;
 use std::path::Path;
 use std::process::exit;
 
@@ -89,18 +87,18 @@ pub fn remove_webhook() {
 }
 
 pub fn clean_recent() {
-	let mut cache_raw = OpenOptions::new().write(true).truncate(true).create(true).open("./assets/recent.json").expect("Could not open recent.json");
-	let mut cache: Recent = serde_json::from_reader(&cache_raw).expect("Json cannot be read");
+	let cache_raw = fs::read_to_string("assets/recent.json.json").expect("Cannot read file");
+	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
 	cache.forums_updates_information.recent_url.clear();
 	cache.warthunder_news.recent_url.clear();
 	cache.warthunder_changelog.recent_url.clear();
 	cache.forums_project_news.recent_url.clear();
 
-
 	let write = serde_json::to_string_pretty(&cache).unwrap();
 	println!("{:?}", write);
-	cache_raw.write_all(write.as_bytes()).expect("Could not write recent.json");
+	let write = serde_json::to_string_pretty(&cache).unwrap();
+	fs::write("assets/recent.json.json", write).expect("Couldn't write to recent file");
 
 	println!("Cleared recent file");
 }
