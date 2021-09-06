@@ -1,13 +1,11 @@
 use std::option::Option::Some;
-use std::process::exit;
 
 use log::error;
-use scraper::Selector;
 
 use crate::json_to_structs::recent::{format_selector, Value};
-use crate::scrapers::scraper_resources::resources::{fetch_failed, request_html};
+use crate::scrapers::scraper_resources::resources::{fetch_failed, format_result, pin_loop, request_html, ScrapeType, RecentHtmlTarget};
 
-pub async fn html_processor_warthunderdotcom(recent_value: &Value) -> Option<String> {
+pub async fn html_processor(recent_value: &Value, scrape_type: ScrapeType) -> Option<String> {
 	let url = &recent_value.domain;
 
 	let html;
@@ -19,30 +17,13 @@ pub async fn html_processor_warthunderdotcom(recent_value: &Value) -> Option<Str
 
 	let mut post: u32 = 1;
 
-	let mut pin: Selector;
+	post = pin_loop(post, &html, &recent_value, scrape_type);
 
-	loop {
-		pin = format_selector(&recent_value, "pin", post);
-
-		if let Some(_top_url) = html.select(&pin).next() {
-			post += 1;
-		} else {
-			break;
-		}
-		if post > 20 {
-			println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
-			exit(-1);
-		}
+	let top_url_selector = format_selector(&recent_value, &RecentHtmlTarget::Post, post);
+	if let Some(top_url) = html.select(&top_url_selector).next() {
+		return Some(format_result(top_url, scrape_type));
 	}
-
-	let top_url_selector = format_selector(&recent_value, "selector", post);
-
-	return if let Some(top_url) = html.select(&top_url_selector).next() {
-		let top_url = format!("https://warthunder.com{}", top_url.value().attr("href").unwrap());
-		Some(top_url)
-	} else {
-		println!("Fetch failed");
-		error!("Fetch failed");
-		None
-	};
+	println!("Fetch failed");
+	error!("Fetch failed");
+	return None;
 }

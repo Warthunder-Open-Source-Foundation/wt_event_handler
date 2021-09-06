@@ -12,6 +12,8 @@ use log::LevelFilter;
 
 use crate::json_to_structs::recent::Recent;
 use crate::json_to_structs::webhooks::{Hooks, WebhookAuth};
+use std::fs::OpenOptions;
+use std::io::Write;
 
 pub fn init_log() {
 	if Path::new("log/latest.log").exists() {
@@ -34,14 +36,20 @@ pub fn init_log() {
 
 pub fn verify_json() {
 	println!("Verifying Json files...");
+
 	let recent_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let mut recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
-	//Just for removing warning
-	recent.warthunder_changelog.recent_url.pop();
+	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+
 	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
-	let mut entry: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-	//Just for removing warning
-	entry.hooks.pop();
+	let token: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+
+	let write_recent = serde_json::to_string_pretty(&recent).unwrap();
+	fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
+
+	let write_token = serde_json::to_string_pretty(&token).unwrap();
+	fs::write("assets/discord_token.json", write_token).expect("Couldn't write to recent file");
+
 	println!("Json files complete");
 }
 
@@ -81,14 +89,63 @@ pub fn remove_webhook() {
 }
 
 pub fn clean_recent() {
-	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
-	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
+	let mut cache_raw = OpenOptions::new().write(true).truncate(true).create(true).open("./assets/recent.json").expect("Could not open recent.json");
+	let mut cache: Recent = serde_json::from_reader(&cache_raw).expect("Json cannot be read");
 
 	cache.forums_updates_information.recent_url.clear();
 	cache.warthunder_news.recent_url.clear();
 	cache.warthunder_changelog.recent_url.clear();
+	cache.forums_project_news.recent_url.clear();
+
 
 	let write = serde_json::to_string_pretty(&cache).unwrap();
-	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+	println!("{:?}", write);
+	cache_raw.write_all(write.as_bytes()).expect("Could not write recent.json");
+
 	println!("Cleared recent file");
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	// #[test]
+	// fn test_clean_recent() {
+	// 	let pre_test_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+	// 	let pre_test_struct: Recent = serde_json::from_str(&pre_test_raw).expect("Json cannot be read");
+	//
+	// 	clean_recent();
+	//
+	// 	let post_test = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+	// 	let post_test_struct: Recent = serde_json::from_str(&post_test).expect("Json cannot be read");
+	//
+	// 	println!("{:?}", pre_test_struct);
+	// 	println!("{:?}", post_test_struct);
+	//
+	// 	assert!(post_test_struct.forums_updates_information.recent_url.is_empty() &&
+	// 		post_test_struct.warthunder_news.recent_url.is_empty() &&
+	// 		post_test_struct.warthunder_changelog.recent_url.is_empty() &&
+	// 		post_test_struct.forums_project_news.recent_url.is_empty()
+	// 	);
+	//
+	//
+	// 	fs::write("assets/recent.json", serde_json::to_string_pretty(&pre_test_struct).unwrap()).expect("Couldn't write to recent file");
+	// }
+
+	#[test]
+	fn test_verify_json() {
+		let pre_test_recent = fs::read("assets/recent.json").expect("Cannot read file");
+		let pre_test_token = fs::read("assets/discord_token.json").expect("Cannot read file");
+
+		verify_json();
+
+		let post_test_recent = fs::read("assets/recent.json").expect("Cannot read file");
+		let post_test_token = fs::read("assets/discord_token.json").expect("Cannot read file");
+
+		assert_eq!(pre_test_token, pre_test_token);
+		assert_eq!(pre_test_recent, post_test_recent);
+
+		fs::write("assets/recent.json", pre_test_recent).expect("Couldn't write to recent file");
+		fs::write("assets/discord_token.json", pre_test_token).expect("Couldn't write to recent file");
+	}
 }
