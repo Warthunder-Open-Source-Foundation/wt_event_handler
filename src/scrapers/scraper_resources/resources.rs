@@ -1,8 +1,10 @@
+use std::process::exit;
+
 use log::{error, info};
 use reqwest::get;
-use scraper::{Html, Selector, ElementRef};
+use scraper::{ElementRef, Html, Selector};
+
 use crate::json_to_structs::recent::{format_selector, Value};
-use std::process::exit;
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {
@@ -27,7 +29,7 @@ pub async fn request_html(url: &str) -> Option<Html> {
 		}
 		return None;
 	}
-	return None;
+	None
 }
 
 pub fn fetch_failed() -> Option<String> {
@@ -47,7 +49,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 	match selection {
 		ScrapeType::Main => {
 			loop {
-				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post);
+				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
 				if let Some(_top_url) = html.select(&pin).next() {
 					post += 1;
 				} else {
@@ -61,11 +63,11 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 		}
 		ScrapeType::Forum => {
 			loop {
-				pin = format_selector(&recent_value, &RecentHtmlTarget::Pin, post);
+				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
 				if let Some(top_url) = html.select(&pin).next() {
 					let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
 					if !is_pinned {
-						return post
+						return post;
 					}
 					post += 1;
 				}
@@ -76,10 +78,9 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 			}
 		}
 	}
-
 }
 
-pub fn format_result(top_url: ElementRef, selection: ScrapeType)  -> String{
+pub fn format_result(top_url: ElementRef, selection: ScrapeType) -> String {
 	return match selection {
 		ScrapeType::Main => {
 			format!("https://warthunder.com{}", top_url.value().attr("href").unwrap())
@@ -87,5 +88,5 @@ pub fn format_result(top_url: ElementRef, selection: ScrapeType)  -> String{
 		ScrapeType::Forum => {
 			top_url.value().attr("href").unwrap().to_string()
 		}
-	}
+	};
 }

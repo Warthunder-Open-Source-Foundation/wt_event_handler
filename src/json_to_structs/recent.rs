@@ -2,6 +2,7 @@ use std::fs;
 
 use log::{info, warn};
 use scraper::Selector;
+
 use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
@@ -37,19 +38,19 @@ impl Value {
 impl Recent {
 	pub fn append_latest_warthunder_news(&mut self, value: &str) {
 		self.warthunder_news.recent_url.push(value.to_owned());
-		self.write_latest(&value);
+		self.write_latest(value);
 	}
 	pub fn append_latest_warthunder_changelog(&mut self, value: &str) {
 		self.warthunder_changelog.recent_url.push(value.to_owned());
-		self.write_latest(&value);
+		self.write_latest(value);
 	}
 	pub fn append_latest_warthunder_forums_updates_information(&mut self, value: &str) {
 		self.forums_updates_information.recent_url.push(value.to_owned());
-		self.write_latest(&value);
+		self.write_latest(value);
 	}
 	pub fn append_latest_warthunder_forums_project_news(&mut self, value: &str) {
 		self.forums_project_news.recent_url.push(value.to_owned());
-		self.write_latest(&value);
+		self.write_latest(value);
 	}
 	pub fn read_latest() -> Self {
 		let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
@@ -72,5 +73,5 @@ pub fn format_selector(main: &Value, which: &RecentHtmlTarget, index: u32) -> Se
 		RecentHtmlTarget::Post => {
 			Selector::parse(&*format!("{}{}{}", &*main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
 		}
-	}
+	};
 }

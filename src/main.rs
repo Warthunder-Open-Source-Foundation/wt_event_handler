@@ -8,7 +8,7 @@ use rand::Rng;
 
 use crate::json_to_structs::recent::Recent;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, verify_json};
-use crate::scrapers::main_news::{html_processor};
+use crate::scrapers::main_news::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 mod webhook_handler;
@@ -120,6 +120,6 @@ async fn main() {
 		let wait = rand::thread_rng().gen_range(50..70);
 		println!("Waiting for {} seconds", wait);
 		info!("Waiting for {} seconds", wait);
-		sleep(time::Duration::from_secs(wait))
+		sleep(time::Duration::from_secs(wait));
 	}
 }

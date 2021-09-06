@@ -5,6 +5,7 @@ Collects and updates news and distributes them on discord via webhooks
 (further information pending)
 
 Following webpages are currently scanned;
+
 1. https://warthunder.com/en/news
 2. https://warthunder.com/en/game/changelog/
 3. https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238

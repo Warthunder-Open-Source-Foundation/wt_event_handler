@@ -12,8 +12,6 @@ use log::LevelFilter;
 
 use crate::json_to_structs::recent::Recent;
 use crate::json_to_structs::webhooks::{Hooks, WebhookAuth};
-use std::fs::OpenOptions;
-use std::io::Write;
 
 pub fn init_log() {
 	if Path::new("log/latest.log").exists() {
@@ -89,18 +87,17 @@ pub fn remove_webhook() {
 }
 
 pub fn clean_recent() {
-	let mut cache_raw = OpenOptions::new().write(true).truncate(true).create(true).open("./assets/recent.json").expect("Could not open recent.json");
-	let mut cache: Recent = serde_json::from_reader(&cache_raw).expect("Json cannot be read");
+	let cache_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+	let mut cache: Recent = serde_json::from_str(&cache_raw).expect("Json cannot be read");
 
 	cache.forums_updates_information.recent_url.clear();
 	cache.warthunder_news.recent_url.clear();
 	cache.warthunder_changelog.recent_url.clear();
 	cache.forums_project_news.recent_url.clear();
 
-
+	// let write = serde_json::to_string_pretty(&cache).unwrap();
 	let write = serde_json::to_string_pretty(&cache).unwrap();
-	println!("{:?}", write);
-	cache_raw.write_all(write.as_bytes()).expect("Could not write recent.json");
+	fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
 
 	println!("Cleared recent file");
 }
@@ -109,7 +106,7 @@ pub fn clean_recent() {
 mod tests {
 	use super::*;
 
-	// #[test]
+// #[test]
 	// fn test_clean_recent() {
 	// 	let pre_test_raw = fs::read_to_string("assets/recent.json").expect("Cannot read file");
 	// 	let pre_test_struct: Recent = serde_json::from_str(&pre_test_raw).expect("Json cannot be read");
