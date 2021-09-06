@@ -7,10 +7,16 @@ use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
+	pub meta: Meta,
 	pub warthunder_news: Value,
 	pub warthunder_changelog: Value,
 	pub forums_updates_information: Value,
 	pub forums_project_news: Value,
+}
+
+#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+pub struct Meta {
+	pub timestamp: u64,
 }
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]

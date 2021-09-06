@@ -71,7 +71,9 @@ async fn main() {
 				recent_data.append_latest_warthunder_news(&wt_news_content);
 				println!("All wt news hooks are served");
 				info!("All wt news hooks are served");
-				continue;
+				if hooks {
+					continue;
+				}
 			}
 		};
 
@@ -83,7 +85,9 @@ async fn main() {
 				recent_data.append_latest_warthunder_changelog(&wt_changelog);
 				println!("All wt changelog hooks are served");
 				info!("All wt changelog hooks are served");
-				continue;
+				if hooks {
+					continue;
+				}
 			}
 		};
 
@@ -95,7 +99,9 @@ async fn main() {
 				recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information);
 				println!("All forum_updates_information hooks are served");
 				info!("All forum_updates_information hooks are served");
-				continue;
+				if hooks {
+					continue;
+				}
 			}
 		};
 
@@ -107,7 +113,9 @@ async fn main() {
 				recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news);
 				println!("All forum_project_news hooks are served");
 				info!("All forum_project_news hooks are served");
-				continue;
+				if hooks {
+					continue;
+				}
 			}
 		};
 
