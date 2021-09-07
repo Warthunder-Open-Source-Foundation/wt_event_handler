@@ -4,6 +4,7 @@ use log::{info, warn};
 use scraper::Selector;
 
 use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
+use crate::RECENT_PATH;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
@@ -59,13 +60,13 @@ impl Recent {
 		self.write_latest(value);
 	}
 	pub fn read_latest() -> Self {
-		let cache_raw_recent = fs::read_to_string("assets/recent.json").expect("Cannot read file");
+		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
 		let recent: Self = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 		recent
 	}
 	fn write_latest(&self, value: &str) {
 		let write = serde_json::to_string_pretty(self).unwrap();
-		fs::write("assets/recent.json", write).expect("Couldn't write to recent file");
+		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
 		println!("Written {} to file", value);
 		warn!("Written {} to file", value);
 	}

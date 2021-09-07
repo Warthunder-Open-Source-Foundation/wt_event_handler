@@ -5,11 +5,12 @@ use serenity::http::Http;
 
 use crate::json_to_structs::recent::Value;
 use crate::json_to_structs::webhooks::{FilterType, Hooks, WebhookAuth};
+use crate::TOKEN_PATH;
 
 impl Value {
 	//Receives latest content and index in recent array (for WT news)
 	pub async fn handle_wt_news_webhook(&self, content: &str) {
-		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
@@ -21,7 +22,7 @@ impl Value {
 
 	//Receives latest content and index in recent array
 	pub async fn handle_simple_webhook(&self, content: &str) {
-		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for i in 0..webhook_auth.hooks.len() {
@@ -80,7 +81,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 
 //Finally sends the webhook to the servers
 async fn deliver_webhooks(content: &str, pos: usize) {
-	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 	let uid = webhook_auth.hooks[pos].uid;
@@ -106,11 +107,10 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 }
 
 mod tests {
-	use crate::json_to_structs::webhooks::FilterType::{Whitelist, Blacklist};
-
 	#[allow(unused_imports)]
 	use super::*;
-	use log4rs::encode::Color::Black;
+	#[allow(unused_imports)]
+	use crate::json_to_structs::webhooks::FilterType::{Whitelist, Blacklist};
 
 	#[test]
 	fn test_filter_default_pass() {

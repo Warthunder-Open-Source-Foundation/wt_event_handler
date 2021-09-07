@@ -40,6 +40,7 @@ pub fn fetch_failed() -> Option<String> {
 
 #[cfg(test)]
 mod tests {
+	#[allow(unused_imports)]
 	use super::*;
 }
 

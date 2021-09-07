@@ -16,6 +16,8 @@ mod scrapers;
 mod json_to_structs;
 mod menu_options;
 
+const RECENT_PATH: &str = "assets/recent.json";
+const TOKEN_PATH: &str = "assets/discord_token.json";
 
 #[tokio::main]
 async fn main() {
