@@ -65,7 +65,6 @@ async fn main() {
 	if json_prefetch_required {
 		clean_recent();
 		println!("Json prefetched and cleaned successfully");
-		exit(0);
 	}
 
 	init_log();
