@@ -108,9 +108,10 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 
 mod tests {
 	#[allow(unused_imports)]
-	use super::*;
+	use crate::json_to_structs::webhooks::FilterType::{Blacklist, Whitelist};
+
 	#[allow(unused_imports)]
-	use crate::json_to_structs::webhooks::FilterType::{Whitelist, Blacklist};
+	use super::*;
 
 	#[test]
 	fn test_filter_default_pass() {

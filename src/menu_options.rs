@@ -33,11 +33,27 @@ pub fn init_log() {
 	log4rs::init_config(config).unwrap();
 }
 
-pub fn verify_json() {
+pub fn verify_json() -> bool {
 	println!("Verifying Json files...");
 
 	let recent_raw = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
-	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+	let mut recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+
+
+	if (Local::now().timestamp() as u64 - recent.meta.timestamp) > 60 * 60 {
+		recent.meta.timestamp = Local::now().timestamp() as u64;
+		let write_recent = serde_json::to_string_pretty(&recent).unwrap();
+		fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
+		return true
+	} else if recent.meta.timestamp == 0 {
+		recent.meta.timestamp = Local::now().timestamp() as u64;
+		println!("The last fetch date was 0 and has been corrected");
+		let write_recent = serde_json::to_string_pretty(&recent).unwrap();
+		fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
+		return true
+	}
+
+	recent.meta.timestamp = Local::now().timestamp() as u64;
 
 	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let token: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
@@ -50,6 +66,7 @@ pub fn verify_json() {
 	fs::write(TOKEN_PATH, write_token).expect("Couldn't write to recent file");
 
 	println!("Json files complete");
+	return false
 }
 
 pub async fn add_webhook() {

@@ -24,6 +24,7 @@ async fn main() {
 	let mut line = String::new();
 	let mut hooks = true;
 	let mut json_verification = true;
+	let mut json_prefetch_required = false;
 
 	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client \n 5. Remove a webhook \n 6. Clean and reload recent file");
 	io::stdin()
@@ -46,6 +47,7 @@ async fn main() {
 		}
 		"6" => {
 			hooks = false;
+			json_verification = false;
 			clean_recent();
 		}
 		_ => {
@@ -55,7 +57,13 @@ async fn main() {
 	}
 
 	if json_verification {
-		verify_json();
+		json_prefetch_required = verify_json();
+	}
+
+	if json_prefetch_required {
+		clean_recent();
+		println!("Json prefetched and cleaned successfully");
+		exit(0);
 	}
 
 	init_log();
