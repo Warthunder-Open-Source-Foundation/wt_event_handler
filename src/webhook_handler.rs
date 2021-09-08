@@ -5,11 +5,12 @@ use serenity::http::Http;
 
 use crate::json_to_structs::recent::Value;
 use crate::json_to_structs::webhooks::{FilterType, Hooks, WebhookAuth};
+use crate::TOKEN_PATH;
 
 impl Value {
 	//Receives latest content and index in recent array (for WT news)
 	pub async fn handle_wt_news_webhook(&self, content: &str) {
-		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
@@ -21,7 +22,7 @@ impl Value {
 
 	//Receives latest content and index in recent array
 	pub async fn handle_simple_webhook(&self, content: &str) {
-		let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for i in 0..webhook_auth.hooks.len() {
@@ -39,7 +40,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 
 	let filter = &hook.filter;
 
-	return match filter {
+	match filter {
 		FilterType::Default => {
 			for keyword in default_keywords {
 				if content.contains(keyword) {
@@ -56,13 +57,13 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 				return Some(content);
 			}
 			for keyword in blacklist {
-				if !content.contains(keyword) {
-					println!("No blacklisted items found in {}", content);
-					warn!("No blacklisted items found in {}", content);
-					return Some(content);
+				if content.contains(keyword) {
+					return None;
 				}
 			}
-			None
+			println!("No blacklisted items found in {}", content);
+			warn!("No blacklisted items found in {}", content);
+			Some(content)
 		}
 		FilterType::Whitelist => {
 			let whitelist = &hook.keywords;
@@ -75,12 +76,12 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 			}
 			None
 		}
-	};
+	}
 }
 
 //Finally sends the webhook to the servers
 async fn deliver_webhooks(content: &str, pos: usize) {
-	let token_raw = fs::read_to_string("assets/discord_token.json").expect("Cannot read file");
+	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 	let uid = webhook_auth.hooks[pos].uid;
@@ -97,13 +98,87 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 		Ok(hook) => hook,
 	};
 
-
 	webhook.execute(my_http_client, false, |w| {
 		w.content(&format!("[{a}]()", a = content));
 		w.username("The WT news bot");
 		w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
 		w
-	})
-		.await
-		.unwrap();
+	}).await.unwrap();
+}
+
+mod tests {
+	#[allow(unused_imports)]
+	use crate::json_to_structs::webhooks::FilterType::{Blacklist, Whitelist};
+
+	#[allow(unused_imports)]
+	use super::*;
+
+	#[test]
+	fn test_filter_default_pass() {
+		assert_eq!(match_filter("pass", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Default::default(),
+			keywords: vec![],
+		}).unwrap(), "pass")
+	}
+
+	#[test]
+	#[should_panic]
+	fn test_filter_default_no_match() {
+		match_filter("xyz", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Default::default(),
+			keywords: vec![],
+		}).unwrap();
+	}
+
+	#[test]
+	fn test_filter_whitelist_match() {
+		assert_eq!(match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Whitelist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap(), "C");
+	}
+
+	#[test]
+	#[should_panic]
+	fn test_filter_whitelist_miss() {
+		match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Whitelist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap();
+	}
+
+	#[test]
+	#[should_panic]
+	fn test_filter_blacklist_match() {
+		match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Blacklist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap();
+	}
+
+	#[test]
+	fn test_filter_blacklist_miss() {
+		match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			filter: Blacklist,
+			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}).unwrap();
+	}
 }

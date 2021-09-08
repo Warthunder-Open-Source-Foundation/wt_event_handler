@@ -62,14 +62,26 @@ impl Hooks {
 		};
 		let mut line = String::new();
 
-		println!("Enter the Name for the webhook \n");
+		println!("Enter the Name for the webhook (you can always abort with n) \n");
 		io::stdin().read_line(&mut line).unwrap();
+
+		if let "n" = line.trim() {
+			println!("Aborting webhook removal");
+			exit(0);
+		}
+
 		val.name = line.clone();
 		val.name.pop();
 
 		println!("Enter the URL for the webhook \n");
 		line.clear();
 		io::stdin().read_line(&mut line).unwrap();
+
+		if let "n" = line.trim() {
+			println!("Aborting webhook removal");
+			exit(0);
+		}
+
 		line.pop();
 		let uid_token: Vec<String> = line.split('/').map(String::from).collect();
 		val.uid = uid_token[5].parse().unwrap();
@@ -78,6 +90,12 @@ impl Hooks {
 		println!("Choose a filter option: \n 1. Default \n 2. Blacklist \n 3. Whitelist  \n");
 		line.clear();
 		io::stdin().read_line(&mut line).unwrap();
+
+		if let "n" = line.trim() {
+			println!("Aborting webhook removal");
+			exit(0);
+		}
+
 		let mut option = line.clone();
 		option.pop();
 		val.filter = FilterType::from_user(option.as_str());
