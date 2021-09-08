@@ -3,8 +3,8 @@ use std::fs;
 use log::{info, warn};
 use scraper::Selector;
 
-use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
 use crate::RECENT_PATH;
+use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {

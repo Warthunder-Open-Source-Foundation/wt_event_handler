@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -10,9 +11,9 @@ use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use log::LevelFilter;
 
+use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::json_to_structs::recent::Recent;
 use crate::json_to_structs::webhooks::{Hooks, WebhookAuth};
-use crate::{RECENT_PATH, TOKEN_PATH};
 
 pub fn init_log() {
 	if Path::new("log/latest.log").exists() {
@@ -39,21 +40,22 @@ pub fn verify_json() -> bool {
 	let recent_raw = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
 	let mut recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
 
+	let local_time = u64::try_from(Local::now().timestamp()).unwrap();
 
-	if (Local::now().timestamp() as u64 - recent.meta.timestamp) > 60 * 60 {
-		recent.meta.timestamp = Local::now().timestamp() as u64;
+	if (local_time - recent.meta.timestamp) > 60 * 60 {
+		recent.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();
 		let write_recent = serde_json::to_string_pretty(&recent).unwrap();
 		fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
-		return true
+		return true;
 	} else if recent.meta.timestamp == 0 {
-		recent.meta.timestamp = Local::now().timestamp() as u64;
+		recent.meta.timestamp = local_time;
 		println!("The last fetch date was 0 and has been corrected");
 		let write_recent = serde_json::to_string_pretty(&recent).unwrap();
 		fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
-		return true
+		return true;
 	}
 
-	recent.meta.timestamp = Local::now().timestamp() as u64;
+	recent.meta.timestamp = local_time;
 
 	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let token: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
@@ -66,7 +68,7 @@ pub fn verify_json() -> bool {
 	fs::write(TOKEN_PATH, write_token).expect("Couldn't write to recent file");
 
 	println!("Json files complete");
-	return false
+	false
 }
 
 pub async fn add_webhook() {
