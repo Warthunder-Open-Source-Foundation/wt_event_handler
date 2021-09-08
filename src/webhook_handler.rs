@@ -106,11 +106,11 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 }
 
 mod tests {
-	use crate::json_to_structs::webhooks::FilterType::{Whitelist, Blacklist};
+	#[allow(unused_imports)]
+	use crate::json_to_structs::webhooks::FilterType::{Blacklist, Whitelist};
 
 	#[allow(unused_imports)]
 	use super::*;
-	use log4rs::encode::Color::Black;
 
 	#[test]
 	fn test_filter_default_pass() {
