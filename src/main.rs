@@ -22,7 +22,13 @@ async fn main() {
 	let mut json_verification = true;
 	let mut json_prefetch_required = false;
 
-	println!("Please select a start profile: \n 1. Regular initialization \n 2. Initialize without self-tests \n 3. Boot without sending hooks \n 4. Add new webhook-client \n 5. Remove a webhook \n 6. Clean and reload recent file");
+	println!("Please select a start profile: \n \
+	1. Regular initialization \n \
+	2. Initialize without self-tests \n \
+	3. Boot without sending hooks \n \
+	4. Add new webhook-client \n \
+	5. Remove a webhook \n \
+	6. Clean and reload recent file");
 	io::stdin()
 		.read_line(&mut line)
 		.expect("failed to read from stdin");
