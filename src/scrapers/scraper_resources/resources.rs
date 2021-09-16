@@ -1,10 +1,11 @@
 use std::process::exit;
 
 use log::{error, info};
-use reqwest::get;
+use reqwest::{Client};
 use scraper::{ElementRef, Html, Selector};
 
 use crate::json_to_structs::recent::{format_selector, Value};
+use std::time::Duration;
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {
@@ -21,8 +22,19 @@ pub async fn request_html(url: &str) -> Option<Html> {
 	println!("{} Fetching data from {}", chrono::Local::now(), &url);
 	info!("Fetching data from {}", &url);
 
+	let client = Client::builder()
+		.connect_timeout(Duration::from_secs(20))
+		.timeout(Duration::from_secs(20))
+		.build()
+		.unwrap();
+
+	let request = client
+		.get(url)
+		.build()
+		.unwrap();
+
 	let html;
-	if let Ok(raw_html) = get(url).await {
+	if let Ok(raw_html) = client.execute(request).await {
 		if let Ok(text) = raw_html.text().await {
 			html = Html::parse_document(text.as_str());
 			return Some(html);
