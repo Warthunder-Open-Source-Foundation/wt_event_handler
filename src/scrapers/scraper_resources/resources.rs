@@ -1,10 +1,11 @@
 use std::process::exit;
 
 use log::{error, info};
-use reqwest::get;
+use reqwest::{Client};
 use scraper::{ElementRef, Html, Selector};
 
 use crate::json_to_structs::recent::{format_selector, Value};
+use std::time::Duration;
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {
@@ -18,11 +19,22 @@ pub enum RecentHtmlTarget {
 }
 
 pub async fn request_html(url: &str) -> Option<Html> {
-	println!("Fetching data from {}", &url);
+	println!("{} Fetching data from {}", chrono::Local::now(), &url);
 	info!("Fetching data from {}", &url);
 
+	let client = Client::builder()
+		.connect_timeout(Duration::from_secs(20))
+		.timeout(Duration::from_secs(20))
+		.build()
+		.unwrap();
+
+	let request = client
+		.get(url)
+		.build()
+		.unwrap();
+
 	let html;
-	if let Ok(raw_html) = get(url).await {
+	if let Ok(raw_html) = client.execute(request).await {
 		if let Ok(text) = raw_html.text().await {
 			html = Html::parse_document(text.as_str());
 			return Some(html);
@@ -33,7 +45,7 @@ pub async fn request_html(url: &str) -> Option<Html> {
 }
 
 pub fn fetch_failed() -> Option<String> {
-	println!("Fetch failed");
+	println!("{} Fetch failed", chrono::Local::now());
 	error!("Fetch failed");
 	None
 }
@@ -57,7 +69,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 					return post;
 				}
 				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+					println!("{} Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!", chrono::Local::now());
 					exit(-1);
 				}
 			}
@@ -73,7 +85,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 					post += 1;
 				}
 				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+					println!("{} Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!", chrono::Local::now());
 					exit(-1);
 				}
 			}

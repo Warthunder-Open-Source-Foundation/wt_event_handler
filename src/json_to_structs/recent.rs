@@ -31,11 +31,11 @@ pub struct Value {
 impl Value {
 	pub fn is_outdated(&self, value: &str) -> bool {
 		if self.recent_url.contains(&value.to_owned()) {
-			println!("Content was recently fetched and is not new");
+			println!("{} Content was recently fetched and is not new", chrono::Local::now());
 			info!("Content was recently fetched and is not new");
 			false
 		} else {
-			println!("New post found, hooking now");
+			println!("{} New post found, hooking now", chrono::Local::now());
 			warn!("New post found, hooking now");
 			true
 		}
@@ -67,7 +67,7 @@ impl Recent {
 	fn write_latest(&self, value: &str) {
 		let write = serde_json::to_string_pretty(self).unwrap();
 		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
-		println!("Written {} to file", value);
+		println!("{} Written {} to file", chrono::Local::now(), value);
 		warn!("Written {} to file", value);
 	}
 }

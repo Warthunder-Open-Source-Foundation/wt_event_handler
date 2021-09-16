@@ -149,20 +149,20 @@ mod tests {
 	// 	fs::write(RECENT_PATH, serde_json::to_string_pretty(&pre_test_struct).unwrap()).expect("Couldn't write to recent file");
 	// }
 
-	#[test]
-	fn test_verify_json() {
-		let pre_test_recent = fs::read(RECENT_PATH).expect("Cannot read file");
-		let pre_test_token = fs::read(TOKEN_PATH).expect("Cannot read file");
-
-		verify_json();
-
-		let post_test_recent = fs::read(RECENT_PATH).expect("Cannot read file");
-		let _post_test_token = fs::read(TOKEN_PATH).expect("Cannot read file");
-
-		assert_eq!(pre_test_token, pre_test_token);
-		assert_eq!(pre_test_recent, post_test_recent);
-
-		fs::write(RECENT_PATH, pre_test_recent).expect("Couldn't write to recent file");
-		fs::write(TOKEN_PATH, pre_test_token).expect("Couldn't write to recent file");
-	}
+	// #[test]
+	// fn test_verify_json() {
+	// 	let pre_test_recent = fs::read(RECENT_PATH).expect("Cannot read file");
+	// 	let pre_test_token = fs::read(TOKEN_PATH).expect("Cannot read file");
+	//
+	// 	verify_json();
+	//
+	// 	let post_test_recent = fs::read(RECENT_PATH).expect("Cannot read file");
+	// 	let _post_test_token = fs::read(TOKEN_PATH).expect("Cannot read file");
+	//
+	// 	assert_eq!(pre_test_token, pre_test_token);
+	// 	assert_eq!(pre_test_recent, post_test_recent);
+	//
+	// 	fs::write(RECENT_PATH, pre_test_recent).expect("Couldn't write to recent file");
+	// 	fs::write(TOKEN_PATH, pre_test_token).expect("Couldn't write to recent file");
+	// }
 }

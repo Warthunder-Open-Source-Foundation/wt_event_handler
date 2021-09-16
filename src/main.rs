@@ -68,7 +68,7 @@ async fn main() {
 	}
 
 	init_log();
-	println!("Started client");
+	println!("{} Started client", chrono::Local::now());
 	info!("Started client");
 
 	fetch_loop(hooks).await;
