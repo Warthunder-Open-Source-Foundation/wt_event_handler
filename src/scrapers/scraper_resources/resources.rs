@@ -18,7 +18,7 @@ pub enum RecentHtmlTarget {
 }
 
 pub async fn request_html(url: &str) -> Option<Html> {
-	println!("Fetching data from {}", &url);
+	println!("{} Fetching data from {}", chrono::Local::now(), &url);
 	info!("Fetching data from {}", &url);
 
 	let html;
@@ -33,7 +33,7 @@ pub async fn request_html(url: &str) -> Option<Html> {
 }
 
 pub fn fetch_failed() -> Option<String> {
-	println!("Fetch failed");
+	println!("{} Fetch failed", chrono::Local::now());
 	error!("Fetch failed");
 	None
 }
@@ -57,7 +57,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 					return post;
 				}
 				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+					println!("{} Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!", chrono::Local::now());
 					exit(-1);
 				}
 			}
@@ -73,7 +73,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: Scr
 					post += 1;
 				}
 				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
+					println!("{} Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!", chrono::Local::now());
 					exit(-1);
 				}
 			}

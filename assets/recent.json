@@ -1,13 +1,13 @@
 {
   "meta": {
-    "timestamp": 1631128844
+    "timestamp": 1631795968
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/news/7331-video-special-arado-blitz-en"
+      "https://warthunder.com/en/news/7342-development-export-order-destroyer-hms-mohawk-en"
     ]
   },
   "warthunder_changelog": {
@@ -15,7 +15,7 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1293"
+      "https://warthunder.com/en/game/changelog/current/1298"
     ]
   },
   "forums_updates_information": {
@@ -23,7 +23,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/534443-update-29017/"
+      "https://forum.warthunder.com/index.php?/topic/535399-update-29036/"
     ]
   },
   "forums_project_news": {
@@ -31,7 +31,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/534501-video-special-arado-blitz/"
+      "https://forum.warthunder.com/index.php?/topic/535323-video-extraordinary-strv/"
     ]
   }
 }

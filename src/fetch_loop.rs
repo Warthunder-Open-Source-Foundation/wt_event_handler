@@ -19,7 +19,7 @@ pub async fn fetch_loop(hooks: bool) {
 					recent_data.warthunder_news.handle_wt_news_webhook(&wt_news_content).await;
 				}
 				recent_data.append_latest_warthunder_news(&wt_news_content);
-				println!("All wt news hooks are served");
+				println!("{} All wt news hooks are served", chrono::Local::now());
 				info!("All wt news hooks are served");
 				if hooks {
 					continue;
@@ -33,7 +33,7 @@ pub async fn fetch_loop(hooks: bool) {
 					recent_data.warthunder_changelog.handle_wt_news_webhook(&wt_changelog).await;
 				}
 				recent_data.append_latest_warthunder_changelog(&wt_changelog);
-				println!("All wt changelog hooks are served");
+				println!("{} All wt changelog hooks are served", chrono::Local::now());
 				info!("All wt changelog hooks are served");
 				if hooks {
 					continue;
@@ -47,7 +47,7 @@ pub async fn fetch_loop(hooks: bool) {
 					recent_data.forums_updates_information.handle_simple_webhook(&forum_news_updates_information).await;
 				}
 				recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information);
-				println!("All forum_updates_information hooks are served");
+				println!("{} All forum_updates_information hooks are served", chrono::Local::now());
 				info!("All forum_updates_information hooks are served");
 				if hooks {
 					continue;
@@ -61,7 +61,7 @@ pub async fn fetch_loop(hooks: bool) {
 					recent_data.forums_project_news.handle_simple_webhook(&forum_news_project_news).await;
 				}
 				recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news);
-				println!("All forum_project_news hooks are served");
+				println!("{} All forum_project_news hooks are served", chrono::Local::now());
 				info!("All forum_project_news hooks are served");
 				if hooks {
 					continue;
@@ -75,7 +75,7 @@ pub async fn fetch_loop(hooks: bool) {
 
 			// Cool down to prevent rate limiting and excessive performance impact
 			let wait = rand::thread_rng().gen_range(50..70);
-			println!("Waiting for {} seconds", wait);
+			println!("{} Waiting for {} seconds", chrono::Local::now(), wait);
 			info!("Waiting for {} seconds", wait);
 			sleep(time::Duration::from_secs(wait));
 		}

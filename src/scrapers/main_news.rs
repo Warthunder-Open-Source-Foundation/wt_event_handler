@@ -23,7 +23,7 @@ pub async fn html_processor(recent_value: &Value, scrape_type: ScrapeType) -> Op
 	if let Some(top_url) = html.select(&top_url_selector).next() {
 		return Some(format_result(top_url, scrape_type));
 	}
-	println!("Fetch failed");
+	println!("{} Fetch failed", chrono::Local::now());
 	error!("Fetch failed");
 	None
 }

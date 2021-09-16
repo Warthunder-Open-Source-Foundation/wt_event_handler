@@ -44,7 +44,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 		FilterType::Default => {
 			for keyword in default_keywords {
 				if content.contains(keyword) {
-					println!("URL {} matched with default keyword {}", content, keyword);
+					println!("{} URL {} matched with default keyword {}", chrono::Local::now(), content, keyword);
 					warn!("URL {} matched with default keyword {}", content, keyword);
 					return Some(content);
 				}
@@ -69,7 +69,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 			let whitelist = &hook.keywords;
 			for keyword in whitelist {
 				if content.contains(keyword) {
-					println!("URL {} matched with whitelisted keyword {}", content, keyword);
+					println!("{} URL {} matched with whitelisted keyword {}", chrono::Local::now(), content, keyword);
 					warn!("URL {} matched with whitelisted keyword {}", content, keyword);
 					return Some(content);
 				}
