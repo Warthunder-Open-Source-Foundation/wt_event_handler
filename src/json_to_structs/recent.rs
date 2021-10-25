@@ -9,10 +9,10 @@ use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
 	pub meta: Meta,
-	pub warthunder_news: Value,
-	pub warthunder_changelog: Value,
-	pub forums_updates_information: Value,
-	pub forums_project_news: Value,
+	pub warthunder_news: Channel,
+	pub warthunder_changelog: Channel,
+	pub forums_updates_information: Channel,
+	pub forums_project_news: Channel,
 }
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
@@ -21,14 +21,14 @@ pub struct Meta {
 }
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
-pub struct Value {
+pub struct Channel {
 	pub domain: String,
 	pub selector: String,
 	pub pin: String,
 	pub recent_url: Vec<String>,
 }
 
-impl Value {
+impl Channel {
 	pub fn is_outdated(&self, value: &str) -> bool {
 		if self.recent_url.contains(&value.to_owned()) {
 			println!("{} Content was recently fetched and is not new", chrono::Local::now());
@@ -72,7 +72,7 @@ impl Recent {
 	}
 }
 
-pub fn format_selector(main: &Value, which: &RecentHtmlTarget, index: u32) -> Selector {
+pub fn format_selector(main: &Channel, which: &RecentHtmlTarget, index: u32) -> Selector {
 	return match which {
 		RecentHtmlTarget::Pin => {
 			Selector::parse(&*format!("{}{}{}", &*main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
