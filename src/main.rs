@@ -20,7 +20,6 @@ async fn main() {
 	let mut line = String::new();
 	let mut hooks = true;
 	let mut json_verification = true;
-	let mut json_prefetch_required = false;
 
 	println!("Please select a start profile: \n \
 	1. Regular initialization \n \
@@ -59,12 +58,7 @@ async fn main() {
 	}
 
 	if json_verification {
-		json_prefetch_required = verify_json();
-	}
-
-	if json_prefetch_required {
-		clean_recent();
-		println!("Json prefetched and cleaned successfully");
+		verify_json();
 	}
 
 	init_log();

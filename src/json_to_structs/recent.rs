@@ -1,5 +1,7 @@
+use std::convert::TryFrom;
 use std::fs;
 
+use chrono::Local;
 use log::{info, warn};
 use scraper::Selector;
 
@@ -45,19 +47,26 @@ impl Channel {
 impl Recent {
 	pub fn append_latest_warthunder_news(&mut self, value: &str) {
 		self.warthunder_news.recent_url.push(value.to_owned());
+		self.update_timestamp();
 		self.write_latest(value);
 	}
 	pub fn append_latest_warthunder_changelog(&mut self, value: &str) {
 		self.warthunder_changelog.recent_url.push(value.to_owned());
+		self.update_timestamp();
 		self.write_latest(value);
 	}
 	pub fn append_latest_warthunder_forums_updates_information(&mut self, value: &str) {
 		self.forums_updates_information.recent_url.push(value.to_owned());
+		self.update_timestamp();
 		self.write_latest(value);
 	}
 	pub fn append_latest_warthunder_forums_project_news(&mut self, value: &str) {
 		self.forums_project_news.recent_url.push(value.to_owned());
+		self.update_timestamp();
 		self.write_latest(value);
+	}
+	fn update_timestamp(&mut self) {
+		self.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();
 	}
 	pub fn read_latest() -> Self {
 		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");

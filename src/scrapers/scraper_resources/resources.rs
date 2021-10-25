@@ -1,11 +1,11 @@
 use std::process::exit;
+use std::time::Duration;
 
 use log::{error, info};
-use reqwest::{Client};
+use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 
-use crate::json_to_structs::recent::{format_selector, Channel};
-use std::time::Duration;
+use crate::json_to_structs::recent::{Channel, format_selector};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {

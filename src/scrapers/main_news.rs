@@ -2,7 +2,7 @@ use std::option::Option::Some;
 
 use log::error;
 
-use crate::json_to_structs::recent::{format_selector, Channel};
+use crate::json_to_structs::recent::{Channel, format_selector};
 use crate::scrapers::scraper_resources::resources::{fetch_failed, format_result, pin_loop, RecentHtmlTarget, request_html, ScrapeType};
 
 pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> Option<String> {
