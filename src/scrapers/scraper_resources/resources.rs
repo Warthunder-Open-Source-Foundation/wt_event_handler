@@ -1,11 +1,11 @@
 use std::process::exit;
+use std::time::Duration;
 
 use log::{error, info};
-use reqwest::{Client};
+use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 
-use crate::json_to_structs::recent::{format_selector, Value};
-use std::time::Duration;
+use crate::json_to_structs::recent::{Channel, format_selector};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {
@@ -56,7 +56,7 @@ mod tests {
 	use super::*;
 }
 
-pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: ScrapeType) -> u32 {
+pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;
 
 	match selection {

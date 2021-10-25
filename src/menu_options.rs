@@ -38,24 +38,34 @@ pub fn verify_json() -> bool {
 	println!("Verifying Json files...");
 
 	let recent_raw = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
-	let mut recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+	let recent: Recent = serde_json::from_str(&recent_raw).expect("Json cannot be read");
+
+	// let local_time = u64::try_from(Local::now().timestamp()).unwrap();
+
+	// if (local_time - recent.meta.timestamp) > 60 * 60 {
+	// 	recent.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();
+	// 	let write_recent = serde_json::to_string_pretty(&recent).unwrap();
+	// 	fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
+	// 	return true;
+	// } else if recent.meta.timestamp == 0 {
+	// 	recent.meta.timestamp = local_time;
+	// 	println!("The last fetch date was 0 and has been corrected");
+	// 	let write_recent = serde_json::to_string_pretty(&recent).unwrap();
+	// 	fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
+	// 	return true;
+	// }
+	//
+	// recent.meta.timestamp = local_time;
 
 	let local_time = u64::try_from(Local::now().timestamp()).unwrap();
 
-	if (local_time - recent.meta.timestamp) > 60 * 60 {
-		recent.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();
-		let write_recent = serde_json::to_string_pretty(&recent).unwrap();
-		fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
-		return true;
-	} else if recent.meta.timestamp == 0 {
-		recent.meta.timestamp = local_time;
-		println!("The last fetch date was 0 and has been corrected");
-		let write_recent = serde_json::to_string_pretty(&recent).unwrap();
-		fs::write("assets/recent.json", write_recent).expect("Couldn't write to recent file");
-		return true;
+	if recent.meta.timestamp == 0 {
+		panic!("Recent file is invalid! (recent.json is timestamped at 0)");
 	}
 
-	recent.meta.timestamp = local_time;
+	if (local_time - recent.meta.timestamp) > 60 * 60 {
+		panic!("Recent file is older than 1 hour and might not be correct!");
+	}
 
 	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let token: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
@@ -114,6 +124,8 @@ pub fn clean_recent() {
 	cache.warthunder_news.recent_url.clear();
 	cache.warthunder_changelog.recent_url.clear();
 	cache.forums_project_news.recent_url.clear();
+
+	cache.meta.timestamp = 0;
 
 	// let write = serde_json::to_string_pretty(&cache).unwrap();
 	let write = serde_json::to_string_pretty(&cache).unwrap();
