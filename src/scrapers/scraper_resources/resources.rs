@@ -1,11 +1,10 @@
 use std::process::exit;
-use std::time::Duration;
 
 use log::{error, info};
-use reqwest::Client;
+use reqwest::get;
 use scraper::{ElementRef, Html, Selector};
 
-use crate::json_to_structs::recent::{Channel, format_selector};
+use crate::json::recent::{format_selector, Channel};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {
@@ -19,22 +18,11 @@ pub enum RecentHtmlTarget {
 }
 
 pub async fn request_html(url: &str) -> Option<Html> {
-	println!("{} Fetching data from {}", chrono::Local::now(), &url);
+	println!("Fetching data from {}", &url);
 	info!("Fetching data from {}", &url);
 
-	let client = Client::builder()
-		.connect_timeout(Duration::from_secs(20))
-		.timeout(Duration::from_secs(20))
-		.build()
-		.unwrap();
-
-	let request = client
-		.get(url)
-		.build()
-		.unwrap();
-
 	let html;
-	if let Ok(raw_html) = client.execute(request).await {
+	if let Ok(raw_html) = get(url).await {
 		if let Ok(text) = raw_html.text().await {
 			html = Html::parse_document(text.as_str());
 			return Some(html);
@@ -45,7 +33,7 @@ pub async fn request_html(url: &str) -> Option<Html> {
 }
 
 pub fn fetch_failed() -> Option<String> {
-	println!("{} Fetch failed", chrono::Local::now());
+	println!("Fetch failed");
 	error!("Fetch failed");
 	None
 }
@@ -69,7 +57,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: S
 					return post;
 				}
 				if post > 20 {
-					println!("{} Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!", chrono::Local::now());
+					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
 					exit(-1);
 				}
 			}
@@ -85,7 +73,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: S
 					post += 1;
 				}
 				if post > 20 {
-					println!("{} Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!", chrono::Local::now());
+					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
 					exit(-1);
 				}
 			}
