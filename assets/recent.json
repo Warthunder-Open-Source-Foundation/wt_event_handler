@@ -1,13 +1,14 @@
 {
   "meta": {
-    "timestamp": 1631128844
+    "timestamp": 1635362830
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/news/7331-video-special-arado-blitz-en"
+      "https://warthunder.com/en/news/7402-video-vickers-tanks-en",
+      "https://warthunder.com/en/news/7403-planned-technical-works-28-10-2021-en"
     ]
   },
   "warthunder_changelog": {
@@ -15,7 +16,7 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1293"
+      "https://warthunder.com/en/game/changelog/current/1310"
     ]
   },
   "forums_updates_information": {
@@ -23,15 +24,13 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/534443-update-29017/"
+      "https://forum.warthunder.com/index.php?/topic/538018-update-290107290106-%E2%80%94-xbox-playstation/"
     ]
   },
   "forums_project_news": {
     "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/534501-video-special-arado-blitz/"
-    ]
+    "recent_url": []
   }
 }
