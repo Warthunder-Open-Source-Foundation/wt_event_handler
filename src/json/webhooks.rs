@@ -14,7 +14,7 @@ pub struct Hooks {
 	pub name: String,
 	pub token: String,
 	pub uid: u64,
-	pub filter: FilterType,
+	pub main_filter: FilterType,
 	pub keywords: Vec<String>,
 }
 
@@ -57,7 +57,7 @@ impl Hooks {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: FilterType::default(),
+			main_filter: FilterType::default(),
 			keywords: vec![],
 		};
 		let mut line = String::new();
@@ -98,9 +98,9 @@ impl Hooks {
 
 		let mut option = line.clone();
 		option.pop();
-		val.filter = FilterType::from_user(option.as_str());
+		val.main_filter = FilterType::from_user(option.as_str());
 
-		if val.filter != FilterType::Default {
+		if val.main_filter != FilterType::Default {
 			let mut line = String::new();
 			println!("Enter the listing parameters, seperated by spaces all lowercase");
 			line.clear();

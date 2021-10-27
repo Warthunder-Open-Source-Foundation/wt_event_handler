@@ -38,7 +38,7 @@ fn match_filter<'a>(content: &'a str, hook: &'a Hooks) -> Option<&'a str> {
 		"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers",
 	];
 
-	let filter = &hook.filter;
+	let filter = &hook.main_filter;
 
 	match filter {
 		FilterType::Default => {
@@ -119,7 +119,7 @@ mod tests {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: Default::default(),
+			main_filter: Default::default(),
 			keywords: vec![],
 		}).unwrap(), "pass")
 	}
@@ -131,7 +131,7 @@ mod tests {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: Default::default(),
+			main_filter: Default::default(),
 			keywords: vec![],
 		}).unwrap();
 	}
@@ -142,7 +142,7 @@ mod tests {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: Whitelist,
+			main_filter: Whitelist,
 			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
 		}).unwrap(), "C");
 	}
@@ -154,7 +154,7 @@ mod tests {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: Whitelist,
+			main_filter: Whitelist,
 			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
 		}).unwrap();
 	}
@@ -166,7 +166,7 @@ mod tests {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: Blacklist,
+			main_filter: Blacklist,
 			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
 		}).unwrap();
 	}
@@ -177,7 +177,7 @@ mod tests {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: Blacklist,
+			main_filter: Blacklist,
 			keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
 		}).unwrap();
 	}
