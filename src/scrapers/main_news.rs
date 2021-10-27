@@ -2,10 +2,10 @@ use std::option::Option::Some;
 
 use log::error;
 
-use crate::json::recent::{format_selector, Value};
+use crate::json::recent::{format_selector, Channel};
 use crate::scrapers::scraper_resources::resources::{fetch_failed, format_result, pin_loop, RecentHtmlTarget, request_html, ScrapeType};
 
-pub async fn html_processor(recent_value: &Value, scrape_type: ScrapeType) -> Option<String> {
+pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> Option<String> {
 	let url = &recent_value.domain;
 
 	let html;

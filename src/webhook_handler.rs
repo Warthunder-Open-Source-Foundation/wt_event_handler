@@ -3,7 +3,7 @@ use std::fs;
 use log::{error, warn};
 use serenity::http::Http;
 
-use crate::json::recent::Value;
+use crate::json::recent::Channel;
 use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::TOKEN_PATH;
@@ -14,7 +14,7 @@ const DEFAULT_KEYWORDS: [&str; 27] = [
 	"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds", "issues", "technical", "servers",
 ];
 
-impl Value {
+impl Channel {
 	pub async fn handle_webhook(&self, content: &str, is_filtered: bool, scrape_type: ScrapeType) {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");

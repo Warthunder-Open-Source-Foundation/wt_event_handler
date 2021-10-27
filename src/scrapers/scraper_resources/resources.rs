@@ -4,7 +4,7 @@ use log::{error, info};
 use reqwest::get;
 use scraper::{ElementRef, Html, Selector};
 
-use crate::json::recent::{format_selector, Value};
+use crate::json::recent::{format_selector, Channel};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {
@@ -44,7 +44,7 @@ mod tests {
 	use super::*;
 }
 
-pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Value, selection: ScrapeType) -> u32 {
+pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;
 
 	match selection {
