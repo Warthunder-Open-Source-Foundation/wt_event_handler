@@ -12,8 +12,8 @@ use log4rs::encode::pattern::PatternEncoder;
 use log::LevelFilter;
 
 use crate::{RECENT_PATH, TOKEN_PATH};
-use crate::json_to_structs::recent::Recent;
-use crate::json_to_structs::webhooks::{Hooks, WebhookAuth};
+use crate::json::recent::Recent;
+use crate::json::webhooks::{Hooks, WebhookAuth};
 
 pub fn init_log() {
 	if Path::new("log/latest.log").exists() {

@@ -5,7 +5,7 @@ use std::thread::sleep;
 use log::info;
 use rand::Rng;
 
-use crate::json_to_structs::recent::Recent;
+use crate::json::recent::Recent;
 use crate::scrapers::main_news::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 

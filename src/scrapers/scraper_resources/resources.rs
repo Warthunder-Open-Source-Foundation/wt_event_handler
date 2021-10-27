@@ -4,7 +4,7 @@ use log::{error, info};
 use reqwest::get;
 use scraper::{ElementRef, Html, Selector};
 
-use crate::json_to_structs::recent::{format_selector, Value};
+use crate::json::recent::{format_selector, Value};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum ScrapeType {

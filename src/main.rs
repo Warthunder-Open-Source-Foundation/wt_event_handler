@@ -8,7 +8,7 @@ use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, v
 
 mod webhook_handler;
 mod scrapers;
-mod json_to_structs;
+mod json;
 mod menu_options;
 mod fetch_loop;
 

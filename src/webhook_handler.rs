@@ -3,8 +3,8 @@ use std::fs;
 use log::{error, warn};
 use serenity::http::Http;
 
-use crate::json_to_structs::recent::Value;
-use crate::json_to_structs::webhooks::{FilterType, Hooks, WebhookAuth};
+use crate::json::recent::Value;
+use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
 use crate::TOKEN_PATH;
 
 impl Value {
@@ -108,7 +108,7 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 
 mod tests {
 	#[allow(unused_imports)]
-	use crate::json_to_structs::webhooks::FilterType::{Blacklist, Whitelist};
+	use crate::json::webhooks::FilterType::{Blacklist, Whitelist};
 
 	#[allow(unused_imports)]
 	use super::*;
