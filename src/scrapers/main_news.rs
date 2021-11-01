@@ -2,7 +2,7 @@ use std::option::Option::Some;
 
 use log::error;
 
-use crate::json_to_structs::recent::{Channel, format_selector};
+use crate::json::recent::{format_selector, Channel};
 use crate::scrapers::scraper_resources::resources::{fetch_failed, format_result, pin_loop, RecentHtmlTarget, request_html, ScrapeType};
 
 pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> Option<String> {
@@ -23,7 +23,7 @@ pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> 
 	if let Some(top_url) = html.select(&top_url_selector).next() {
 		return Some(format_result(top_url, scrape_type));
 	}
-	println!("{} Fetch failed", chrono::Local::now());
+	println!("Fetch failed");
 	error!("Fetch failed");
 	None
 }

@@ -14,8 +14,10 @@ pub struct Hooks {
 	pub name: String,
 	pub token: String,
 	pub uid: u64,
-	pub filter: FilterType,
-	pub keywords: Vec<String>,
+	pub main_filter: FilterType,
+	pub forum_filter: FilterType,
+	pub main_keywords: Vec<String>,
+	pub forum_keywords: Vec<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
@@ -57,8 +59,10 @@ impl Hooks {
 			name: "".to_string(),
 			token: "".to_string(),
 			uid: 0,
-			filter: FilterType::default(),
-			keywords: vec![],
+			main_filter: FilterType::default(),
+			forum_filter: FilterType::default(),
+			main_keywords: vec![],
+			forum_keywords: vec![]
 		};
 		let mut line = String::new();
 
@@ -66,7 +70,7 @@ impl Hooks {
 		io::stdin().read_line(&mut line).unwrap();
 
 		if let "n" = line.trim() {
-			println!("Aborting webhook removal");
+			println!("Aborting webhook creation");
 			exit(0);
 		}
 
@@ -78,7 +82,7 @@ impl Hooks {
 		io::stdin().read_line(&mut line).unwrap();
 
 		if let "n" = line.trim() {
-			println!("Aborting webhook removal");
+			println!("Aborting webhook creation");
 			exit(0);
 		}
 
@@ -87,26 +91,38 @@ impl Hooks {
 		val.uid = uid_token[5].parse().unwrap();
 		val.token = uid_token[6].clone();
 
-		println!("Choose a filter option: \n 1. Default \n 2. Blacklist \n 3. Whitelist  \n");
+		println!("Choose a filter option the main and forum list seperated by 1 space (such as \"1 2\"): \n 1. Default \n 2. Blacklist \n 3. Whitelist  \n");
 		line.clear();
 		io::stdin().read_line(&mut line).unwrap();
 
 		if let "n" = line.trim() {
-			println!("Aborting webhook removal");
+			println!("Aborting webhook creation");
 			exit(0);
 		}
 
-		let mut option = line.clone();
-		option.pop();
-		val.filter = FilterType::from_user(option.as_str());
+		let option = line.clone();
+		let main_filter_string = option.split_at(1).0;
+		let forum_filter_string = option.split_at(1).1;
+		val.main_filter = FilterType::from_user(main_filter_string);
+		val.forum_filter = FilterType::from_user(forum_filter_string);
 
-		if val.filter != FilterType::Default {
+		if val.main_filter != FilterType::Default {
 			let mut line = String::new();
-			println!("Enter the listing parameters, seperated by spaces all lowercase");
+			println!("Enter main keywords, seperated by spaces all lowercase");
 			line.clear();
 			io::stdin().read_line(&mut line).unwrap();
-			val.keywords = line.split_whitespace().map(String::from).collect();
+			val.main_keywords = line.split_whitespace().map(String::from).collect();
 		}
+
+		if val.forum_filter != FilterType::Default {
+			let mut line = String::new();
+			println!("Enter forum keywords, seperated by spaces all lowercase");
+			line.clear();
+			io::stdin().read_line(&mut line).unwrap();
+			val.forum_keywords = line.split_whitespace().map(String::from).collect();
+		}
+
+
 		println!("Entry created successfully, do you want to send a test-message to test the hook? y/n \n");
 		line.clear();
 		io::stdin().read_line(&mut line).unwrap();
