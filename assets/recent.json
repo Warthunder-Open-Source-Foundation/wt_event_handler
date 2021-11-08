@@ -1,6 +1,6 @@
 {
   "meta": {
-    "timestamp": 1635779302
+    "timestamp": 1636373073
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
@@ -23,7 +23,9 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/538934-server-update-29102021/"
+      "https://forum.warthunder.com/index.php?/topic/538934-server-update-29102021/",
+      "https://forum.warthunder.com/index.php?/topic/539448-update-211038/",
+      "https://forum.warthunder.com/index.php?/topic/539532-update-211041-211038-%E2%80%94-xbox-playstation-5/"
     ]
   },
   "forums_project_news": {
@@ -31,7 +33,16 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/539335-technical-issues-on-game-servers/"
+      "https://forum.warthunder.com/index.php?/topic/539335-technical-issues-on-game-servers/",
+      "https://forum.warthunder.com/index.php?/topic/539250-video-the-shooting-range-276/",
+      "https://forum.warthunder.com/index.php?/topic/539524-news-technical-issues-over-the-past-weekend/",
+      "https://forum.warthunder.com/index.php?/topic/539580-video-terrain-shaping/",
+      "https://forum.warthunder.com/index.php?/topic/539661-special-italian-national-unity-and-armed-forces-day/",
+      "https://forum.warthunder.com/index.php?/topic/539670-technical-issues-on-game-servers/",
+      "https://forum.warthunder.com/index.php?/topic/539753-technical-issues-on-game-servers/",
+      "https://forum.warthunder.com/index.php?/topic/539769-video-thunder-show-toasty/",
+      "https://forum.warthunder.com/index.php?/topic/539980-clarification-on-the-economy-changes-with-rewards-for-actions-in-battles/",
+      "https://forum.warthunder.com/index.php?/topic/539986-shop-war-thunder-birthday-sale-in-gaijinnet-store/"
     ]
   }
 }
