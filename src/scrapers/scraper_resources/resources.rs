@@ -38,12 +38,6 @@ pub fn fetch_failed() -> Option<String> {
 	None
 }
 
-#[cfg(test)]
-mod tests {
-	#[allow(unused_imports)]
-	use super::*;
-}
-
 pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;
 
