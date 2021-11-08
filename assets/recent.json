@@ -1,11 +1,11 @@
 {
   "meta": {
-    "timestamp": 1636383219
+    "timestamp": 1636384389
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
-    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__decal.js-tooltip.new-tooltip",
+    "pin": "#bodyRoot>div.content>div:nth-child(2)>div:nth-child(2)>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
       "https://warthunder.com/en/news/7417-shop-war-thunder-birthday-sale-in-gaijin-net-store-en"
     ]
@@ -13,9 +13,10 @@
   "warthunder_changelog": {
     "domain": "https://warthunder.com/en/game/changelog/",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
-    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__decal.js-tooltip.new-tooltip",
+    "pin": "#bodyRoot>div.content>div:nth-child(2)>div:nth-child(2)>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1311"
+      "https://warthunder.com/en/game/changelog/current/1311",
+      "https://warthunder.com/en/game/changelog/current/1315"
     ]
   },
   "forums_updates_information": {

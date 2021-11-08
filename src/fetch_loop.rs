@@ -24,7 +24,6 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				println!("All wt news hooks are served");
 				info!("All wt news hooks are served");
 				if hooks && write_files {
-					println!("{}", "yes");
 					continue;
 				}
 			}
