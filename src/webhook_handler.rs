@@ -21,7 +21,7 @@ impl Channel {
 
 		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
 			if is_filtered {
-				if matches_filter(content, hook, scrape_type) {
+				if match_filter(content, hook, scrape_type) {
 					deliver_webhooks(content, i).await;
 				}
 			} else {
@@ -31,7 +31,7 @@ impl Channel {
 	}
 }
 
-fn matches_filter(content: &str, hook: &Hooks, scrape_type: ScrapeType) -> bool {
+fn match_filter(content: &str, hook: &Hooks, scrape_type: ScrapeType) -> bool {
 	match scrape_type {
 		ScrapeType::Main => {
 			filter_main(content, hook)
@@ -161,91 +161,173 @@ fn print_log(input: &str) {
 	warn!("{}", input);
 }
 
-// mod tests {
-// 	#[allow(unused_imports)]
-// 	use crate::json::webhooks::FilterType::{Blacklist, Whitelist};
-//
-// 	#[allow(unused_imports)]
-// 	use super::*;
-//
-// 	#[test]
-// 	fn test_filter_default_pass() {
-// 		assert_eq!(match_filter("pass", &Hooks {
-// 			name: "".to_string(),
-// 			token: "".to_string(),
-// 			uid: 0,
-// 			main_filter: FilterType::default(),
-// 			forum_filter: FilterType::default(),
-// 			main_keywords: vec![],
-// 			forum_keywords: vec![],
-// 		}).unwrap(), "pass")
-// 	}
-//
-// 	#[test]
-// 	#[should_panic]
-// 	fn test_filter_default_no_match() {
-// 		match_filter("xyz", &Hooks {
-// 			name: "".to_string(),
-// 			token: "".to_string(),
-// 			uid: 0,
-// 			main_filter: FilterType::default(),
-// 			forum_filter: FilterType::default(),
-// 			main_keywords: vec![],
-// 			forum_keywords: vec![],
-// 		}).unwrap();
-// 	}
-//
-// 	#[test]
-// 	fn test_filter_whitelist_match() {
-// 		assert_eq!(match_filter("C", &Hooks {
-// 			name: "".to_string(),
-// 			token: "".to_string(),
-// 			uid: 0,
-// 			main_filter: Whitelist,
-// 			forum_filter: Blacklist,
-// 			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
-// 			forum_keywords: vec!["W".to_owned(), "X".to_owned(), "Y".to_owned(), "Z".to_owned()],
-// 		}).unwrap(), "C");
-// 	}
-//
-// 	#[test]
-// 	#[should_panic]
-// 	fn test_filter_whitelist_miss() {
-// 		match_filter("E", &Hooks {
-// 			name: "".to_string(),
-// 			token: "".to_string(),
-// 			uid: 0,
-// 			main_filter: Whitelist,
-// 			forum_filter: Blacklist,
-// 			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
-// 			forum_keywords: vec!["W".to_owned(), "X".to_owned(), "Y".to_owned(), "Z".to_owned()],
-// 		}).unwrap();
-// 	}
-//
-// 	#[test]
-// 	#[should_panic]
-// 	fn test_filter_blacklist_match() {
-// 		match_filter("C", &Hooks {
-// 			name: "".to_string(),
-// 			token: "".to_string(),
-// 			uid: 0,
-// 			main_filter: Blacklist,
-// 			forum_filter: Blacklist,
-// 			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
-// 			forum_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
-// 		}).unwrap();
-// 	}
-//
-// 	#[test]
-// 	fn test_filter_blacklist_miss() {
-// 		match_filter("E", &Hooks {
-// 			name: "".to_string(),
-// 			token: "".to_string(),
-// 			uid: 0,
-// 			main_filter: Blacklist,
-// 			forum_filter: Blacklist,
-// 			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
-// 			forum_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
-// 		}).unwrap();
-// 	}
-// }
+// Tests  -----------------------------------------------------------------------
+
+mod tests {
+	#[allow(unused_imports)]
+	use crate::json::webhooks::FilterType::{Blacklist, Whitelist};
+
+	#[allow(unused_imports)]
+	use super::*;
+
+	// Main tests -------------------------------------------------------------------
+	#[test]
+	fn main_test_filter_default_pass() {
+		assert_eq!(match_filter("pass", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: FilterType::default(),
+			forum_filter: FilterType::default(),
+			main_keywords: vec![],
+			forum_keywords: vec![],
+		}, ScrapeType::Main), true)
+	}
+
+	#[test]
+	fn main_test_filter_default_no_match() {
+		assert_eq!(match_filter("xyz", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: FilterType::default(),
+			forum_filter: FilterType::default(),
+			main_keywords: vec![],
+			forum_keywords: vec![],
+		}, ScrapeType::Main), false);
+	}
+
+	#[test]
+	fn main_test_filter_whitelist_match() {
+		assert_eq!(match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Whitelist,
+			forum_filter: Blacklist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["W".to_owned(), "X".to_owned(), "Y".to_owned(), "Z".to_owned()],
+		}, ScrapeType::Main), true);
+	}
+
+	#[test]
+	#[should_panic]
+	fn main_test_filter_whitelist_miss() {
+		assert_eq!(match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Whitelist,
+			forum_filter: Whitelist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["W".to_owned(), "X".to_owned(), "Y".to_owned(), "Z".to_owned()],
+		}, ScrapeType::Main), true);
+	}
+
+	#[test]
+	#[should_panic]
+	fn main_test_filter_blacklist_match() {
+		assert_eq!(match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Blacklist,
+			forum_filter: Blacklist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}, ScrapeType::Main), true);
+	}
+
+	#[test]
+	fn main_test_filter_blacklist_miss() {
+		assert_eq!(match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Blacklist,
+			forum_filter: Blacklist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}, ScrapeType::Main), true);
+	}
+
+	// forum tests ------------------------------------------------------------------
+
+	#[test]
+	fn forum_test_filter_default_pass() {
+		assert_eq!(match_filter("pass", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: FilterType::default(),
+			forum_filter: FilterType::default(),
+			main_keywords: vec![],
+			forum_keywords: vec![],
+		}, ScrapeType::Forum), true)
+	}
+
+	#[test]
+	fn forum_test_filter_default_no_match() {
+		assert_eq!(match_filter("xyz", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: FilterType::default(),
+			forum_filter: FilterType::default(),
+			main_keywords: vec![],
+			forum_keywords: vec![],
+		}, ScrapeType::Forum), false);
+	}
+
+	#[test]
+	fn forum_test_filter_whitelist_match() {
+		assert_eq!(match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Whitelist,
+			forum_filter: Blacklist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["W".to_owned(), "X".to_owned(), "Y".to_owned(), "Z".to_owned()],
+		}, ScrapeType::Forum), true);
+	}
+
+	#[test]
+	fn forum_test_filter_whitelist_miss() {
+		assert_eq!(match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Whitelist,
+			forum_filter: Whitelist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["W".to_owned(), "X".to_owned(), "Y".to_owned(), "Z".to_owned()],
+		}, ScrapeType::Forum), false);
+	}
+
+	#[test]
+	fn forum_test_filter_blacklist_match() {
+		assert_eq!(match_filter("C", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Blacklist,
+			forum_filter: Blacklist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}, ScrapeType::Forum), false);
+	}
+
+	#[test]
+	fn forum_test_filter_blacklist_miss() {
+		match_filter("E", &Hooks {
+			name: "".to_string(),
+			token: "".to_string(),
+			uid: 0,
+			main_filter: Blacklist,
+			forum_filter: Blacklist,
+			main_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+			forum_keywords: vec!["A".to_owned(), "B".to_owned(), "C".to_owned(), "D".to_owned()],
+		}, ScrapeType::Forum);
+	}
+}
