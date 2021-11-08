@@ -38,11 +38,7 @@ pub fn fetch_failed() -> Option<String> {
 	None
 }
 
-#[cfg(test)]
-mod tests {
-	#[allow(unused_imports)]
-	use super::*;
-}
+
 
 pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;
@@ -51,7 +47,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: S
 		ScrapeType::Main => {
 			loop {
 				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
-				if let Some(_top_url) = html.select(&pin).next() {
+				if html.select(&pin).next().is_some() {
 					post += 1;
 				} else {
 					return post;

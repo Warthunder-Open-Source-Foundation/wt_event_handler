@@ -23,7 +23,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 				println!("All wt news hooks are served");
 				info!("All wt news hooks are served");
-				if hooks && !write_files {
+				if hooks && write_files {
 					continue;
 				}
 			}
@@ -39,7 +39,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 				println!("All wt changelog hooks are served");
 				info!("All wt changelog hooks are served");
-				if hooks && !write_files {
+				if hooks && write_files {
 					continue;
 				}
 			}
@@ -55,7 +55,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 				println!("All forum_updates_information hooks are served");
 				info!("All forum_updates_information hooks are served");
-				if hooks && !write_files {
+				if hooks && write_files {
 					continue;
 				}
 			}
@@ -71,13 +71,13 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 				println!("All forum_project_news hooks are served");
 				info!("All forum_project_news hooks are served");
-				if hooks && !write_files {
+				if hooks && write_files {
 					continue;
 				}
 			}
 
 			//Aborts program after running without hooks
-			if !hooks {
+			if !hooks || !write_files {
 				exit(0);
 			}
 

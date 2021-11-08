@@ -66,5 +66,5 @@ async fn main() {
 	println!("Started client");
 	info!("Started client");
 
-	fetch_loop(hooks, write_files).await;
+	fetch_loop(hooks, write_files).await; // For the love of god clippy
 }
