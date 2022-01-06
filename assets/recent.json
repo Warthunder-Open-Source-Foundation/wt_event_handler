@@ -1,48 +1,29 @@
 {
   "meta": {
-    "timestamp": 1636373073
+    "timestamp": 1639396049
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
-    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__decal.js-tooltip.new-tooltip",
-    "recent_url": [
-      "https://warthunder.com/en/news/7408-news-happy-birthday-war-thunder-en"
-    ]
+    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
+    "recent_url": []
   },
   "warthunder_changelog": {
     "domain": "https://warthunder.com/en/game/changelog/",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
-    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__decal.js-tooltip.new-tooltip",
-    "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1311"
-    ]
+    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
+    "recent_url": []
   },
   "forums_updates_information": {
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/538934-server-update-29102021/",
-      "https://forum.warthunder.com/index.php?/topic/539448-update-211038/",
-      "https://forum.warthunder.com/index.php?/topic/539532-update-211041-211038-%E2%80%94-xbox-playstation-5/"
-    ]
+    "recent_url": []
   },
   "forums_project_news": {
     "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/539335-technical-issues-on-game-servers/",
-      "https://forum.warthunder.com/index.php?/topic/539250-video-the-shooting-range-276/",
-      "https://forum.warthunder.com/index.php?/topic/539524-news-technical-issues-over-the-past-weekend/",
-      "https://forum.warthunder.com/index.php?/topic/539580-video-terrain-shaping/",
-      "https://forum.warthunder.com/index.php?/topic/539661-special-italian-national-unity-and-armed-forces-day/",
-      "https://forum.warthunder.com/index.php?/topic/539670-technical-issues-on-game-servers/",
-      "https://forum.warthunder.com/index.php?/topic/539753-technical-issues-on-game-servers/",
-      "https://forum.warthunder.com/index.php?/topic/539769-video-thunder-show-toasty/",
-      "https://forum.warthunder.com/index.php?/topic/539980-clarification-on-the-economy-changes-with-rewards-for-actions-in-battles/",
-      "https://forum.warthunder.com/index.php?/topic/539986-shop-war-thunder-birthday-sale-in-gaijinnet-store/"
-    ]
+    "recent_url": []
   }
 }
