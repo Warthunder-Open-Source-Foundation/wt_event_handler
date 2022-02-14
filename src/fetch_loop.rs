@@ -1,10 +1,8 @@
-use core::time;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
 
 use log::info;
-use rand::Rng;
 
 use crate::json::recent::Recent;
 use crate::scrapers::main_news::html_processor;
