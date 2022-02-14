@@ -1,9 +1,8 @@
-use core::time;
 use std::process::exit;
 use std::thread::sleep;
+use std::time::Duration;
 
 use log::info;
-use rand::Rng;
 
 use crate::json::recent::Recent;
 use crate::scrapers::main_news::html_processor;
@@ -82,10 +81,10 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 			}
 
 			// Cool down to prevent rate limiting and excessive performance impact
-			let wait = rand::thread_rng().gen_range(50..70);
-			println!("Waiting for {} seconds", wait);
-			info!("Waiting for {} seconds", wait);
-			sleep(time::Duration::from_secs(wait));
+			let wait = Duration::from_secs(60);
+			println!("{} Waiting for 60 seconds", chrono::Local::now());
+			info!("{} Waiting for 60 seconds", chrono::Local::now());
+			sleep(wait);
 		}
 	}
 }
