@@ -5,3 +5,5 @@ RUN rustup toolchain install stable-x86_64-unknown-linux-gnu
 RUN git clone https://github.com/Warthunder-Open-Source-Foundation/wt_event_handler.git
 WORKDIR ./wt_event_handler
 RUN cargo build --release
+
+COPY discord_token.json ./assets
