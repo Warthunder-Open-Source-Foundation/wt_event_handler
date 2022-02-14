@@ -1,29 +1,37 @@
 {
   "meta": {
-    "timestamp": 1639396049
+    "timestamp": 1644838662
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-    "recent_url": []
+    "recent_url": [
+      "https://warthunder.com/en/news/7554-video-the-shooting-range-291-en"
+    ]
   },
   "warthunder_changelog": {
     "domain": "https://warthunder.com/en/game/changelog/",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-    "recent_url": []
+    "recent_url": [
+      "https://warthunder.com/en/game/changelog/current/1344"
+    ]
   },
   "forums_updates_information": {
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": []
+    "recent_url": [
+      "https://forum.warthunder.com/index.php?/topic/546779-update-2130109-2130109-xbox-playstation/"
+    ]
   },
   "forums_project_news": {
     "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": []
+    "recent_url": [
+      "https://forum.warthunder.com/index.php?/topic/547061-video-the-shooting-range-291/"
+    ]
   }
 }

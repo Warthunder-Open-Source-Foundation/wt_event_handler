@@ -18,8 +18,8 @@ pub enum RecentHtmlTarget {
 }
 
 pub async fn request_html(url: &str) -> Option<Html> {
-	println!("Fetching data from {}", &url);
-	info!("Fetching data from {}", &url);
+	println!("{} Fetching data from {}", chrono::Local::now(), &url);
+	info!("{} Fetching data from {}", chrono::Local::now(), &url);
 
 	let html;
 	if let Ok(raw_html) = get(url).await {
@@ -33,8 +33,8 @@ pub async fn request_html(url: &str) -> Option<Html> {
 }
 
 pub fn fetch_failed() -> Option<String> {
-	println!("Fetch failed");
-	error!("Fetch failed");
+	println!("{} Fetch failed", chrono::Local::now());
+	error!("{} Fetch failed", chrono::Local::now());
 	None
 }
 
