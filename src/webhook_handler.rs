@@ -151,8 +151,6 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 
 	webhook.execute(my_http_client, false, |w| {
 		w.content(&format!("[{a}]()", a = content));
-		w.username("The WT news bot");
-		w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
 		w
 	}).await.unwrap();
 }
