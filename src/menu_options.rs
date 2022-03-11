@@ -3,13 +3,15 @@ use std::fs;
 use std::io;
 use std::path::Path;
 use std::process::exit;
+use std::str::FromStr;
 
 use chrono::Local;
 use log4rs::append::file::FileAppender;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
-use log::LevelFilter;
+use log::{error, LevelFilter};
+use serenity::http::Http;
 
 use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::json::recent::Recent;
@@ -79,6 +81,40 @@ pub async fn add_webhook() {
 
 	let write = serde_json::to_string_pretty(&webhook_auth).unwrap();
 	fs::write(TOKEN_PATH, write).expect("Couldn't write to recent file");
+	exit(0);
+}
+
+pub async fn test_hook() {
+	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
+	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+	let mut line = String::new();
+
+	println!("Choose the webhook order in the array to test\n");
+
+	io::stdin().read_line(&mut line).unwrap();
+
+	let pos = usize::from_str(line.trim()).unwrap();
+
+	let uid = webhook_auth.hooks[pos].uid;
+	let token = &webhook_auth.hooks[pos].token;
+
+	let my_http_client = Http::new_with_token(token);
+
+	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
+		Err(why) => {
+			println!("{}", why);
+			error!("{}", why);
+			panic!("")
+		}
+		Ok(hook) => hook,
+	};
+
+	webhook.execute(my_http_client, false, |w| {
+		w.content("This is a test message");
+		w
+	}).await.unwrap();
+
 	exit(0);
 }
 

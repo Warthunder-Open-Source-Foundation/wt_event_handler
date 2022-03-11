@@ -4,7 +4,7 @@ use std::process::exit;
 use log::info;
 
 use crate::fetch_loop::fetch_loop;
-use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, verify_json};
+use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
 
 mod webhook_handler;
 mod scrapers;
@@ -30,6 +30,7 @@ async fn main() {
 	4. Add new webhook-client\n\
 	5. Remove a webhook\n\
 	6. Clean and reload recent file\n\
+	7. Test webhook client\n\
 	0. Debug, does not modify local files");
 	io::stdin()
 		.read_line(&mut line)
@@ -46,6 +47,10 @@ async fn main() {
 			hooks = false;
 			json_verification = false;
 			clean_recent();
+		}
+		"7" => {
+			hooks = false;
+			test_hook().await;
 		}
 		_ => {
 			println!("No option specified");
