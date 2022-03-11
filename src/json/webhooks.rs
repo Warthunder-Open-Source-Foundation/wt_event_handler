@@ -30,7 +30,7 @@ pub enum FilterType {
 impl FilterType {
 	pub fn from_user(option: &str) -> Self {
 		println!("{}", option);
-		match option {
+		match option.trim() {
 			"1" => {
 				Self::Default
 			}
@@ -158,8 +158,6 @@ async fn send_test_hook(hook: &Hooks) {
 
 	webhook.execute(my_http_client, false, |w| {
 		w.content(&format!("Webhook {} was successfully created", &hook.name));
-		w.username("The WT news bot");
-		w.avatar_url("https://cdn.discordapp.com/attachments/866634236232597534/868623209631744000/the_news_broke.png");
 		w
 	})
 		.await
