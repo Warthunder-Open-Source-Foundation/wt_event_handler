@@ -1,7 +1,11 @@
 use std::fs;
 
 use log::{error, warn};
+use serenity::builder::CreateEmbedFooter;
 use serenity::http::Http;
+use serenity::model::channel::Embed;
+use serenity::utils::Color;
+use crate::embed::EmbedData;
 
 use crate::json::recent::Channel;
 use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
@@ -16,17 +20,17 @@ const DEFAULT_KEYWORDS: [&str; 28] = [
 ];
 
 impl Channel {
-	pub async fn handle_webhook(&self, content: &str, is_filtered: bool, scrape_type: ScrapeType) {
+	pub async fn handle_webhook(&self, content: EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
 			if is_filtered {
-				if match_filter(content, hook, scrape_type) {
-					deliver_webhooks(content, i).await;
+				if match_filter(&content.url, hook, scrape_type) {
+					deliver_webhook(content.clone(), i).await;
 				}
 			} else {
-				deliver_webhooks(content, i).await;
+				deliver_webhook(content.clone(), i).await;
 			}
 		}
 	}
@@ -34,7 +38,7 @@ impl Channel {
 
 fn match_filter(content: &str, hook: &Hooks, scrape_type: ScrapeType) -> bool {
 	match scrape_type {
-		ScrapeType::Main => {
+		ScrapeType::Main | ScrapeType::Changelog => {
 			filter_main(content, hook)
 		}
 		ScrapeType::Forum => {
@@ -131,7 +135,7 @@ fn filter_forum(content: &str, hook: &Hooks) -> bool {
 }
 
 //Finally sends the webhook to the servers
-async fn deliver_webhooks(content: &str, pos: usize) {
+pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
@@ -149,8 +153,22 @@ async fn deliver_webhooks(content: &str, pos: usize) {
 		Ok(hook) => hook,
 	};
 
+	eprintln!("&content = {:?}", &content);
+
+	let embed = Embed::fake(|e| {
+		e.title(content.scrape_type.to_string())
+			.color(Color::from_rgb(116, 16, 210))
+			.field(&content.title, &content.preview_text, false)
+			.image(&content.img_url)
+			.url(&content.url)
+			.footer(|f|{
+				f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
+			})
+	});
+
 	webhook.execute(my_http_client, false, |w| {
-		w.content(&format!("[{a}]()", a = content));
+		w.content(&format!("[{}]()", &content.url));
+		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
 }

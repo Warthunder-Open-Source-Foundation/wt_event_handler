@@ -1,13 +1,13 @@
 {
   "meta": {
-    "timestamp": 1647017369
+    "timestamp": 1647128844
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/news/7595-video-thunder-show-pitch-en"
+      "https://warthunder.com/en/news/7594-development-pre-order-ztz96a-prototype-china-en"
     ]
   },
   "warthunder_changelog": {
