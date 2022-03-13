@@ -11,6 +11,7 @@ mod scrapers;
 mod json;
 mod menu_options;
 mod fetch_loop;
+mod embed;
 
 const RECENT_PATH: &str = "assets/recent.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";

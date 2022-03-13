@@ -14,8 +14,10 @@ use log::{error, LevelFilter};
 use serenity::http::Http;
 
 use crate::{RECENT_PATH, TOKEN_PATH};
+use crate::embed::EmbedData;
 use crate::json::recent::Recent;
 use crate::json::webhooks::{Hooks, WebhookAuth};
+use crate::webhook_handler::deliver_webhook;
 
 pub fn init_log() {
 	if Path::new("log/latest.log").exists() {
@@ -96,24 +98,7 @@ pub async fn test_hook() {
 
 	let pos = usize::from_str(line.trim()).unwrap();
 
-	let uid = webhook_auth.hooks[pos].uid;
-	let token = &webhook_auth.hooks[pos].token;
-
-	let my_http_client = Http::new_with_token(token);
-
-	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
-		Err(why) => {
-			println!("{}", why);
-			error!("{}", why);
-			panic!("")
-		}
-		Ok(hook) => hook,
-	};
-
-	webhook.execute(my_http_client, false, |w| {
-		w.content("This is a test message");
-		w
-	}).await.unwrap();
+	deliver_webhook(EmbedData::test(), pos).await;
 
 	exit(0);
 }
