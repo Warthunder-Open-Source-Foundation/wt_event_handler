@@ -13,12 +13,12 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 
 	loop {
 		if let Some(wt_news_content) = html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
-			if recent_data.warthunder_news.is_outdated(&wt_news_content) {
+			if recent_data.warthunder_news.is_outdated(&wt_news_content.url) {
 				if hooks {
-					recent_data.warthunder_news.handle_webhook(&wt_news_content, true, ScrapeType::Main).await;
+					recent_data.warthunder_news.handle_webhook(wt_news_content.clone(), true, ScrapeType::Main).await;
 				}
 				if write_files {
-					recent_data.append_latest_warthunder_news(&wt_news_content);
+					recent_data.append_latest_warthunder_news(&wt_news_content.url);
 				}
 				println!("All wt news hooks are served");
 				info!("All wt news hooks are served");
@@ -28,13 +28,13 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 			}
 		};
 
-		if let Some(wt_changelog) = html_processor(&recent_data.warthunder_changelog, ScrapeType::Main).await {
-			if recent_data.warthunder_changelog.is_outdated(&wt_changelog) {
+		if let Some(wt_changelog) = html_processor(&recent_data.warthunder_changelog, ScrapeType::Changelog).await {
+			if recent_data.warthunder_changelog.is_outdated(&wt_changelog.url) {
 				if hooks {
-					recent_data.warthunder_changelog.handle_webhook(&wt_changelog, true, ScrapeType::Main).await;
+					recent_data.warthunder_changelog.handle_webhook(wt_changelog.clone(), true, ScrapeType::Changelog).await;
 				}
 				if write_files {
-					recent_data.append_latest_warthunder_changelog(&wt_changelog);
+					recent_data.append_latest_warthunder_changelog(&wt_changelog.url);
 				}
 				println!("All wt changelog hooks are served");
 				info!("All wt changelog hooks are served");
@@ -45,12 +45,12 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		};
 
 		if let Some(forum_news_updates_information) = html_processor(&recent_data.forums_updates_information, ScrapeType::Forum).await {
-			if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information) {
+			if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information.url) {
 				if hooks {
-					recent_data.forums_updates_information.handle_webhook(&forum_news_updates_information, true, ScrapeType::Forum).await;
+					recent_data.forums_updates_information.handle_webhook(forum_news_updates_information.clone(), true, ScrapeType::Forum).await;
 				}
 				if write_files {
-					recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information);
+					recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information.url);
 				}
 				println!("All forum_updates_information hooks are served");
 				info!("All forum_updates_information hooks are served");
@@ -61,12 +61,12 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		};
 
 		if let Some(forum_news_project_news) = html_processor(&recent_data.forums_project_news, ScrapeType::Forum).await {
-			if recent_data.forums_project_news.is_outdated(&forum_news_project_news) {
+			if recent_data.forums_project_news.is_outdated(&forum_news_project_news.url) {
 				if hooks {
-					recent_data.forums_project_news.handle_webhook(&forum_news_project_news, true, ScrapeType::Forum).await;
+					recent_data.forums_project_news.handle_webhook(forum_news_project_news.clone(), true, ScrapeType::Forum).await;
 				}
 				if write_files {
-					recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news);
+					recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news.url);
 				}
 				println!("All forum_project_news hooks are served");
 				info!("All forum_project_news hooks are served");

@@ -3,13 +3,31 @@ use std::process::exit;
 use log::{error, info};
 use reqwest::get;
 use scraper::{ElementRef, Html, Selector};
+use crate::embed::EmbedData;
 
 use crate::json::recent::{format_selector, Channel};
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum ScrapeType {
 	Forum,
 	Main,
+	Changelog,
+}
+
+impl ToString for ScrapeType {
+	fn to_string(&self) -> String {
+		match self {
+			ScrapeType::Forum => {
+				"Forum news".to_owned()
+			}
+			ScrapeType::Main => {
+				"News".to_owned()
+			}
+			ScrapeType::Changelog => {
+				"Changelog".to_owned()
+			}
+		}
+	}
 }
 
 pub enum RecentHtmlTarget {
@@ -32,7 +50,7 @@ pub async fn request_html(url: &str) -> Option<Html> {
 	None
 }
 
-pub fn fetch_failed() -> Option<String> {
+pub fn fetch_failed() -> Option<EmbedData> {
 	println!("{} Fetch failed", chrono::Local::now());
 	error!("{} Fetch failed", chrono::Local::now());
 	None
@@ -44,7 +62,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: S
 	let mut pin: Selector;
 
 	match selection {
-		ScrapeType::Main => {
+		ScrapeType::Main | ScrapeType::Changelog => {
 			loop {
 				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
 				if html.select(&pin).next().is_some() {
@@ -79,7 +97,7 @@ pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: S
 
 pub fn format_result(top_url: ElementRef, selection: ScrapeType) -> String {
 	return match selection {
-		ScrapeType::Main => {
+		ScrapeType::Main | ScrapeType::Changelog => {
 			format!("https://warthunder.com{}", top_url.value().attr("href").unwrap())
 		}
 		ScrapeType::Forum => {
