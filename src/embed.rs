@@ -24,9 +24,9 @@ impl EmbedData {
 		Self {
 			scrape_type: ScrapeType::Main,
 			title: "This is a test message".to_owned(),
-			url: "".to_owned(),
-			img_url: "".to_owned(),
-			preview_text: "".to_owned()
+			url: "https://github.com/Warthunder-Open-Source-Foundation/wt_event_handler".to_owned(),
+			img_url: "https://avatars.githubusercontent.com/u/97326911?s=200&v=4".to_owned(),
+			preview_text: "Test preview text".to_owned()
 		}
 	}
 }

@@ -1,7 +1,6 @@
 use std::fs;
 
 use log::{error, warn};
-use serenity::builder::CreateEmbedFooter;
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
@@ -152,8 +151,6 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		}
 		Ok(hook) => hook,
 	};
-
-	eprintln!("&content = {:?}", &content);
 
 	let embed = Embed::fake(|e| {
 		e.title(content.scrape_type.to_string())

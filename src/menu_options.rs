@@ -10,8 +10,7 @@ use log4rs::append::file::FileAppender;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
-use log::{error, LevelFilter};
-use serenity::http::Http;
+use log::{LevelFilter};
 
 use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
@@ -87,9 +86,6 @@ pub async fn add_webhook() {
 }
 
 pub async fn test_hook() {
-	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
 	let mut line = String::new();
 
 	println!("Choose the webhook order in the array to test\n");
