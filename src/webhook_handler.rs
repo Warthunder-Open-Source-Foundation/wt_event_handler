@@ -1,7 +1,6 @@
 use std::fs;
 
 use log::{error, warn};
-use serenity::builder::CreateEmbedFooter;
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
