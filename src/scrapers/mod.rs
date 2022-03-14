@@ -1,2 +1,2 @@
 pub mod scraper_resources;
-pub mod main_news;
+pub mod html_processing;

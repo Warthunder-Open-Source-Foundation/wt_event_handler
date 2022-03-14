@@ -5,7 +5,7 @@ use std::time::Duration;
 use log::info;
 
 use crate::json::recent::Recent;
-use crate::scrapers::main_news::html_processor;
+use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
