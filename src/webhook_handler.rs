@@ -153,8 +153,6 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		Ok(hook) => hook,
 	};
 
-	eprintln!("&content = {:?}", &content);
-
 	let embed = Embed::fake(|e| {
 		e.title(content.scrape_type.to_string())
 			.color(Color::from_rgb(116, 16, 210))
