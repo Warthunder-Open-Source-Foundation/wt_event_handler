@@ -72,11 +72,19 @@ mod tests {
 	use crate::scrapers::scraper_resources::resources::{request_html, ScrapeType};
 
 	#[tokio::test]
-	async fn test_embed_data() {
+	async fn test_embed_data_main() {
 		// let url = "https://warthunder.com/en/news/7598-development-lav-ad-revolving-firepower-en";
 		let url = "https://warthunder.com/en/news/7594-development-pre-order-ztz96a-prototype-china-en";
 		let html = request_html(url).await.unwrap();
 
 		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Main, url.to_owned()));
+	}
+
+	#[tokio::test]
+	async fn test_embed_data_changelog() {
+		let url = "https://warthunder.com/en/game/changelog/current/1352";
+		let html = request_html(url).await.unwrap();
+
+		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Changelog, url.to_owned()));
 	}
 }
