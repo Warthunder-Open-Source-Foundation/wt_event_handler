@@ -30,7 +30,7 @@ pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> 
 			return fetch_failed();
 		}
 
-		return Some(scrape_meta(&post_html, scrape_type, post_url));
+		return Some(scrape_meta(&post_html, scrape_type, &post_url));
 	}
 
 	fetch_failed()
