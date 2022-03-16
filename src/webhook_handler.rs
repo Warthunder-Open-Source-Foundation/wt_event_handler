@@ -146,7 +146,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		Err(why) => {
 			println!("{}", why);
 			error!("{}", why);
-			panic!("")
+			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
 	};
@@ -167,6 +167,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
+	print_log(&format!("Posted webhook for {}", webhook_auth.hooks[pos].name));
 }
 
 fn print_log(input: &str) {
