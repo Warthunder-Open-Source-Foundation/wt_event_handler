@@ -105,7 +105,6 @@ fn filter_forum(content: &str, hook: &Hooks) -> bool {
 		}
 		FilterType::Blacklist => {
 			let blacklist = &hook.forum_keywords;
-			println!("{:?}", blacklist);
 			if blacklist.is_empty() {
 				print_log(&format!("URL {} matched empty blacklist for forum", content));
 				return true;
