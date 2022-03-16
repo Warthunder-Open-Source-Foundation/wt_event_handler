@@ -7,6 +7,7 @@ use log::info;
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
+use crate::webhook_handler::print_log;
 
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	let mut recent_data = Recent::read_latest();
@@ -36,8 +37,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				if write_files {
 					recent_data.append_latest_warthunder_changelog(&wt_changelog.url);
 				}
-				println!("All wt changelog hooks are served");
-				info!("All wt changelog hooks are served");
+				print_log("ll wt changelog hooks are served", 1);
 				if hooks && write_files {
 					continue;
 				}
