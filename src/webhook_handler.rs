@@ -179,7 +179,7 @@ pub fn print_log(input: &str, log_level: u8) {
 		1 => {
 			warn!("{}", input);
 		}
-		0 | _ => {
+		 _ => {
 			error!("{}", input);
 		}
 	}

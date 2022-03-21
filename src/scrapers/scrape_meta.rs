@@ -1,7 +1,4 @@
-use std::thread::current;
-use reqwest::get;
 use scraper::{Html, Selector};
-use serenity::futures::StreamExt;
 
 use crate::embed::EmbedData;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -41,6 +38,9 @@ fn scrape_main(html: &Html) -> (String, String, String) {
 }
 
 fn sanitize_html(html: &str) -> String {
+	static SPECIAL_DELIM: char = '🦆'; // Quack quack :D
+
+
 	let urls = {
 		// Splits all parts of the HTML into its a elements
 		let left: Vec<&str> = html.split(r#"href=""#).collect();
@@ -69,8 +69,6 @@ fn sanitize_html(html: &str) -> String {
 		}
 		finished_urls
 	};
-
-	static SPECIAL_DELIM: char = '🦆'; // Quack quack :D
 
 	let mut in_escape = false;
 	let mut constructed = "".to_owned();
