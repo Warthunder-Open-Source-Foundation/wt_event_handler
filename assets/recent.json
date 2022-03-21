@@ -1,18 +1,22 @@
 {
   "meta": {
-    "timestamp": 1647271219
+    "timestamp": 1647899105
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-    "recent_url": []
+    "recent_url": [
+      "https://warthunder.com/en/news/7612-development-dagor-engine-6-5-new-graphic-features-en"
+    ]
   },
   "warthunder_changelog": {
     "domain": "https://warthunder.com/en/game/changelog/",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-    "recent_url": []
+    "recent_url": [
+      "https://warthunder.com/en/game/changelog/current/1353"
+    ]
   },
   "forums_updates_information": {
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",

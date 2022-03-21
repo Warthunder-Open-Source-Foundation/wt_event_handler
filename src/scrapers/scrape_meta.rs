@@ -32,8 +32,32 @@ fn scrape_main(html: &Html) -> (String, String, String) {
 		{
 			scrape_news_image(html)
 		},
-		html.select(&Selector::parse("p").unwrap()).next().unwrap().inner_html()
+		sanitize_html(&html.select(&Selector::parse("p").unwrap()).next().unwrap().inner_html())
 	)
+}
+
+fn sanitize_html(html: &str) -> String {
+	let mut in_escape = false;
+	let mut constructed = "".to_owned();
+	for char in html.chars() {
+		match char {
+			'>' => {
+				in_escape = false;
+				continue;
+			}
+			'<' => {
+				in_escape = true;
+				continue;
+			}
+			_ => {}
+		};
+
+		if !in_escape {
+			constructed.push(char)
+		}
+	}
+
+	constructed
 }
 
 fn scrape_changelog(html: &Html) -> (String, String, String) {
@@ -68,7 +92,7 @@ fn scrape_news_image(html: &Html) -> String {
 
 #[cfg(test)]
 mod tests {
-	use crate::scrapers::scrape_meta::scrape_meta;
+	use crate::scrapers::scrape_meta::{sanitize_html, scrape_meta};
 	use crate::scrapers::scraper_resources::resources::{request_html, ScrapeType};
 
 	#[tokio::test]
@@ -86,5 +110,13 @@ mod tests {
 		let html = request_html(url).await.unwrap();
 
 		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Changelog, url.to_owned()));
+	}
+
+	#[test]
+	fn test_html_sanitization() {
+		static RAW: &str = r#"Together with <a href="https://warthunder.com/en/news/7583-development-dagor-engine-6-5-zoom-in-enhance-it-en">texture upscaling</a> and <a href="https://warthunder.com/en/news/7585-development-dagor-engine-6-5-new-surface-rendering-en">new surface rendering options</a>, the new version of the War Thunder graphic engine brings numerous minor features and improvements. Meet new visuals coming soon in the “Wind of Change” update!"#;
+		static ESCAPED: &str = r#"Together with texture upscaling and new surface rendering options, the new version of the War Thunder graphic engine brings numerous minor features and improvements. Meet new visuals coming soon in the “Wind of Change” update!"#;
+
+		assert_eq!(sanitize_html(RAW), ESCAPED);
 	}
 }
