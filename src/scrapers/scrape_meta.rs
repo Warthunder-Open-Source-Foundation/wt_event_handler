@@ -1,4 +1,7 @@
+use std::thread::current;
+use reqwest::get;
 use scraper::{Html, Selector};
+use serenity::futures::StreamExt;
 
 use crate::embed::EmbedData;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -38,24 +41,63 @@ fn scrape_main(html: &Html) -> (String, String, String) {
 }
 
 fn sanitize_html(html: &str) -> String {
+	let urls = {
+		// Splits all parts of the HTML into its a elements
+		let left: Vec<&str> = html.split(r#"href=""#).collect();
+
+		let mut finished_urls: Vec<(String, String)> = Vec::new();
+
+		// iterate all items in the split, and extract their corresponding items
+		for item in left {
+			// abort current iter if it doesnt contain link
+			if !item.contains("https") {
+				continue;
+			}
+
+			// url without the link, such as `https://flareflo.dev` and `>text content </a>`
+			let url_split: Vec<&str> = item.split(r#"">"#).collect();
+
+			// Only should have link and alias
+			if url_split.len() != 2 {
+				continue;
+			}
+			let url = url_split[0];
+
+			// breaks apart the reminder such as inputs like `>bla bla bla</a>` so that only bla bla remains
+			let text = url_split[1].split("</a>").collect::<Vec<&str>>()[0];
+			finished_urls.push((text.to_owned(), url.to_owned()));
+		}
+		finished_urls
+	};
+
+	static SPECIAL_DELIM: char = '🦆'; // Quack quack :D
+
 	let mut in_escape = false;
 	let mut constructed = "".to_owned();
-	for char in html.chars() {
+
+	for (i, char) in html.chars().enumerate() {
 		match char {
 			'>' => {
 				in_escape = false;
-				continue;
 			}
 			'<' => {
+				if html.chars().collect::<Vec<char>>().get(i + 1) == Some(&'a') {
+					constructed.push(SPECIAL_DELIM);
+					constructed.push(' ');
+				}
 				in_escape = true;
-				continue;
 			}
-			_ => {}
+			_ => {
+				if !in_escape {
+					constructed.push(char);
+				}
+			}
 		};
+	}
 
-		if !in_escape {
-			constructed.push(char)
-		}
+	for url in urls {
+		constructed = constructed.replace(&url.0, "");
+		constructed = constructed.replacen(SPECIAL_DELIM, &format!("[{}]({})", url.0, url.1), 1);
 	}
 
 	constructed
@@ -100,7 +142,7 @@ mod tests {
 		let url = "https://warthunder.com/en/news/7594-development-pre-order-ztz96a-prototype-china-en";
 		let html = request_html(url).await.unwrap();
 
-		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Main, url.to_owned()));
+		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Main, &url.to_owned()));
 	}
 
 	#[tokio::test]
@@ -108,13 +150,13 @@ mod tests {
 		let url = "https://warthunder.com/en/game/changelog/current/1352";
 		let html = request_html(url).await.unwrap();
 
-		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Changelog, url.to_owned()));
+		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Changelog, &url.to_owned()));
 	}
 
 	#[test]
 	fn test_html_sanitization() {
 		static RAW: &str = r#"Together with <a href="https://warthunder.com/en/news/7583-development-dagor-engine-6-5-zoom-in-enhance-it-en">texture upscaling</a> and <a href="https://warthunder.com/en/news/7585-development-dagor-engine-6-5-new-surface-rendering-en">new surface rendering options</a>, the new version of the War Thunder graphic engine brings numerous minor features and improvements. Meet new visuals coming soon in the “Wind of Change” update!"#;
-		static ESCAPED: &str = r#"Together with texture upscaling and new surface rendering options, the new version of the War Thunder graphic engine brings numerous minor features and improvements. Meet new visuals coming soon in the “Wind of Change” update!"#;
+		static ESCAPED: &str = r#"Together with [texture upscaling](https://warthunder.com/en/news/7583-development-dagor-engine-6-5-zoom-in-enhance-it-en)  and [new surface rendering options](https://warthunder.com/en/news/7585-development-dagor-engine-6-5-new-surface-rendering-en) , the new version of the War Thunder graphic engine brings numerous minor features and improvements. Meet new visuals coming soon in the “Wind of Change” update!"#;
 
 		assert_eq!(sanitize_html(RAW), ESCAPED);
 	}
