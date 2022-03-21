@@ -1,8 +1,9 @@
 use scraper::{Html, Selector};
+
 use crate::embed::EmbedData;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: String) -> EmbedData {
+pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> EmbedData {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
 			scrape_forum(html)
@@ -15,7 +16,7 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: String) -> Em
 		}
 	};
 
-	EmbedData::new(&title, &post_url, &img_url, &preview_text, scrape_type)
+	EmbedData::new(&title, post_url, &img_url, &preview_text, scrape_type)
 }
 
 fn scrape_forum(html: &Html) -> (String, String, String) {
@@ -74,11 +75,9 @@ fn scrape_news_image(html: &Html) -> String {
 	let mut actual = "".to_owned();
 	for item in html.select(&Selector::parse("meta, img").unwrap()) {
 		if let Some(proper_image) = item.value().attr("content") {
-			if proper_image.contains("https://warthunder.com/upload/image//!") {
-				if item.value().attr("name") != Some("twitter:image") {
-					actual = proper_image.to_owned();
-					break;
-				}
+			if proper_image.contains("https://warthunder.com/upload/image//!") && item.value().attr("name") != Some("twitter:image") {
+				actual = proper_image.to_owned();
+				break;
 			}
 		}
 

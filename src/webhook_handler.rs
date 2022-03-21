@@ -1,11 +1,11 @@
 use std::fs;
 
-use log::{error, warn};
+use log::{error, info, warn};
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
-use crate::embed::EmbedData;
 
+use crate::embed::EmbedData;
 use crate::json::recent::Channel;
 use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -53,37 +53,37 @@ fn filter_main(content: &str, hook: &Hooks) -> bool {
 		FilterType::Default => {
 			for keyword in DEFAULT_KEYWORDS {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with default main keyword {}", content, keyword));
+					print_log(&format!("URL {} matched with default main keyword {}", content, keyword), 1);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in main default list", content));
+			print_log(&format!("URL {} did not match any whitelist in main default list", content), 1);
 			false
 		}
 		FilterType::Blacklist => {
 			let blacklist = &hook.main_keywords;
 			if blacklist.is_empty() {
-				print_log(&format!("URL {} matched empty blacklist for main", content));
+				print_log(&format!("URL {} matched empty blacklist for main", content), 1);
 				return true;
 			}
 			for keyword in blacklist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} found in blacklist for main", content));
+					print_log(&format!("URL {} found in blacklist for main", content), 1);
 					return false;
 				}
 			}
-			print_log(&format!("{} is not in main blacklist", content));
+			print_log(&format!("{} is not in main blacklist", content), 1);
 			true
 		}
 		FilterType::Whitelist => {
 			let whitelist = &hook.main_keywords;
 			for keyword in whitelist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with whitelisted keyword {} from main list", content, keyword));
+					print_log(&format!("URL {} matched with whitelisted keyword {} from main list", content, keyword), 1);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in main list", content));
+			print_log(&format!("URL {} did not match any whitelist in main list", content), 1);
 			false
 		}
 	}
@@ -96,38 +96,37 @@ fn filter_forum(content: &str, hook: &Hooks) -> bool {
 		FilterType::Default => {
 			for keyword in DEFAULT_KEYWORDS {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with default forum keyword {}", content, keyword));
+					print_log(&format!("URL {} matched with default forum keyword {}", content, keyword), 1);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in forum default list", content));
+			print_log(&format!("URL {} did not match any whitelist in forum default list", content), 1);
 			false
 		}
 		FilterType::Blacklist => {
 			let blacklist = &hook.forum_keywords;
-			println!("{:?}", blacklist);
 			if blacklist.is_empty() {
-				print_log(&format!("URL {} matched empty blacklist for forum", content));
+				print_log(&format!("URL {} matched empty blacklist for forum", content), 1);
 				return true;
 			}
 			for keyword in blacklist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} found in blacklist for forum", content));
+					print_log(&format!("URL {} found in blacklist for forum", content), 1);
 					return false;
 				}
 			}
-			print_log(&format!("{} is not in forum blacklist", content));
+			print_log(&format!("{} is not in forum blacklist", content), 1);
 			true
 		}
 		FilterType::Whitelist => {
 			let whitelist = &hook.forum_keywords;
 			for keyword in whitelist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with whitelisted keyword {} from forum list", content, keyword));
+					print_log(&format!("URL {} matched with whitelisted keyword {} from forum list", content, keyword), 1);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in forum list", content));
+			print_log(&format!("URL {} did not match any whitelist in forum list", content), 1);
 			false
 		}
 	}
@@ -147,7 +146,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		Err(why) => {
 			println!("{}", why);
 			error!("{}", why);
-			panic!("")
+			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
 	};
@@ -158,7 +157,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 			.field(&content.title, &content.preview_text, false)
 			.image(&content.img_url)
 			.url(&content.url)
-			.footer(|f|{
+			.footer(|f| {
 				f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
 			})
 	});
@@ -168,11 +167,22 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
+	print_log(&format!("Posted webhook for {}", webhook_auth.hooks[pos].name), 1);
 }
 
-fn print_log(input: &str) {
-	println!("{}", input);
-	warn!("{}", input);
+pub fn print_log(input: &str, log_level: u8) {
+	println!("{} {}", chrono::Local::now().naive_local(),input);
+	match log_level {
+		2 => {
+			info!("{}", input);
+		}
+		1 => {
+			warn!("{}", input);
+		}
+		0 | _ => {
+			error!("{}", input);
+		}
+	}
 }
 
 // Tests  -----------------------------------------------------------------------

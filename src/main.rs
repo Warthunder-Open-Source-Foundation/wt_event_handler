@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 use std::io;
 use std::process::exit;
 
@@ -72,5 +74,6 @@ async fn main() {
 	println!("Started client");
 	info!("Started client");
 
+	#[allow(clippy::semicolon_if_nothing_returned)]
 	fetch_loop(hooks, write_files).await; // For the love of god clippy
 }

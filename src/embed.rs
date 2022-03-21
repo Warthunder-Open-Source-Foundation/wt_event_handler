@@ -11,7 +11,7 @@ pub struct EmbedData {
 
 impl EmbedData {
 	pub fn new(title: &str, url: &str, img_url: &str, preview_text: &str, scrape_type: ScrapeType) -> Self {
-		let sanitized_img_url = img_url.replace(' ', "%20").to_owned();
+		let sanitized_img_url = img_url.replace(' ', "%20");
 		Self {
 			scrape_type,
 			title: title.to_owned(),
