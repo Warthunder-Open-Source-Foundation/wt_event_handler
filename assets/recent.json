@@ -1,6 +1,6 @@
 {
   "meta": {
-    "timestamp": 1647899105
+    "timestamp": 1647902248
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
@@ -22,12 +22,16 @@
     "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": []
+    "recent_url": [
+      "https://forum.warthunder.com/index.php?/topic/549123-update-2130180/"
+    ]
   },
   "forums_project_news": {
     "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": []
+    "recent_url": [
+      "https://forum.warthunder.com/index.php?/topic/549573-war-thunder-screenshot-competition-march-week-3-winners/"
+    ]
   }
 }
