@@ -155,6 +155,8 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		e.title(content.scrape_type.to_string())
 			.color(Color::from_rgb(116, 16, 210))
 			.field(&content.title, &content.preview_text, false)
+			.description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
+			.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
 			.image(&content.img_url)
 			.url(&content.url)
 			.footer(|f| {

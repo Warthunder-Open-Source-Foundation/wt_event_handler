@@ -6,5 +6,7 @@ ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN git clone https://github.com/Warthunder-Open-Source-Foundation/wt_event_handler.git
 WORKDIR ./wt_event_handler
 RUN cargo build --release
+RUN mv target/debug/wt_event_handler wt_event_handler
+RUN rm -rf target
 
 COPY discord_token.json ./assets
