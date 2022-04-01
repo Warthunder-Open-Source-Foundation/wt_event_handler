@@ -21,8 +21,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				if write_files {
 					recent_data.append_latest_warthunder_news(&wt_news_content.url);
 				}
-				println!("All wt news hooks are served");
-				info!("All wt news hooks are served");
+				print_log("All wt news hooks are served", 2);
 				if hooks && write_files {
 					continue;
 				}
@@ -37,7 +36,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				if write_files {
 					recent_data.append_latest_warthunder_changelog(&wt_changelog.url);
 				}
-				print_log("ll wt changelog hooks are served", 1);
+				print_log("All wt changelog hooks are served", 1);
 				if hooks && write_files {
 					continue;
 				}
@@ -52,8 +51,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				if write_files {
 					recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information.url);
 				}
-				println!("All forum_updates_information hooks are served");
-				info!("All forum_updates_information hooks are served");
+				print_log("All forum_updates_information hooks are served", 2);
 				if hooks && write_files {
 					continue;
 				}
