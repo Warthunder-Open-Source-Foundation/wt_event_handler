@@ -15,6 +15,7 @@ pub struct Recent {
 	pub warthunder_changelog: Channel,
 	pub forums_updates_information: Channel,
 	pub forums_project_news: Channel,
+	pub forums_notice_board: Channel,
 }
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
@@ -62,6 +63,11 @@ impl Recent {
 	}
 	pub fn append_latest_warthunder_forums_project_news(&mut self, value: &str) {
 		self.forums_project_news.recent_url.push(value.to_owned());
+		self.update_timestamp();
+		self.write_latest(value);
+	}
+	pub fn append_latest_forums_notice_board(&mut self, value: &str) {
+		self.forums_notice_board.recent_url.push(value.to_owned());
 		self.update_timestamp();
 		self.write_latest(value);
 	}

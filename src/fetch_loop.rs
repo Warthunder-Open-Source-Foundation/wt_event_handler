@@ -66,8 +66,23 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				if write_files {
 					recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news.url);
 				}
-				println!("All forum_project_news hooks are served");
-				info!("All forum_project_news hooks are served");
+				print_log("All forum_project_news hooks are served", 2);
+				if hooks && write_files {
+					continue;
+				}
+			}
+		}
+
+		if let Some(forums_notice_board) = html_processor(&recent_data.forums_notice_board, ScrapeType::Forum).await {
+			if recent_data.forums_notice_board.is_outdated(&forums_notice_board.url) {
+				if hooks {
+					recent_data.forums_notice_board.handle_webhook(forums_notice_board.clone(), true, ScrapeType::Forum).await;
+				}
+				if write_files {
+					recent_data.append_latest_forums_notice_board(&forums_notice_board.url);
+				}
+				print_log("All forums_notice_board hooks are served", 2);
+
 				if hooks && write_files {
 					continue;
 				}
