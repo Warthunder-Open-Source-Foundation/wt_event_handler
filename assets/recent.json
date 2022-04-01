@@ -1,6 +1,6 @@
 {
   "meta": {
-    "timestamp": 1648796436
+    "timestamp": 1648796678
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
@@ -39,8 +39,6 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/547940-suggestions-passed-to-the-developers-february-2022/",
-      "https://forum.warthunder.com/index.php?/topic/547940-suggestions-passed-to-the-developers-february-2022/",
       "https://forum.warthunder.com/index.php?/topic/547940-suggestions-passed-to-the-developers-february-2022/"
     ]
   }
