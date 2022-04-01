@@ -1,8 +1,8 @@
 use std::io;
 use std::process::exit;
 
-use log::error;
 use serenity::http::Http;
+use crate::print_log;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct WebhookAuth {
@@ -148,9 +148,8 @@ async fn send_test_hook(hook: &Hooks) {
 
 	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
-			println!("{}", why);
-			error!("{}", why);
-			panic!("")
+			print_log(&format!("{why}"), 0);
+			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
 	};
@@ -159,7 +158,5 @@ async fn send_test_hook(hook: &Hooks) {
 	webhook.execute(my_http_client, false, |w| {
 		w.content(&format!("Webhook {} was successfully created", &hook.name));
 		w
-	})
-		.await
-		.unwrap();
+	}).await.unwrap();
 }

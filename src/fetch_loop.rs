@@ -2,8 +2,6 @@ use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
 
-use log::info;
-
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -96,8 +94,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 
 		// Cool down to prevent rate limiting and excessive performance impact
 		let wait = Duration::from_secs(60);
-		println!("{} Waiting for 60 seconds", chrono::Local::now());
-		info!("{} Waiting for 60 seconds", chrono::Local::now());
+		print_log("Waiting for 60 seconds", 2);
 		sleep(wait);
 	}
 }

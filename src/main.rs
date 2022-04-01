@@ -3,10 +3,9 @@
 use std::io;
 use std::process::exit;
 
-use log::info;
-
 use crate::fetch_loop::fetch_loop;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
+use crate::webhook_handler::print_log;
 
 mod webhook_handler;
 mod scrapers;
@@ -71,8 +70,7 @@ async fn main() {
 	}
 
 	init_log();
-	println!("Started client");
-	info!("Started client");
+	print_log("Started client", 2);
 
 	#[allow(clippy::semicolon_if_nothing_returned)]
 	fetch_loop(hooks, write_files).await; // For the love of god clippy
