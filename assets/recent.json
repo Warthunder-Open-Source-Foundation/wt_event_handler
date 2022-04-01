@@ -1,13 +1,13 @@
 {
   "meta": {
-    "timestamp": 1647943678
+    "timestamp": 1648797157
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/news/7612-development-dagor-engine-6-5-new-graphic-features-en"
+      "https://warthunder.com/en/news/7630-wiki-video-wiki-review-merkava-mk-2d-en"
     ]
   },
   "warthunder_changelog": {
@@ -15,7 +15,7 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1353"
+      "https://warthunder.com/en/game/changelog/current/1356"
     ]
   },
   "forums_updates_information": {
@@ -23,7 +23,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/549123-update-2130180/"
+      "https://forum.warthunder.com/index.php?/topic/550407-update-215029-215028--xbox/"
     ]
   },
   "forums_project_news": {
@@ -31,7 +31,15 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/549573-war-thunder-screenshot-competition-march-week-3-winners/"
+      "https://forum.warthunder.com/index.php?/topic/550529-wiki-video-wiki-review-merkava-mk2d/"
+    ]
+  },
+  "forums_notice_board": {
+    "domain": "https://forum.warthunder.com/index.php?/forum/1500-notice-board-announcements-information/",
+    "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
+    "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
+    "recent_url": [
+      "https://forum.warthunder.com/index.php?/topic/547940-suggestions-passed-to-the-developers-february-2022/"
     ]
   }
 }

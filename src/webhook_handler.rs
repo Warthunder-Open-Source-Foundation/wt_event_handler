@@ -11,11 +11,11 @@ use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::TOKEN_PATH;
 
-const DEFAULT_KEYWORDS: [&str; 28] = [
+const DEFAULT_KEYWORDS: [&str; 30] = [
 	"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 	"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
 	"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds",
-	"issues", "technical", "servers", "christmas"
+	"issues", "technical", "servers", "christmas", "market", "camouflages"
 ];
 
 impl Channel {
@@ -144,8 +144,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 
 	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
 		Err(why) => {
-			println!("{}", why);
-			error!("{}", why);
+			print_log(&format!("{why}"), 0);
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
