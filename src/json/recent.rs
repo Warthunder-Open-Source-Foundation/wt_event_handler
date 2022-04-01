@@ -2,11 +2,11 @@ use std::convert::TryFrom;
 use std::fs;
 
 use chrono::Local;
-use log::{info, warn};
 use scraper::Selector;
 
 use crate::RECENT_PATH;
 use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
+use crate::webhook_handler::print_log;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
@@ -34,12 +34,10 @@ pub struct Channel {
 impl Channel {
 	pub fn is_outdated(&self, value: &str) -> bool {
 		if self.recent_url.contains(&value.to_owned()) {
-			println!("{} Content was recently fetched and is not new", chrono::Local::now());
-			info!("Content was recently fetched and is not new");
+			print_log("Content was recently fetched and is not new", 2);
 			false
 		} else {
-			println!("{} New post found, hooking now", chrono::Local::now());
-			warn!("New post found, hooking now");
+			print_log("New post found, hooking now", 1);
 			true
 		}
 	}
@@ -82,8 +80,7 @@ impl Recent {
 	fn write_latest(&self, value: &str) {
 		let write = serde_json::to_string_pretty(self).unwrap();
 		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
-		println!("{} Written {} to file", chrono::Local::now(), value);
-		warn!("Written {} to file", value);
+		print_log(&format!("Written {} to file", value), 1);
 	}
 }
 
