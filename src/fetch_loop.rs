@@ -74,17 +74,17 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					continue;
 				}
 			}
-
-			//Aborts program after running without hooks
-			if !hooks || !write_files {
-				exit(0);
-			}
-
-			// Cool down to prevent rate limiting and excessive performance impact
-			let wait = Duration::from_secs(60);
-			println!("{} Waiting for 60 seconds", chrono::Local::now());
-			info!("{} Waiting for 60 seconds", chrono::Local::now());
-			sleep(wait);
 		}
+
+		//Aborts program after running without hooks
+		if !hooks || !write_files {
+			exit(0);
+		}
+
+		// Cool down to prevent rate limiting and excessive performance impact
+		let wait = Duration::from_secs(60);
+		println!("{} Waiting for 60 seconds", chrono::Local::now());
+		info!("{} Waiting for 60 seconds", chrono::Local::now());
+		sleep(wait);
 	}
 }
