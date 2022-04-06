@@ -144,8 +144,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 
 	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
 		Err(why) => {
-			println!("{}", why);
-			error!("{}", why);
+			print_log(&format!("{why}"), 0);
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
