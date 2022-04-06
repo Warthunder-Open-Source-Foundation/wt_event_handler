@@ -3,6 +3,8 @@ use scraper::{Html, Selector};
 use crate::embed::EmbedData;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
+const ZERO_WIDTH_PLACEHOLDER: &str = "​";
+
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> EmbedData {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
@@ -21,20 +23,29 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Embe
 
 fn scrape_forum(html: &Html) -> (String, String, String) {
 	(
-		html.select(&Selector::parse("head>meta:nth-child(5)").unwrap()).next().unwrap().value().attr("content").unwrap_or("").to_string(),
+		html.select(&Selector::parse("head>meta:nth-child(5)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
 		"".to_string(),
-		html.select(&Selector::parse("head>meta:nth-child(8)").unwrap()).next().unwrap().value().attr("content").unwrap_or("").to_string()
+		html.select(&Selector::parse("head>meta:nth-child(8)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string()
 	)
 }
 
 fn scrape_main(html: &Html) -> (String, String, String) {
 	(
-		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or("").to_string(),
-		{
-			scrape_news_image(html)
-		},
-		sanitize_html(&html.select(&Selector::parse("p").unwrap()).next().unwrap().inner_html())
+		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
+		scrape_news_image(html),
+		sanitize_html(&get_next_selector(html, "p"))
 	)
+}
+
+fn get_next_selector(html: &Html, selector: &str) -> String {
+	let selector = Selector::parse(selector).unwrap();
+	let selected = html.select(&selector);
+	for item in selected {
+		if item.inner_html().len() >= 5 {
+			return item.inner_html();
+		}
+	}
+	ZERO_WIDTH_PLACEHOLDER.to_string()
 }
 
 fn sanitize_html(html: &str) -> String {
@@ -103,7 +114,7 @@ fn sanitize_html(html: &str) -> String {
 
 fn scrape_changelog(html: &Html) -> (String, String, String) {
 	(
-		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or("").to_string(),
+		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
 		{
 			scrape_news_image(html)
 		},
@@ -137,7 +148,7 @@ mod tests {
 	#[tokio::test]
 	async fn test_embed_data_main() {
 		// let url = "https://warthunder.com/en/news/7598-development-lav-ad-revolving-firepower-en";
-		let url = "https://warthunder.com/en/news/7594-development-pre-order-ztz96a-prototype-china-en";
+		let url = "https://warthunder.com/en/news/7640-event-the-battle-for-arachis-en";
 		let html = request_html(url).await.unwrap();
 
 		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Main, &url.to_owned()));
