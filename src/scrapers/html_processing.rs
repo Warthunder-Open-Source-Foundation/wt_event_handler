@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::option::Option::Some;
 use crate::embed::EmbedData;
 use crate::error::NewsError;
 

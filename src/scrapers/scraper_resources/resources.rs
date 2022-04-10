@@ -4,7 +4,6 @@ use std::process::exit;
 use log::{info};
 use reqwest::get;
 use scraper::{ElementRef, Html, Selector};
-use crate::embed::EmbedData;
 
 use crate::json::recent::{format_selector, Channel};
 

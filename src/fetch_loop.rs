@@ -1,6 +1,7 @@
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
+use crate::error::error_webhook;
 
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
@@ -26,7 +27,9 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			Err(e) => {}
+			Err(e) => {
+				error_webhook(e).await;
+			}
 		};
 
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
@@ -44,7 +47,9 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			Err(e) => {}
+			Err(e) => {
+				error_webhook(e).await;
+			}
 		};
 
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
@@ -62,7 +67,9 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			Err(e) => {}
+			Err(e) => {
+				error_webhook(e).await;
+			}
 		};
 
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
@@ -80,7 +87,9 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			Err(e) => {}
+			Err(e) => {
+				error_webhook(e).await;
+			}
 		};
 
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
@@ -99,7 +108,9 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			Err(e) => {}
+			Err(e) => {
+				error_webhook(e).await;
+			}
 		};
 
 		//Aborts program after running without hooks

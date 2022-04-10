@@ -1,6 +1,6 @@
 {
   "meta": {
-    "timestamp": 1649626911
+    "timestamp": 1649632689
   },
   "warthunder_news": {
     "domain": "https://warthunder.com/en/news",
@@ -15,7 +15,7 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1361"
+      "https://warthunder.com/en/news/7642-video-the-shooting-range-297-en"
     ]
   },
   "forums_updates_information": {
@@ -23,7 +23,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/551283-update-215135/"
+      "https://warthunder.com/en/news/7642-video-the-shooting-range-297-en"
     ]
   },
   "forums_project_news": {
@@ -31,7 +31,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/551536-video-the-shooting-range-297/"
+      "https://warthunder.com/en/news/7642-video-the-shooting-range-297-en"
     ]
   },
   "forums_notice_board": {
@@ -39,7 +39,8 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/550543-april-fools-2022-suggestions-yeeted-at-the-developers-march-2022/"
+      "https://forum.warthunder.com/index.php?/topic/550543-april-fools-2022-suggestions-yeeted-at-the-developers-march-2022/",
+      "https://warthunder.com/en/news/7642-video-the-shooting-range-297-en"
     ]
   }
 }
