@@ -21,5 +21,10 @@ pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> 
 
 	let post_html = request_html(&post_url).await?;
 
-	return Ok(scrape_meta(&post_html, scrape_type, &post_url)?);
+	let finished = match scrape_meta(&post_html, scrape_type, &post_url) {
+		Ok(ok) => ok,
+		Err() => {}
+	};
+
+	return Ok(finished);
 }

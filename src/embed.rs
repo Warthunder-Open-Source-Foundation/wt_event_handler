@@ -29,4 +29,13 @@ impl EmbedData {
 			preview_text: "Test preview text".to_owned()
 		}
 	}
+	pub fn fail_over(url: &str, scrape_type: ScrapeType) -> Self {
+		Self {
+			scrape_type,
+			title: "Failed to collect embed data".to_string(),
+			url: url.to_string(),
+			img_url: "".to_string(),
+			preview_text: "Failed to collect embed data".to_string()
+		}
+	}
 }
