@@ -1,11 +1,14 @@
 #![allow(clippy::module_name_repetitions)]
 
-use std::io;
+use std::{fs, io};
 use std::process::exit;
+use lazy_static::lazy_static;
 
 use crate::fetch_loop::fetch_loop;
+use crate::json::webhooks::CrashHook;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
 use crate::webhook_handler::print_log;
+use crate::json::webhooks::WebhookAuth;
 
 mod webhook_handler;
 mod scrapers;
@@ -13,9 +16,18 @@ mod json;
 mod menu_options;
 mod fetch_loop;
 mod embed;
+mod error;
 
 const RECENT_PATH: &str = "assets/recent.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
+
+lazy_static! {
+	pub static ref PANIC_INFO: CrashHook = {
+		let raw = fs::read("assets/discord_token.json").unwrap();
+		let json: WebhookAuth = serde_json::from_slice(&raw).unwrap();
+		json.crash_hook[0].clone()
+	};
+}
 
 #[tokio::main]
 async fn main() {

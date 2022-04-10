@@ -1,6 +1,7 @@
+use std::error::Error;
 use std::process::exit;
 
-use log::{error, info};
+use log::{info};
 use reqwest::get;
 use scraper::{ElementRef, Html, Selector};
 use crate::embed::EmbedData;
@@ -35,28 +36,14 @@ pub enum RecentHtmlTarget {
 	Post,
 }
 
-pub async fn request_html(url: &str) -> Option<Html> {
+pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
 	println!("{} Fetching data from {}", chrono::Local::now(), &url);
 	info!("{} Fetching data from {}", chrono::Local::now(), &url);
 
-	let html;
-	if let Ok(raw_html) = get(url).await {
-		if let Ok(text) = raw_html.text().await {
-			html = Html::parse_document(text.as_str());
-			return Some(html);
-		}
-		return None;
-	}
-	None
+	let raw_html = get(url).await?;
+	let text = raw_html.text().await?;
+	Ok(Html::parse_document(text.as_str()))
 }
-
-pub fn fetch_failed() -> Option<EmbedData> {
-	println!("{} Fetch failed", chrono::Local::now());
-	error!("{} Fetch failed", chrono::Local::now());
-	None
-}
-
-
 
 pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
 	let mut pin: Selector;

@@ -1,3 +1,4 @@
+use std::error::Error;
 use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;
@@ -5,36 +6,46 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 const ZERO_WIDTH_PLACEHOLDER: &str = "​";
 
-pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> EmbedData {
+pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, Box<dyn Error>> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
-			scrape_forum(html)
+			scrape_forum(html)?
 		}
 		ScrapeType::Main => {
-			scrape_main(html)
+			scrape_main(html)?
 		}
 		ScrapeType::Changelog => {
-			scrape_changelog(html)
+			scrape_changelog(html)?
 		}
 	};
 
-	EmbedData::new(&title, post_url, &img_url, &preview_text, scrape_type)
+	Ok(EmbedData::new(&title, post_url, &img_url, &preview_text, scrape_type))
 }
 
-fn scrape_forum(html: &Html) -> (String, String, String) {
-	(
+fn scrape_forum(html: &Html) -> Result<(String, String, String), Box<dyn Error>>  {
+	Ok((
 		html.select(&Selector::parse("head>meta:nth-child(5)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
 		"".to_string(),
 		html.select(&Selector::parse("head>meta:nth-child(8)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string()
-	)
+	))
 }
 
-fn scrape_main(html: &Html) -> (String, String, String) {
-	(
+fn scrape_main(html: &Html) -> Result<(String, String, String), Box<dyn Error>> {
+	Ok((
 		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
 		scrape_news_image(html),
 		sanitize_html(&get_next_selector(html, "p"))
-	)
+	))
+}
+
+fn scrape_changelog(html: &Html) -> Result<(String, String, String), Box<dyn Error>>  {
+	Ok((
+		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
+		{
+			scrape_news_image(html)
+		},
+		"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
+	))
 }
 
 fn get_next_selector(html: &Html, selector: &str) -> String {
@@ -110,16 +121,6 @@ fn sanitize_html(html: &str) -> String {
 	}
 
 	constructed
-}
-
-fn scrape_changelog(html: &Html) -> (String, String, String) {
-	(
-		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
-		{
-			scrape_news_image(html)
-		},
-		"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
-	)
 }
 
 fn scrape_news_image(html: &Html) -> String {
