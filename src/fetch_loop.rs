@@ -22,9 +22,6 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 						recent_data.append_latest_warthunder_news(&wt_news_content.url);
 					}
 					print_log("All wt news hooks are served", 2);
-					if hooks && write_files {
-						continue;
-					}
 				}
 			}
 			Err(e) => {
@@ -42,9 +39,6 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 						recent_data.append_latest_warthunder_changelog(&wt_changelog.url);
 					}
 					print_log("All wt changelog hooks are served", 1);
-					if hooks && write_files {
-						continue;
-					}
 				}
 			}
 			Err(e) => {
@@ -62,9 +56,6 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 						recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information.url);
 					}
 					print_log("All forum_updates_information hooks are served", 2);
-					if hooks && write_files {
-						continue;
-					}
 				}
 			}
 			Err(e) => {
@@ -82,9 +73,6 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 						recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news.url);
 					}
 					print_log("All forum_project_news hooks are served", 2);
-					if hooks && write_files {
-						continue;
-					}
 				}
 			}
 			Err(e) => {
@@ -102,10 +90,6 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 						recent_data.append_latest_forums_notice_board(&forums_notice_board.url);
 					}
 					print_log("All forums_notice_board hooks are served", 2);
-
-					if hooks && write_files {
-						continue;
-					}
 				}
 			}
 			Err(e) => {
