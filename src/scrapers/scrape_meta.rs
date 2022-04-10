@@ -1,12 +1,17 @@
 use std::error::Error;
 use scraper::{Html, Selector};
+use serenity::futures::StreamExt;
 
 use crate::embed::EmbedData;
+use crate::error::NewsError;
+use crate::error::NewsError::MetaCannotBeScraped;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 const ZERO_WIDTH_PLACEHOLDER: &str = "​";
 
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, Box<dyn Error>> {
+	let fallback_embed_data = || "a";
+
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
 			scrape_forum(html)?
@@ -23,40 +28,41 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 }
 
 fn scrape_forum(html: &Html) -> Result<(String, String, String), Box<dyn Error>>  {
+	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Forum);
 	Ok((
-		html.select(&Selector::parse("head>meta:nth-child(5)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
+		html.select(&Selector::parse("head>meta:nth-child(5)").map_err(|_|FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
 		"".to_string(),
-		html.select(&Selector::parse("head>meta:nth-child(8)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string()
+		html.select(&Selector::parse("head>meta:nth-child(8)").map_err(|_|FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string()
 	))
 }
 
 fn scrape_main(html: &Html) -> Result<(String, String, String), Box<dyn Error>> {
+	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Main);
 	Ok((
-		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
+		html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|_|FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
 		scrape_news_image(html),
-		sanitize_html(&get_next_selector(html, "p"))
+		sanitize_html(&get_next_selector(html, "p", ScrapeType::Main)?)
 	))
 }
 
 fn scrape_changelog(html: &Html) -> Result<(String, String, String), Box<dyn Error>>  {
+	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Changelog);
 	Ok((
-		html.select(&Selector::parse("head>meta:nth-child(13)").unwrap()).next().unwrap().value().attr("content").unwrap_or(ZERO_WIDTH_PLACEHOLDER).to_string(),
-		{
-			scrape_news_image(html)
-		},
+		html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|_|FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
+		scrape_news_image(html),
 		"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
 	))
 }
 
-fn get_next_selector(html: &Html, selector: &str) -> String {
+fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Result<String, Box<dyn Error>> {
 	let selector = Selector::parse(selector).unwrap();
 	let selected = html.select(&selector);
 	for item in selected {
 		if item.inner_html().len() >= 5 {
-			return item.inner_html();
+			return Ok(item.inner_html());
 		}
 	}
-	ZERO_WIDTH_PLACEHOLDER.to_string()
+	Err(Box::new(NewsError::MetaCannotBeScraped(scape_type)))
 }
 
 fn sanitize_html(html: &str) -> String {

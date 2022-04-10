@@ -4,10 +4,12 @@ use serenity::http::Http;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
 use crate::{PANIC_INFO, print_log};
+use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Debug, Clone)]
 pub enum NewsError {
 	NoUrlOnPost(String),
+	MetaCannotBeScraped(ScrapeType),
 }
 
 impl Display for NewsError {
@@ -15,6 +17,9 @@ impl Display for NewsError {
 		match self {
 			NewsError::NoUrlOnPost(err_message) => {
 				write!(f, "No URL was scraped on target \'{err_message}\'")
+			}
+			NewsError::MetaCannotBeScraped(scrape_type) => {
+				write!(f, "The meta data for \'{scrape_type}\' cannot be collected, falling back to defaults")
 			}
 		}
 	}

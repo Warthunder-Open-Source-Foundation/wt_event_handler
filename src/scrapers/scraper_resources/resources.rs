@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::fmt::{Display, Formatter};
 use std::process::exit;
 
 use log::{info};
@@ -14,17 +15,17 @@ pub enum ScrapeType {
 	Changelog,
 }
 
-impl ToString for ScrapeType {
-	fn to_string(&self) -> String {
+impl Display for ScrapeType {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		match self {
 			ScrapeType::Forum => {
-				"Forum news".to_owned()
+				write!(f, "Forum news")
 			}
 			ScrapeType::Main => {
-				"News".to_owned()
+				write!(f, "News")
 			}
 			ScrapeType::Changelog => {
-				"Changelog".to_owned()
+				write!(f, "Changelog")
 			}
 		}
 	}
