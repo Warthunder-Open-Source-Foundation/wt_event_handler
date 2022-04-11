@@ -1,17 +1,11 @@
 use std::error::Error;
 use scraper::{Html, Selector};
-use serenity::futures::StreamExt;
 
 use crate::embed::EmbedData;
 use crate::error::NewsError;
-use crate::error::NewsError::MetaCannotBeScraped;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-const ZERO_WIDTH_PLACEHOLDER: &str = "​";
-
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, Box<dyn Error>> {
-	let fallback_embed_data = || "a";
-
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
 			scrape_forum(html)?
