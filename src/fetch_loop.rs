@@ -25,7 +25,8 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e).await;
+				error_webhook(e, false).await;
+				exit(1);
 			}
 		};
 
@@ -42,7 +43,8 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e).await;
+				error_webhook(e, false).await;
+				exit(1);
 			}
 		};
 
@@ -59,7 +61,8 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e).await;
+				error_webhook(e, false).await;
+				exit(1);
 			}
 		};
 
@@ -76,7 +79,8 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e).await;
+				error_webhook(e, false).await;
+				exit(1);
 			}
 		};
 
@@ -93,7 +97,8 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e).await;
+				error_webhook(e, false).await;
+				exit(1);
 			}
 		};
 

@@ -24,7 +24,7 @@ pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> 
 	let finished = match scrape_meta(&post_html, scrape_type, &post_url) {
 		Ok(ok) => ok,
 		Err(e) => {
-			error_webhook(e).await;
+			error_webhook(e, true).await;
 			EmbedData::fail_over(&post_url, scrape_type)
 		}
 	};
