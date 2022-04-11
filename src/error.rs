@@ -27,7 +27,7 @@ impl Display for NewsError {
 
 impl Error for NewsError {}
 
-pub async fn error_webhook(error: Box<dyn Error>, can_recover: bool) {
+pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 	let my_http_client = Http::new_with_token(&PANIC_INFO.token);
 
 	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid, &PANIC_INFO.token).await {

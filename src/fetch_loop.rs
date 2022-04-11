@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
@@ -10,6 +11,12 @@ use crate::webhook_handler::print_log;
 
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	let mut recent_data = Recent::read_latest();
+
+	let crash_and_burn =  |e: Box<dyn Error>| async move {
+		print_log(&e.to_string(), 0);
+		error_webhook(&e, false).await;
+		panic!("{}", e);
+	};
 
 	loop {
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
@@ -25,8 +32,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
@@ -43,8 +49,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
@@ -61,8 +66,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
@@ -79,8 +83,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
@@ -97,8 +100,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 

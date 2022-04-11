@@ -1,6 +1,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use std::{fs, io};
+use std::error::Error;
 use std::process::exit;
 use lazy_static::lazy_static;
 
@@ -21,6 +22,16 @@ mod error;
 const RECENT_PATH: &str = "assets/recent.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
 
+pub const HANDLE_RESULT_FN: fn(Result<(), Box<dyn Error>>) = |e: Result<(), Box<dyn Error>>| {
+	match e {
+		Ok(_) => {}
+		Err(e) => {
+			print_log(&e.to_string(), 0);
+			panic!("{}", e);
+		}
+	}
+};
+
 lazy_static! {
 	pub static ref PANIC_INFO: CrashHook = {
 		let raw = fs::read("assets/discord_token.json").unwrap();
@@ -34,7 +45,6 @@ async fn main() {
 	let mut line = String::new();
 	let mut hooks = true;
 	let mut json_verification = true;
-	let mut json_prefetch_required = false;
 	let mut write_files = true;
 
 	println!("Please select a start profile:\n\
@@ -46,25 +56,23 @@ async fn main() {
 	6. Clean and reload recent file\n\
 	7. Test webhook client\n\
 	0. Debug, does not modify local files");
-	io::stdin()
-		.read_line(&mut line)
-		.expect("failed to read from stdin");
+	io::stdin().read_line(&mut line).expect("failed to read from stdin");
 
 	match line.trim() {
 		"0" => { write_files = false }
 		"1" => {}
 		"2" => { json_verification = false; }
 		"3" => { hooks = false; }
-		"4" => { add_webhook().await; }
-		"5" => { remove_webhook(); }
+		"4" => { HANDLE_RESULT_FN(add_webhook().await) }
+		"5" => { HANDLE_RESULT_FN(remove_webhook()) }
 		"6" => {
 			hooks = false;
 			json_verification = false;
-			clean_recent();
+			HANDLE_RESULT_FN(clean_recent());
 		}
 		"7" => {
 			hooks = false;
-			test_hook().await;
+			HANDLE_RESULT_FN(test_hook().await);
 		}
 		_ => {
 			println!("No option specified");
@@ -73,16 +81,22 @@ async fn main() {
 	}
 
 	if json_verification {
-		json_prefetch_required = verify_json();
+		match verify_json() {
+			Ok(result) => {
+				if result {
+					HANDLE_RESULT_FN(clean_recent());
+					print_log("Json prefetched and cleaned successfully", 1);
+				}
+			}
+			Err(e) => {
+				print_log(&e.to_string(), 0);
+				panic!("{}", e);
+			}
+		}
 	}
 
-	if json_prefetch_required {
-		clean_recent();
-		println!("Json prefetched and cleaned successfully");
-	}
-
-	init_log();
-	print_log("Started client", 2);
+	HANDLE_RESULT_FN(init_log());
+	print_log("Started client", 1);
 
 	#[allow(clippy::semicolon_if_nothing_returned)]
 	fetch_loop(hooks, write_files).await; // For the love of god clippy
