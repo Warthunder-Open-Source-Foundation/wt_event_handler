@@ -1,6 +1,6 @@
 use std::error::Error;
 use crate::embed::EmbedData;
-use crate::error::NewsError;
+use crate::error::{error_webhook, NewsError};
 
 use crate::json::recent::{format_selector, Channel};
 use crate::scrapers::scrape_meta::scrape_meta;
@@ -23,7 +23,8 @@ pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> 
 
 	let finished = match scrape_meta(&post_html, scrape_type, &post_url) {
 		Ok(ok) => ok,
-		Err(_) => {
+		Err(e) => {
+			error_webhook(e).await;
 			EmbedData::fail_over(&post_url, scrape_type)
 		}
 	};
