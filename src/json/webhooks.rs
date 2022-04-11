@@ -4,12 +4,21 @@ use std::process::exit;
 use serenity::http::Http;
 use crate::print_log;
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
+	pub crash_hook: Vec<CrashHook>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct CrashHook {
+	pub name: String,
+	pub token: String,
+	pub uid: u64,
+}
+
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Hooks {
 	pub name: String,
 	pub token: String,
@@ -20,7 +29,7 @@ pub struct Hooks {
 	pub forum_keywords: Vec<String>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug, Copy, Clone)]
 pub enum FilterType {
 	Default = 0,
 	Blacklist = 1,
