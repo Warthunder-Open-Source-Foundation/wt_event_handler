@@ -27,7 +27,7 @@ impl Display for NewsError {
 
 impl Error for NewsError {}
 
-pub async fn error_webhook(error: Box<dyn Error>) {
+pub async fn error_webhook(error: Box<dyn Error>, can_recover: bool) {
 	let my_http_client = Http::new_with_token(&PANIC_INFO.token);
 
 	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid, &PANIC_INFO.token).await {
@@ -39,8 +39,13 @@ pub async fn error_webhook(error: Box<dyn Error>) {
 	};
 
 	let embed = Embed::fake(|e| {
-		e.title("News bot error")
-			.field("Error information", error, false)
+		e.title(if can_recover {
+			"A recoverable error occurred"
+		} else {
+			"A non-recoverable error occurred"
+		}
+		)
+			.field("More information", error, false)
 			.description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
 			.color(Color::from_rgb(116, 16, 210))
 			.footer(|f| {
