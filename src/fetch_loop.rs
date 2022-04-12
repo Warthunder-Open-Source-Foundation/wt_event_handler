@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
@@ -10,6 +11,12 @@ use crate::webhook_handler::print_log;
 
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	let mut recent_data = Recent::read_latest();
+
+	let crash_and_burn =  |e: Box<dyn Error>| async move {
+		print_log(&e.to_string(), 0);
+		error_webhook(&e, false).await;
+		panic!("{}", e);
+	};
 
 	loop {
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
@@ -25,12 +32,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
-		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
+		match html_processor(&recent_data.warthunder_changelog, ScrapeType::Main).await {
 			Ok(wt_changelog) => {
 				if recent_data.warthunder_changelog.is_outdated(&wt_changelog.url) {
 					if hooks {
@@ -43,12 +49,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
-		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
+		match html_processor(&recent_data.forums_updates_information, ScrapeType::Forum).await {
 			Ok(forum_news_updates_information) => {
 				if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information.url) {
 					if hooks {
@@ -61,12 +66,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
-		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
+		match html_processor(&recent_data.forums_project_news, ScrapeType::Forum).await {
 			Ok(forum_news_project_news) => {
 				if recent_data.forums_project_news.is_outdated(&forum_news_project_news.url) {
 					if hooks {
@@ -79,12 +83,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
-		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
+		match html_processor(&recent_data.forums_notice_board, ScrapeType::Forum).await {
 			Ok(forums_notice_board) => {
 				if recent_data.forums_notice_board.is_outdated(&forums_notice_board.url) {
 					if hooks {
@@ -97,8 +100,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				error_webhook(e, false).await;
-				exit(1);
+				crash_and_burn(e).await;
 			}
 		};
 
