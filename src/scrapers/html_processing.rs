@@ -16,7 +16,7 @@ pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> 
 
 	let top_url_selector = format_selector(recent_value, &RecentHtmlTarget::Post, post);
 
-	let top_url = html.select(&top_url_selector).next().ok_or_else(|| NewsError::NoUrlOnPost(format!("Failed to get url from {scrape_type:?}")))?;
+	let top_url = html.select(&top_url_selector).next().ok_or_else(|| NewsError::NoUrlOnPost(format!("{scrape_type:?}")))?;
 	let post_url = format_result(top_url, scrape_type);
 
 	let post_html = request_html(&post_url).await?;
