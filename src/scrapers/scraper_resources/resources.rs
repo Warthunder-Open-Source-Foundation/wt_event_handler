@@ -1,9 +1,10 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::process::exit;
+use std::time::Duration;
 
 use log::{info};
-use reqwest::get;
+use reqwest::{Client, get};
 use scraper::{ElementRef, Html, Selector};
 
 use crate::json::recent::{format_selector, Channel};
@@ -40,7 +41,10 @@ pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
 	println!("{} Fetching data from {}", chrono::Local::now(), &url);
 	info!("{} Fetching data from {}", chrono::Local::now(), &url);
 
-	let raw_html = get(url).await?;
+	let client = Client::builder()
+		.timeout(Duration::from_secs(1))
+		.build()?;
+	let raw_html = client.get(url).send().await?;
 	let text = raw_html.text().await?;
 	Ok(Html::parse_document(text.as_str()))
 }

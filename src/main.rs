@@ -1,3 +1,4 @@
+#![feature(if_let_guard)]
 #![allow(clippy::module_name_repetitions)]
 
 use std::{fs, io};
@@ -18,6 +19,7 @@ mod menu_options;
 mod fetch_loop;
 mod embed;
 mod error;
+mod timeout;
 
 const RECENT_PATH: &str = "assets/recent.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
