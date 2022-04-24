@@ -13,8 +13,10 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	let mut recent_data = Recent::read_latest();
 
 	let crash_and_burn =  |e: Box<dyn Error>| async move {
+		if hooks {
+			error_webhook(&e, false).await;
+		}
 		print_log(&e.to_string(), 0);
-		error_webhook(&e, false).await;
 		panic!("{}", e);
 	};
 
