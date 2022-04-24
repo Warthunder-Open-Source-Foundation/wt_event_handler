@@ -137,7 +137,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 			let now = chrono::offset::Utc::now().timestamp();
 			let then = now + (60 * 60);
 			error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, then)).into(), true).await;
-			&timeouts.time_out(source, then);
+			let _ = &timeouts.time_out(source, then);
 		}
 		_ => {
 			crash_and_burn(e).await;
