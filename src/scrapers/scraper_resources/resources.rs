@@ -4,7 +4,7 @@ use std::process::exit;
 use std::time::Duration;
 
 use log::{info};
-use reqwest::{Client, get};
+use reqwest::{Client};
 use scraper::{ElementRef, Html, Selector};
 
 use crate::json::recent::{format_selector, Channel};
