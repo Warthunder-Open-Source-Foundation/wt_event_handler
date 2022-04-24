@@ -2,7 +2,7 @@ use std::error::Error;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
-use crate::error::error_webhook;
+use crate::error::{error_webhook, NewsError};
 
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
@@ -20,6 +20,23 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		panic!("{}", e);
 	};
 
+	let handle_err = |e: Box<dyn Error>, scrape_type: ScrapeType| async move {
+		match () {
+			_ if let Some(reqwest) = e.downcast_ref::<&reqwest::Error>() => {
+				if reqwest.is_timeout() {
+					let now = chrono::offset::Utc::now().timestamp();
+					let then = now + (60 * 60);
+					error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, then)).into(), true).await;
+				} else {
+					crash_and_burn(e).await;
+				}
+			}
+			_ => {
+				crash_and_burn(e).await;
+			}
+		}
+	};
+
 	loop {
 		match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
 			Ok(wt_news_content) => {
@@ -34,7 +51,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				crash_and_burn(e).await;
+				handle_err(e, ScrapeType::Main).await;
 			}
 		};
 
@@ -51,7 +68,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				crash_and_burn(e).await;
+				handle_err(e, ScrapeType::Changelog).await;
 			}
 		};
 
@@ -68,7 +85,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				crash_and_burn(e).await;
+				handle_err(e, ScrapeType::Forum).await;
 			}
 		};
 
@@ -85,7 +102,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				crash_and_burn(e).await;
+				handle_err(e, ScrapeType::Forum).await;
 			}
 		};
 
@@ -102,7 +119,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			Err(e) => {
-				crash_and_burn(e).await;
+				handle_err(e, ScrapeType::Forum).await;
 			}
 		};
 
