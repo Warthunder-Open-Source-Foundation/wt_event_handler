@@ -1,13 +1,13 @@
 {
   "meta": {
-    "timestamp": 1649779853
+    "timestamp": 1650822342
   },
   "warthunder_news": {
-    "domain": "https://warthunder.com/en/news",
+    "domain": "http://httpstat.us/200?sleep=60000",
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/news/7645-decals-new-authentic-decals-available-until-may-12th-en"
+      "https://warthunder.com/en/news/7658-video-the-shooting-range-299-en"
     ]
   },
   "warthunder_changelog": {
@@ -15,7 +15,7 @@
     "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
     "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
     "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1362"
+      "https://warthunder.com/en/game/changelog/current/1365"
     ]
   },
   "forums_updates_information": {
@@ -23,7 +23,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/551601-server-update-11042022/"
+      "https://forum.warthunder.com/index.php?/topic/552517-server-update-23042022/"
     ]
   },
   "forums_project_news": {
@@ -31,7 +31,7 @@
     "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
     "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
     "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/551668-decals-new-authentic-decals-available-until-may-12th/"
+      "https://forum.warthunder.com/index.php?/topic/552576-video-the-shooting-range-299/"
     ]
   },
   "forums_notice_board": {

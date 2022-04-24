@@ -8,7 +8,7 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Debug, Clone)]
 pub enum NewsError {
-	NoUrlOnPost(String),
+	NoUrlOnPost(ScrapeType),
 	MetaCannotBeScraped(ScrapeType),
 	SourceTimeout(ScrapeType, i64),
 }
@@ -16,8 +16,8 @@ pub enum NewsError {
 impl Display for NewsError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		match self {
-			NewsError::NoUrlOnPost(err_message) => {
-				write!(f, "No URL was scraped on target \'{err_message}\'")
+			NewsError::NoUrlOnPost(scrape_type) => {
+				write!(f, "{scrape_type} returned a document, but no URL was found")
 			}
 			NewsError::MetaCannotBeScraped(scrape_type) => {
 				write!(f, "The meta data for \'{scrape_type}\' cannot be collected, falling back to defaults")
