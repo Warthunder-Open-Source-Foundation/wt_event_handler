@@ -132,12 +132,26 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		panic!("{}", e);
 	};
 
+	let time_out = || async {
+		let now = chrono::offset::Utc::now().timestamp();
+		let then = now + (60 * 60);
+		error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, then)).into(), true).await;
+		let _ = &timeouts.time_out(source, then);
+	};
+
 	match () {
 		_ if e.downcast_ref::<reqwest::Error>().is_some() => {
-			let now = chrono::offset::Utc::now().timestamp();
-			let then = now + (60 * 60);
-			error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, then)).into(), true).await;
-			let _ = &timeouts.time_out(source, then);
+			time_out().await;
+		}
+		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
+			match variant {
+				NewsError::NoUrlOnPost(_) => {
+					time_out().await;
+				}
+				_ => {
+					crash_and_burn(e).await;
+				}
+			}
 		}
 		_ => {
 			crash_and_burn(e).await;
