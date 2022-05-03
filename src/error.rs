@@ -10,7 +10,7 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 pub enum NewsError {
 	NoUrlOnPost(ScrapeType),
 	MetaCannotBeScraped(ScrapeType),
-	SourceTimeout(ScrapeType, i64),
+	SourceTimeout(ScrapeType, String, i64),
 }
 
 impl Display for NewsError {
@@ -22,8 +22,8 @@ impl Display for NewsError {
 			NewsError::MetaCannotBeScraped(scrape_type) => {
 				write!(f, "The meta data for \'{scrape_type}\' cannot be collected, falling back to defaults")
 			}
-			NewsError::SourceTimeout(scrape_type, timestamp) => {
-				write!(f, "Source \'{scrape_type}\' has not responded and will not be fetched until <t:{timestamp}>")
+			NewsError::SourceTimeout(scrape_type, msg, timestamp) => {
+				write!(f, "Source \'{scrape_type}\' was timeouted and will not be fetched until <t:{timestamp}>. \nError message: \"{msg}\"")
 			}
 		}
 	}

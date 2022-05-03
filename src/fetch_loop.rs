@@ -2,6 +2,7 @@ use std::error::Error;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
+use reqwest::StatusCode;
 use crate::error::{error_webhook, NewsError};
 
 use crate::json::recent::Recent;
@@ -132,21 +133,50 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		panic!("{}", e);
 	};
 
-	let time_out = || async {
+	let time_out = |msg: String| async move {
 		let now = chrono::offset::Utc::now().timestamp();
 		let then = now + (60 * 60);
-		error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, then)).into(), true).await;
+		error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, msg, then)).into(), true).await;
 		let _ = &timeouts.time_out(source, then);
 	};
 
 	match () {
-		_ if e.downcast_ref::<reqwest::Error>().is_some() => {
-			time_out().await;
+		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
+			let e: &reqwest::Error = e;
+			match () {
+				_ if e.is_builder() => {
+					time_out(format!("reqwest_bad_builder: {e}")).await;
+				}
+				_ if e.is_redirect() => {
+					time_out(format!("reqwest_bad_redirect: {e}")).await;
+				}
+				_ if e.is_status() => {
+					time_out(format!("reqwest_bad_status_{}: {e}", e.status().unwrap_or(StatusCode::IM_A_TEAPOT))).await;
+				}
+				_ if e.is_timeout() => {
+					time_out(format!("reqwest_timeout: {e}")).await;
+				}
+				_ if e.is_request() => {
+					time_out(format!("reqwest_bad_request: {e}")).await;
+				}
+				_ if e.is_connect() => {
+					time_out(format!("reqwest_bad_connect: {e}")).await;
+				}
+				_ if e.is_body() => {
+					time_out(format!("reqwest_bad_body: {e}")).await;
+				}
+				_ if e.is_decode() => {
+					time_out(format!("reqwest_bad_body: {e}")).await;
+				}
+				_ => {
+					time_out(format!("reqwest_everything_bad: {e}")).await;
+				}
+			}
 		}
 		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
 			match variant {
 				NewsError::NoUrlOnPost(_) => {
-					time_out().await;
+					time_out("no_url_on_post".to_owned()).await;
 				}
 				_ => {
 					crash_and_burn(e).await;

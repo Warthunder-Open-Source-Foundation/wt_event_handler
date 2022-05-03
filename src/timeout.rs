@@ -12,7 +12,7 @@ impl Timeout {
 		}
 	}
 	pub fn time_out(&mut self, source: String, until: i64) {
-		self.blocked.insert(source.to_owned(), until);
+		self.blocked.insert(source, until);
 	}
 	pub fn is_timed_out(&self, source: &str) -> bool {
 		return if let Some(time) = self.blocked.get(source) {
