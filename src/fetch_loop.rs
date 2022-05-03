@@ -143,33 +143,35 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;
+			let status =  e.status().unwrap_or(StatusCode::IM_A_TEAPOT);
+			let status_text = format!("status: {status} was returned and initiated");
 			match () {
 				_ if e.is_builder() => {
-					time_out(format!("reqwest_bad_builder: {e}")).await;
+					time_out(format!("{status_text} reqwest_bad_builder: {e}")).await;
 				}
 				_ if e.is_redirect() => {
-					time_out(format!("reqwest_bad_redirect: {e}")).await;
+					time_out(format!("{status_text} reqwest_bad_redirect: {e}")).await;
 				}
 				_ if e.is_status() => {
-					time_out(format!("reqwest_bad_status_{}: {e}", e.status().unwrap_or(StatusCode::IM_A_TEAPOT))).await;
+					time_out(format!("{status_text} reqwest_bad_status_{e}: {e}",)).await;
 				}
 				_ if e.is_timeout() => {
-					time_out(format!("reqwest_timeout: {e}")).await;
+					time_out(format!("{status_text} reqwest_timeout: {e}")).await;
 				}
 				_ if e.is_request() => {
-					time_out(format!("reqwest_bad_request: {e}")).await;
+					time_out(format!("{status_text} reqwest_bad_request: {e}")).await;
 				}
 				_ if e.is_connect() => {
-					time_out(format!("reqwest_bad_connect: {e}")).await;
+					time_out(format!("{status_text} reqwest_bad_connect: {e}")).await;
 				}
 				_ if e.is_body() => {
-					time_out(format!("reqwest_bad_body: {e}")).await;
+					time_out(format!("{status_text} reqwest_bad_body: {e}")).await;
 				}
 				_ if e.is_decode() => {
-					time_out(format!("reqwest_bad_body: {e}")).await;
+					time_out(format!("{status_text} reqwest_bad_body: {e}")).await;
 				}
 				_ => {
-					time_out(format!("reqwest_everything_bad: {e}")).await;
+					time_out(format!("{status_text} reqwest_everything_bad: {e}")).await;
 				}
 			}
 		}
