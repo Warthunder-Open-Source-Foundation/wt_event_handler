@@ -118,8 +118,8 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		}
 
 		// Cool down to prevent rate limiting and excessive performance impact
-		let wait = Duration::from_secs(120);
-		print_log("Waiting for 120 seconds", 2);
+		let wait = Duration::from_secs(240);
+		print_log("Waiting for 240 seconds", 2);
 		sleep(wait);
 	}
 }
