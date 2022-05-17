@@ -133,52 +133,60 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		panic!("{}", e);
 	};
 
-	let time_out = |msg: String| async move {
+	let time_out = |send, msg: String| async move {
 		let now = chrono::offset::Utc::now().timestamp();
-		let then = now + (60 * 60);
-		error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, msg, then)).into(), true).await;
+		let then = now + (60 * 30);
+		if send {
+			error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, msg, then)).into(), true).await;
+		}
 		let _ = &timeouts.time_out(source, then);
 	};
 
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;
-			let status =  e.status().unwrap_or(StatusCode::IM_A_TEAPOT);
-			let status_text = format!("status: {status} was returned and initiated");
+
+			let status = e.status();
+			let status_text = if let Some(status) = status {
+				format!("status: {status} was returned and initiated:")
+			} else {
+				format!("no status code related error was returned and initiated:")
+			};
 			match () {
 				_ if e.is_builder() => {
-					time_out(format!("{status_text} reqwest_bad_builder: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_bad_builder: {e}")).await;
 				}
 				_ if e.is_redirect() => {
-					time_out(format!("{status_text} reqwest_bad_redirect: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_bad_redirect: {e}")).await;
 				}
 				_ if e.is_status() => {
-					time_out(format!("{status_text} reqwest_bad_status_{e}: {e}",)).await;
+					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}", )).await;
 				}
 				_ if e.is_timeout() => {
-					time_out(format!("{status_text} reqwest_timeout: {e}")).await;
+					// Timeouts happen too often, they are no longer returned
+					time_out(false, format!("{status_text} reqwest_timeout: {e}")).await;
 				}
 				_ if e.is_request() => {
-					time_out(format!("{status_text} reqwest_bad_request: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_bad_request: {e}")).await;
 				}
 				_ if e.is_connect() => {
-					time_out(format!("{status_text} reqwest_bad_connect: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_bad_connect: {e}")).await;
 				}
 				_ if e.is_body() => {
-					time_out(format!("{status_text} reqwest_bad_body: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_bad_body: {e}")).await;
 				}
 				_ if e.is_decode() => {
-					time_out(format!("{status_text} reqwest_bad_body: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_bad_body: {e}")).await;
 				}
 				_ => {
-					time_out(format!("{status_text} reqwest_everything_bad: {e}")).await;
+					time_out(true, format!("{status_text} reqwest_everything_bad: {e}")).await;
 				}
 			}
 		}
 		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
 			match variant {
 				NewsError::NoUrlOnPost(_) => {
-					time_out("no_url_on_post".to_owned()).await;
+					time_out(true, "no_url_on_post".to_owned()).await;
 				}
 				_ => {
 					crash_and_burn(e).await;
