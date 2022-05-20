@@ -2,6 +2,7 @@ use std::io;
 use std::process::exit;
 
 use serenity::http::Http;
+
 use crate::print_log;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -71,7 +72,7 @@ impl Hooks {
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
 			main_keywords: vec![],
-			forum_keywords: vec![]
+			forum_keywords: vec![],
 		};
 		let mut line = String::new();
 

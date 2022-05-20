@@ -21,6 +21,6 @@ impl Timeout {
 			now < *time
 		} else {
 			false
-		}
+		};
 	}
 }

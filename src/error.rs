@@ -1,8 +1,10 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
+
 use serenity::http::Http;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
+
 use crate::{PANIC_INFO, print_log};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
@@ -51,12 +53,12 @@ pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 			"A non-recoverable error occurred"
 		}
 		)
-			.field("More information", error, false)
-			.description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
-			.color(Color::from_rgb(116, 16, 210))
-			.footer(|f| {
-				f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-			})
+		 .field("More information", error, false)
+		 .description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
+		 .color(Color::from_rgb(116, 16, 210))
+		 .footer(|f| {
+			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
+		 })
 	});
 
 	webhook.execute(my_http_client, false, |w| {

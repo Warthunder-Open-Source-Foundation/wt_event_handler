@@ -3,11 +3,11 @@ use std::fmt::{Display, Formatter};
 use std::process::exit;
 use std::time::Duration;
 
-use log::{info};
-use reqwest::{Client};
+use log::info;
+use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 
-use crate::json::recent::{format_selector, Channel};
+use crate::json::recent::{Channel, format_selector};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum ScrapeType {

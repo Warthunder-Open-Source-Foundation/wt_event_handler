@@ -152,15 +152,15 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 
 	let embed = Embed::fake(|e| {
 		e.title(content.scrape_type.to_string())
-			.color(Color::from_rgb(116, 16, 210))
-			.field(&content.title, &content.preview_text, false)
-			.description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
-			.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
-			.image(&content.img_url)
-			.url(&content.url)
-			.footer(|f| {
-				f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-			})
+		 .color(Color::from_rgb(116, 16, 210))
+		 .field(&content.title, &content.preview_text, false)
+		 .description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
+		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
+		 .image(&content.img_url)
+		 .url(&content.url)
+		 .footer(|f| {
+			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
+		 })
 	});
 
 	webhook.execute(my_http_client, false, |w| {
@@ -172,7 +172,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 }
 
 pub fn print_log(input: &str, log_level: u8) {
-	println!("{} {}", chrono::Local::now().naive_local(),input);
+	println!("{} {}", chrono::Local::now().naive_local(), input);
 	match log_level {
 		2 => {
 			info!("{}", input);
@@ -180,7 +180,7 @@ pub fn print_log(input: &str, log_level: u8) {
 		1 => {
 			warn!("{}", input);
 		}
-		 _ => {
+		_ => {
 			error!("{}", input);
 		}
 	}

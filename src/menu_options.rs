@@ -11,7 +11,7 @@ use log4rs::append::file::FileAppender;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
-use log::{LevelFilter};
+use log::LevelFilter;
 
 use crate::{print_log, RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
@@ -87,7 +87,7 @@ pub async fn add_webhook() -> Result<(), Box<dyn Error>> {
 	exit(0);
 }
 
-pub async fn test_hook()-> Result<(), Box<dyn Error>> {
+pub async fn test_hook() -> Result<(), Box<dyn Error>> {
 	let mut line = String::new();
 
 	println!("Choose the webhook order in the array to test\n");

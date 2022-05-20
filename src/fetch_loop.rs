@@ -2,8 +2,8 @@ use std::error::Error;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
-use crate::error::{error_webhook, NewsError};
 
+use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;

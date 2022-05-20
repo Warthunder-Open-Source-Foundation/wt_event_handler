@@ -1,8 +1,8 @@
 use std::error::Error;
+
 use crate::embed::EmbedData;
 use crate::error::{error_webhook, NewsError};
-
-use crate::json::recent::{format_selector, Channel};
+use crate::json::recent::{Channel, format_selector};
 use crate::scrapers::scrape_meta::scrape_meta;
 use crate::scrapers::scraper_resources::resources::{format_result, pin_loop, RecentHtmlTarget, request_html};
 

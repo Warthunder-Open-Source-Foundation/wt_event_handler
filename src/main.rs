@@ -4,13 +4,14 @@
 use std::{fs, io};
 use std::error::Error;
 use std::process::exit;
+
 use lazy_static::lazy_static;
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
+use crate::json::webhooks::WebhookAuth;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
 use crate::webhook_handler::print_log;
-use crate::json::webhooks::WebhookAuth;
 
 mod webhook_handler;
 mod scrapers;
