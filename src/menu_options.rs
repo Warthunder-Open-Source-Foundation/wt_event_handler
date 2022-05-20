@@ -129,12 +129,10 @@ pub fn clean_recent() -> Result<(), Box<dyn Error>> {
 	let cache_raw = fs::read_to_string(RECENT_PATH)?;
 	let mut cache: Recent = serde_json::from_str(&cache_raw)?;
 
-	cache.forums_updates_information.recent_url.clear();
-	cache.warthunder_news.recent_url.clear();
-	cache.warthunder_changelog.recent_url.clear();
-	cache.forums_project_news.recent_url.clear();
+	for source in &mut cache.sources {
+		source.recent_url.clear();
+	}
 
-	// let write = serde_json::to_string_pretty(&cache).unwrap();
 	let write = serde_json::to_string_pretty(&cache)?;
 	fs::write(RECENT_PATH, write)?;
 

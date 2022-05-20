@@ -5,17 +5,13 @@ use chrono::Local;
 use scraper::Selector;
 
 use crate::RECENT_PATH;
-use crate::scrapers::scraper_resources::resources::RecentHtmlTarget;
+use crate::scrapers::scraper_resources::resources::{RecentHtmlTarget, ScrapeType};
 use crate::webhook_handler::print_log;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
 	pub meta: Meta,
-	pub warthunder_news: Channel,
-	pub warthunder_changelog: Channel,
-	pub forums_updates_information: Channel,
-	pub forums_project_news: Channel,
-	pub forums_notice_board: Channel,
+	pub sources: Vec<Channel>,
 }
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
@@ -23,9 +19,11 @@ pub struct Meta {
 	pub timestamp: u64,
 }
 
-#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Channel {
+	pub name: String,
 	pub domain: String,
+	pub scrape_type: ScrapeType,
 	pub selector: String,
 	pub pin: String,
 	pub recent_url: Vec<String>,
@@ -41,33 +39,18 @@ impl Channel {
 			true
 		}
 	}
+	pub fn append_latest(&mut self, value: &str) {
+		self.recent_url.push(value.to_owned());
+	}
 }
 
 impl Recent {
-	pub fn append_latest_warthunder_news(&mut self, value: &str) {
-		self.warthunder_news.recent_url.push(value.to_owned());
+	pub fn save(&mut self) {
 		self.update_timestamp();
-		self.write_latest(value);
-	}
-	pub fn append_latest_warthunder_changelog(&mut self, value: &str) {
-		self.warthunder_changelog.recent_url.push(value.to_owned());
-		self.update_timestamp();
-		self.write_latest(value);
-	}
-	pub fn append_latest_warthunder_forums_updates_information(&mut self, value: &str) {
-		self.forums_updates_information.recent_url.push(value.to_owned());
-		self.update_timestamp();
-		self.write_latest(value);
-	}
-	pub fn append_latest_warthunder_forums_project_news(&mut self, value: &str) {
-		self.forums_project_news.recent_url.push(value.to_owned());
-		self.update_timestamp();
-		self.write_latest(value);
-	}
-	pub fn append_latest_forums_notice_board(&mut self, value: &str) {
-		self.forums_notice_board.recent_url.push(value.to_owned());
-		self.update_timestamp();
-		self.write_latest(value);
+
+		let write = serde_json::to_string_pretty(self).unwrap();
+		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
+		print_log("Saved recent to file", 1);
 	}
 	fn update_timestamp(&mut self) {
 		self.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();
@@ -76,11 +59,6 @@ impl Recent {
 		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
 		let recent: Self = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 		recent
-	}
-	fn write_latest(&self, value: &str) {
-		let write = serde_json::to_string_pretty(self).unwrap();
-		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
-		print_log(&format!("Written {} to file", value), 1);
 	}
 }
 

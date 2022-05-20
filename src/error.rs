@@ -31,6 +31,8 @@ impl Display for NewsError {
 
 impl Error for NewsError {}
 
+// Clippy error
+#[allow(clippy::borrowed_box)]
 pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 	let my_http_client = Http::new_with_token(&PANIC_INFO.token);
 
