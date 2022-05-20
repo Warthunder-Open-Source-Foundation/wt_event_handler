@@ -140,7 +140,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 	let uid = webhook_auth.hooks[pos].uid;
 	let token = &webhook_auth.hooks[pos].token;
 
-	let my_http_client = Http::new_with_token(token);
+	let my_http_client = Http::new(token);
 
 	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
 		Err(why) => {
