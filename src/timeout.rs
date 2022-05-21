@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+
 use crate::fetch_loop::STATS;
 use crate::statistics::Incr;
 

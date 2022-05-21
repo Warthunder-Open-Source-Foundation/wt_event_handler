@@ -2,10 +2,11 @@ use std::error::Error;
 use std::fs;
 use std::lazy::SyncLazy;
 use std::process::exit;
-use std::thread::sleep;
 use std::time::Duration;
+
 use tokio::sync::Mutex;
 
+use crate::{TOKEN_PATH, WebhookAuth};
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
@@ -13,7 +14,6 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, Statistics};
 use crate::timeout::Timeout;
 use crate::webhook_handler::print_log;
-use crate::{TOKEN_PATH, WebhookAuth};
 
 const FETCH_DELAY: u64 = 48;
 
@@ -29,7 +29,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	let mut timeouts = Timeout::new();
 
 	// Spawn statistics thread
-	tokio::task::spawn( async {
+	tokio::task::spawn(async {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 

@@ -1,15 +1,11 @@
 use std::fmt::{Display, Formatter};
 use std::fs;
-use std::process::exit;
-use std::thread::sleep;
-use std::time::Duration;
 
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
 use crate::{print_log, TOKEN_PATH, WebhookAuth};
-use crate::fetch_loop::STATS;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {
@@ -21,7 +17,7 @@ pub struct Statistics {
 
 }
 
-impl Display for Statistics  {
+impl Display for Statistics {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		write!(f, "Fetch count: {}\n\
 					Posted news: {}\n\
@@ -30,10 +26,10 @@ impl Display for Statistics  {
 					Sources timed out: {}
 					",
 			   self.fetch_counter,
-			self.post_counter,
-			self.new_news,
-			self.errors,
-			self.timeouts,
+			   self.post_counter,
+			   self.new_news,
+			   self.errors,
+			   self.timeouts,
 		)
 	}
 }
@@ -56,13 +52,6 @@ impl Statistics {
 			errors: 0,
 			timeouts: 0
 		}
-	}
-	pub fn dbg(&mut self) {
-		self.fetch_counter = 1234;
-		self.post_counter = 666;
-		self.new_news = 69;
-		self.errors = 1337;
-		self.timeouts = 420;
 	}
 	pub fn increment(&mut self, incr: Incr) {
 		match incr {
