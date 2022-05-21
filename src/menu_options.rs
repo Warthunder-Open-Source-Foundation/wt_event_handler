@@ -11,7 +11,7 @@ use log4rs::append::file::FileAppender;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
-use log::{LevelFilter};
+use log::LevelFilter;
 
 use crate::{print_log, RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
@@ -87,7 +87,7 @@ pub async fn add_webhook() -> Result<(), Box<dyn Error>> {
 	exit(0);
 }
 
-pub async fn test_hook()-> Result<(), Box<dyn Error>> {
+pub async fn test_hook() -> Result<(), Box<dyn Error>> {
 	let mut line = String::new();
 
 	println!("Choose the webhook order in the array to test\n");
@@ -129,12 +129,10 @@ pub fn clean_recent() -> Result<(), Box<dyn Error>> {
 	let cache_raw = fs::read_to_string(RECENT_PATH)?;
 	let mut cache: Recent = serde_json::from_str(&cache_raw)?;
 
-	cache.forums_updates_information.recent_url.clear();
-	cache.warthunder_news.recent_url.clear();
-	cache.warthunder_changelog.recent_url.clear();
-	cache.forums_project_news.recent_url.clear();
+	for source in &mut cache.sources {
+		source.recent_url.clear();
+	}
 
-	// let write = serde_json::to_string_pretty(&cache).unwrap();
 	let write = serde_json::to_string_pretty(&cache)?;
 	fs::write(RECENT_PATH, write)?;
 

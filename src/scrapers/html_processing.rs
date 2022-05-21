@@ -1,13 +1,14 @@
 use std::error::Error;
+
 use crate::embed::EmbedData;
 use crate::error::{error_webhook, NewsError};
-
-use crate::json::recent::{format_selector, Channel};
+use crate::json::recent::{Channel, format_selector};
 use crate::scrapers::scrape_meta::scrape_meta;
-use crate::scrapers::scraper_resources::resources::{format_result, pin_loop, RecentHtmlTarget, request_html, ScrapeType};
+use crate::scrapers::scraper_resources::resources::{format_result, pin_loop, RecentHtmlTarget, request_html};
 
-pub async fn html_processor(recent_value: &Channel, scrape_type: ScrapeType) -> Result<EmbedData, Box<dyn Error>> {
+pub async fn html_processor(recent_value: &Channel) -> Result<EmbedData, Box<dyn Error>> {
 	let url = &recent_value.domain;
+	let scrape_type = recent_value.scrape_type;
 
 	let html = request_html(url).await?;
 	let mut post: u32 = 1;

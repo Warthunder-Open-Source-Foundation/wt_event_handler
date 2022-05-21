@@ -6,9 +6,11 @@ use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
 use crate::embed::EmbedData;
+use crate::fetch_loop::STATS;
 use crate::json::recent::Channel;
 use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
+use crate::statistics::Incr;
 use crate::TOKEN_PATH;
 
 const DEFAULT_KEYWORDS: [&str; 30] = [
@@ -19,7 +21,7 @@ const DEFAULT_KEYWORDS: [&str; 30] = [
 ];
 
 impl Channel {
-	pub async fn handle_webhook(&self, content: EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
+	pub async fn handle_webhook(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
@@ -31,6 +33,7 @@ impl Channel {
 			} else {
 				deliver_webhook(content.clone(), i).await;
 			}
+			STATS.lock().await.increment(Incr::PostCounter);
 		}
 	}
 }
@@ -140,7 +143,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 	let uid = webhook_auth.hooks[pos].uid;
 	let token = &webhook_auth.hooks[pos].token;
 
-	let my_http_client = Http::new_with_token(token);
+	let my_http_client = Http::new(token);
 
 	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
 		Err(why) => {
@@ -152,15 +155,15 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 
 	let embed = Embed::fake(|e| {
 		e.title(content.scrape_type.to_string())
-			.color(Color::from_rgb(116, 16, 210))
-			.field(&content.title, &content.preview_text, false)
-			.description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
-			.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
-			.image(&content.img_url)
-			.url(&content.url)
-			.footer(|f| {
-				f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-			})
+		 .color(Color::from_rgb(116, 16, 210))
+		 .field(&content.title, &content.preview_text, false)
+		 .description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
+		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
+		 .image(&content.img_url)
+		 .url(&content.url)
+		 .footer(|f| {
+			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
+		 })
 	});
 
 	webhook.execute(my_http_client, false, |w| {
@@ -172,7 +175,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 }
 
 pub fn print_log(input: &str, log_level: u8) {
-	println!("{} {}", chrono::Local::now().naive_local(),input);
+	println!("{} {}", chrono::Local::now().naive_local(), input);
 	match log_level {
 		2 => {
 			info!("{}", input);
@@ -180,7 +183,7 @@ pub fn print_log(input: &str, log_level: u8) {
 		1 => {
 			warn!("{}", input);
 		}
-		 _ => {
+		_ => {
 			error!("{}", input);
 		}
 	}

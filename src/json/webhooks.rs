@@ -2,12 +2,14 @@ use std::io;
 use std::process::exit;
 
 use serenity::http::Http;
+
 use crate::print_log;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
 	pub crash_hook: Vec<CrashHook>,
+	pub statistics_hook: StatisticsHook,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -27,6 +29,15 @@ pub struct Hooks {
 	pub forum_filter: FilterType,
 	pub main_keywords: Vec<String>,
 	pub forum_keywords: Vec<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct StatisticsHook {
+	pub name: String,
+	pub token: String,
+	pub uid: u64,
+	// In minutes
+	pub time_between_post: u64,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug, Copy, Clone)]
@@ -71,7 +82,7 @@ impl Hooks {
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
 			main_keywords: vec![],
-			forum_keywords: vec![]
+			forum_keywords: vec![],
 		};
 		let mut line = String::new();
 
@@ -153,7 +164,7 @@ async fn send_test_hook(hook: &Hooks) {
 	let token = &hook.token;
 	let uid = &hook.uid;
 
-	let my_http_client = Http::new_with_token(token);
+	let my_http_client = Http::new(token);
 
 	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {

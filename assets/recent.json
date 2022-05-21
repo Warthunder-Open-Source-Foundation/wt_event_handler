@@ -1,45 +1,57 @@
 {
   "meta": {
-    "timestamp": 1650821854
+    "timestamp": 1653090898
   },
-  "warthunder_news": {
-    "domain": "https://warthunder.com/en/news",
-    "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
-    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-    "recent_url": [
-      "https://warthunder.com/en/news/7658-video-the-shooting-range-299-en"
-    ]
-  },
-  "warthunder_changelog": {
-    "domain": "https://warthunder.com/en/game/changelog/",
-    "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
-    "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-    "recent_url": [
-      "https://warthunder.com/en/game/changelog/current/1365"
-    ]
-  },
-  "forums_updates_information": {
-    "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
-    "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
-    "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/552517-server-update-23042022/"
-    ]
-  },
-  "forums_project_news": {
-    "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
-    "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
-    "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/552576-video-the-shooting-range-299/"
-    ]
-  },
-  "forums_notice_board": {
-    "domain": "https://forum.warthunder.com/index.php?/forum/1500-notice-board-announcements-information/",
-    "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
-    "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-    "recent_url": [
-      "https://forum.warthunder.com/index.php?/topic/550543-april-fools-2022-suggestions-yeeted-at-the-developers-march-2022/"
-    ]
-  }
+  "sources": [
+    {
+      "name": "warthunder_news",
+      "domain": "https://warthunder.com/en/news",
+      "scrape_type": "Main",
+      "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
+      "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
+      "recent_url": [
+        "https://warthunder.com/en/news/7692-video-thunder-show-bashing-bounce-en"
+      ]
+    },
+    {
+      "name": "warthunder_changelog",
+      "domain": "https://warthunder.com/en/game/changelog/",
+      "scrape_type": "Changelog",
+      "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
+      "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
+      "recent_url": [
+        "https://warthunder.com/en/game/changelog/current/1372"
+      ]
+    },
+    {
+      "name": "forums_updates_information",
+      "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
+      "scrape_type": "Forum",
+      "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
+      "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
+      "recent_url": [
+        "https://forum.warthunder.com/index.php?/topic/554235-server-update-19052022/"
+      ]
+    },
+    {
+      "name": "forums_project_news",
+      "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
+      "scrape_type": "Forum",
+      "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
+      "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
+      "recent_url": [
+        "https://forum.warthunder.com/index.php?/topic/554354-video-thunder-show-bashing-bounce/"
+      ]
+    },
+    {
+      "name": "forums_notice_board",
+      "domain": "https://forum.warthunder.com/index.php?/forum/1500-notice-board-announcements-information/",
+      "scrape_type": "Forum",
+      "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
+      "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
+      "recent_url": [
+        "https://forum.warthunder.com/index.php?/topic/550967-suggestions-passed-to-the-developers-march-2022/"
+      ]
+    }
+  ]
 }

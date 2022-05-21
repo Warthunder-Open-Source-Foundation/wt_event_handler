@@ -1,126 +1,82 @@
 use std::error::Error;
+use std::fs;
+use std::lazy::SyncLazy;
 use std::process::exit;
-use std::thread::sleep;
 use std::time::Duration;
-use reqwest::StatusCode;
-use crate::error::{error_webhook, NewsError};
 
+use tokio::sync::Mutex;
+
+use crate::{TOKEN_PATH, WebhookAuth};
+use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
+use crate::statistics::{Incr, Statistics};
 use crate::timeout::Timeout;
 use crate::webhook_handler::print_log;
 
+const FETCH_DELAY: u64 = 48;
+
+pub static STATS: SyncLazy<Mutex<Statistics>> = SyncLazy::new(||
+	Mutex::new(Statistics::new())
+);
+
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
+	// First run of the program will fetch everything with no delay
+	let mut oneshot = true;
 	let mut recent_data = Recent::read_latest();
 
 	let mut timeouts = Timeout::new();
 
+	// Spawn statistics thread
+	tokio::task::spawn(async {
+		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
+		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+		loop {
+			tokio::time::sleep(Duration::from_secs(webhook_auth.statistics_hook.time_between_post / 60)).await;
+			let mut lock = STATS.lock().await;
+			lock.post().await;
+			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
+			drop(lock);
+		}
+	});
+
 	loop {
-		if !timeouts.is_timed_out("warthunder_news") {
-			match html_processor(&recent_data.warthunder_news, ScrapeType::Main).await {
-				Ok(wt_news_content) => {
-					if recent_data.warthunder_news.is_outdated(&wt_news_content.url) {
-						if hooks {
-							recent_data.warthunder_news.handle_webhook(wt_news_content.clone(), true, ScrapeType::Main).await;
+		for source in &mut recent_data.sources {
+			if !timeouts.is_timed_out(&source.name) {
+				STATS.lock().await.increment(Incr::FetchCounter);
+				match html_processor(source).await {
+					Ok(content) => {
+						if source.is_new(&content.url) {
+							if hooks {
+								source.handle_webhook(&content, true, source.scrape_type).await;
+							}
+							if write_files {
+								source.append_latest(&content.url);
+							}
+							STATS.lock().await.increment(Incr::NewNews);
 						}
-						if write_files {
-							recent_data.append_latest_warthunder_news(&wt_news_content.url);
-						}
-						print_log("All wt news hooks are served", 2);
+					}
+					Err(e) => {
+						STATS.lock().await.increment(Incr::Errors);
+						handle_err(e, source.scrape_type, source.name.clone(), &mut timeouts, hooks).await;
 					}
 				}
-				Err(e) => {
-					handle_err(e, ScrapeType::Main, "warthunder_news".to_owned(), &mut timeouts, hooks).await;
-				}
-			};
+			}
+			if oneshot {
+				print_log("Skipping sleep for oneshot", 2);
+			} else {
+				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), 2);
+				tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
+			}
 		}
-
-		if !timeouts.is_timed_out("warthunder_changelog") {
-			match html_processor(&recent_data.warthunder_changelog, ScrapeType::Changelog).await {
-				Ok(wt_changelog) => {
-					if recent_data.warthunder_changelog.is_outdated(&wt_changelog.url) {
-						if hooks {
-							recent_data.warthunder_changelog.handle_webhook(wt_changelog.clone(), true, ScrapeType::Changelog).await;
-						}
-						if write_files {
-							recent_data.append_latest_warthunder_changelog(&wt_changelog.url);
-						}
-						print_log("All wt changelog hooks are served", 1);
-					}
-				}
-				Err(e) => {
-					handle_err(e, ScrapeType::Changelog, "warthunder_changelog".to_owned(), &mut timeouts, hooks).await;
-				}
-			};
-		}
-
-		if !timeouts.is_timed_out("forums_updates_information") {
-			match html_processor(&recent_data.forums_updates_information, ScrapeType::Forum).await {
-				Ok(forum_news_updates_information) => {
-					if recent_data.forums_updates_information.is_outdated(&forum_news_updates_information.url) {
-						if hooks {
-							recent_data.forums_updates_information.handle_webhook(forum_news_updates_information.clone(), true, ScrapeType::Forum).await;
-						}
-						if write_files {
-							recent_data.append_latest_warthunder_forums_updates_information(&forum_news_updates_information.url);
-						}
-						print_log("All forum_updates_information hooks are served", 2);
-					}
-				}
-				Err(e) => {
-					handle_err(e, ScrapeType::Forum, "forums_updates_information".to_owned(), &mut timeouts, hooks).await;
-				}
-			};
-		}
-
-		if !timeouts.is_timed_out("forums_project_news") {
-			match html_processor(&recent_data.forums_project_news, ScrapeType::Forum).await {
-				Ok(forum_news_project_news) => {
-					if recent_data.forums_project_news.is_outdated(&forum_news_project_news.url) {
-						if hooks {
-							recent_data.forums_project_news.handle_webhook(forum_news_project_news.clone(), true, ScrapeType::Forum).await;
-						}
-						if write_files {
-							recent_data.append_latest_warthunder_forums_project_news(&forum_news_project_news.url);
-						}
-						print_log("All forum_project_news hooks are served", 2);
-					}
-				}
-				Err(e) => {
-					handle_err(e, ScrapeType::Forum, "forums_project_news".to_owned(), &mut timeouts, hooks).await;
-				}
-			};
-		}
-
-		if !timeouts.is_timed_out("forums_notice_board") {
-			match html_processor(&recent_data.forums_notice_board, ScrapeType::Forum).await {
-				Ok(forums_notice_board) => {
-					if recent_data.forums_notice_board.is_outdated(&forums_notice_board.url) {
-						if hooks {
-							recent_data.forums_notice_board.handle_webhook(forums_notice_board.clone(), true, ScrapeType::Forum).await;
-						}
-						if write_files {
-							recent_data.append_latest_forums_notice_board(&forums_notice_board.url);
-						}
-						print_log("All forums_notice_board hooks are served", 2);
-					}
-				}
-				Err(e) => {
-					handle_err(e, ScrapeType::Forum, "forums_notice_board".to_owned(), &mut timeouts, hooks).await;
-				}
-			};
-		}
-
+		oneshot = false;
+		recent_data.save();
 		//Aborts program after running without hooks
 		if !hooks || !write_files {
 			exit(0);
 		}
-
-		// Cool down to prevent rate limiting and excessive performance impact
-		let wait = Duration::from_secs(240);
-		print_log("Waiting for 240 seconds", 2);
-		sleep(wait);
 	}
 }
 
@@ -150,7 +106,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 			let status_text = if let Some(status) = status {
 				format!("status: {status} was returned and initiated:")
 			} else {
-				format!("no status code related error was returned and initiated:")
+				"no status code related error was returned and initiated:".to_owned()
 			};
 			match () {
 				_ if e.is_builder() => {
