@@ -1,16 +1,25 @@
 use std::error::Error;
+use std::fs;
+use std::lazy::SyncLazy;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
+use tokio::sync::Mutex;
 
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
+use crate::statistics::{Incr, Statistics};
 use crate::timeout::Timeout;
 use crate::webhook_handler::print_log;
+use crate::{TOKEN_PATH, WebhookAuth};
 
 const FETCH_DELAY: u64 = 48;
+
+pub static STATS: SyncLazy<Mutex<Statistics>> = SyncLazy::new(||
+	Mutex::new(Statistics::new())
+);
 
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	// First run of the program will fetch everything with no delay
@@ -19,21 +28,38 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 
 	let mut timeouts = Timeout::new();
 
+	// Spawn statistics thread
+	tokio::task::spawn( async {
+		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
+		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+
+		loop {
+			tokio::time::sleep(Duration::from_secs(webhook_auth.statistics_hook.time_between_post / 60)).await;
+			let mut lock = STATS.lock().await;
+			lock.post().await;
+			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
+			drop(lock);
+		}
+	});
+
 	loop {
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
+				STATS.lock().await.increment(Incr::FetchCounter);
 				match html_processor(source).await {
 					Ok(content) => {
-						if source.is_outdated(&content.url) {
+						if source.is_new(&content.url) {
 							if hooks {
 								source.handle_webhook(&content, true, source.scrape_type).await;
 							}
 							if write_files {
 								source.append_latest(&content.url);
 							}
+							STATS.lock().await.increment(Incr::NewNews);
 						}
 					}
 					Err(e) => {
+						STATS.lock().await.increment(Incr::Errors);
 						handle_err(e, source.scrape_type, source.name.clone(), &mut timeouts, hooks).await;
 					}
 				}
@@ -42,7 +68,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				print_log("Skipping sleep for oneshot", 2);
 			} else {
 				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), 2);
-				sleep(Duration::from_secs(FETCH_DELAY));
+				tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 			}
 		}
 		oneshot = false;

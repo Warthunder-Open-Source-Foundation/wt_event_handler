@@ -6,9 +6,11 @@ use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
 use crate::embed::EmbedData;
+use crate::fetch_loop::STATS;
 use crate::json::recent::Channel;
 use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
+use crate::statistics::Incr;
 use crate::TOKEN_PATH;
 
 const DEFAULT_KEYWORDS: [&str; 30] = [
@@ -31,6 +33,7 @@ impl Channel {
 			} else {
 				deliver_webhook(content.clone(), i).await;
 			}
+			STATS.lock().await.increment(Incr::PostCounter);
 		}
 	}
 }

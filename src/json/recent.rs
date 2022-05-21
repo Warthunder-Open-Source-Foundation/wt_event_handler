@@ -30,7 +30,7 @@ pub struct Channel {
 }
 
 impl Channel {
-	pub fn is_outdated(&self, value: &str) -> bool {
+	pub fn is_new(&self, value: &str) -> bool {
 		if self.recent_url.contains(&value.to_owned()) {
 			print_log("Content was recently fetched and is not new", 2);
 			false

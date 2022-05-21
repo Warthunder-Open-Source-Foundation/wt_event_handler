@@ -9,6 +9,7 @@ use crate::print_log;
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
 	pub crash_hook: Vec<CrashHook>,
+	pub statistics_hook: StatisticsHook,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -28,6 +29,15 @@ pub struct Hooks {
 	pub forum_filter: FilterType,
 	pub main_keywords: Vec<String>,
 	pub forum_keywords: Vec<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct StatisticsHook {
+	pub name: String,
+	pub token: String,
+	pub uid: u64,
+	// In minutes
+	pub time_between_post: u64,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug, Copy, Clone)]
