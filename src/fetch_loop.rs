@@ -34,7 +34,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 
 		loop {
-			tokio::time::sleep(Duration::from_secs(webhook_auth.statistics_hook.time_between_post / 60)).await;
+			tokio::time::sleep(Duration::from_secs(webhook_auth.statistics_hook.time_between_post * 60)).await;
 			let mut lock = STATS.lock().await;
 			lock.post().await;
 			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
