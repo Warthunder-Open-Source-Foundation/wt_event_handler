@@ -11,7 +11,7 @@ use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
-use crate::statistics::{Incr, Statistics};
+use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
 use crate::webhook_handler::print_log;
 
@@ -45,7 +45,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	loop {
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
-				STATS.lock().await.increment(Incr::FetchCounter);
+				increment(Incr::FetchCounter).await;
 				match html_processor(source).await {
 					Ok(content) => {
 						if source.is_new(&content.url) {
@@ -55,11 +55,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 							if write_files {
 								source.append_latest(&content.url);
 							}
-							STATS.lock().await.increment(Incr::NewNews);
+							increment(Incr::NewNews).await;
 						}
 					}
 					Err(e) => {
-						STATS.lock().await.increment(Incr::Errors);
+						increment(Incr::Errors).await;
 						handle_err(e, source.scrape_type, source.name.clone(), &mut timeouts, hooks).await;
 					}
 				}

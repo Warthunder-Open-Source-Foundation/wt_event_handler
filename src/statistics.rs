@@ -6,6 +6,7 @@ use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
 use crate::{print_log, TOKEN_PATH, WebhookAuth};
+use crate::fetch_loop::STATS;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {
@@ -93,4 +94,9 @@ impl Statistics {
 
 		print_log("All statistics are posted", 1);
 	}
+}
+
+pub async fn increment(incr: Incr) {
+	let mut lock = STATS.lock().await;
+	lock.increment(incr);
 }

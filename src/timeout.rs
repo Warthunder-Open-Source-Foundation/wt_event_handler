@@ -17,6 +17,7 @@ impl Timeout {
 	pub async fn time_out(&mut self, source: String, until: i64) {
 		self.blocked.insert(source, until);
 		STATS.lock().await.increment(Incr::Timeouts);
+
 	}
 	pub fn is_timed_out(&self, source: &str) -> bool {
 		return if let Some(time) = self.blocked.get(source) {
