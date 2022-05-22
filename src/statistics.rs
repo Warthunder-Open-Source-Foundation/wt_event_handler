@@ -63,6 +63,13 @@ impl Statistics {
 			Incr::Timeouts => { self.timeouts += 1 }
 		}
 	}
+	pub fn reset(&mut self) {
+		self.fetch_counter = 0;
+		self.post_counter = 0;
+		self.new_news = 0;
+		self.errors = 0;
+		self.timeouts = 0;
+	}
 	pub async fn post(&mut self) {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");

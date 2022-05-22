@@ -37,6 +37,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 			tokio::time::sleep(Duration::from_secs(webhook_auth.statistics_hook.time_between_post * 60)).await;
 			let mut lock = STATS.lock().await;
 			lock.post().await;
+			lock.reset();
 			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
 			drop(lock);
 		}
