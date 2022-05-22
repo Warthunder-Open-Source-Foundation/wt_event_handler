@@ -1,14 +1,14 @@
 use std::error::Error;
-use std::fs;
+
 use std::lazy::SyncLazy;
 use std::process::exit;
 use std::time::{Duration};
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Timelike};
+
 
 use tokio::sync::Mutex;
-use tokio::time::{Instant, interval_at};
 
-use crate::{TOKEN_PATH, WebhookAuth};
+
+
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
