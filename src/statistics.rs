@@ -6,6 +6,7 @@ use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
 use crate::{print_log, TOKEN_PATH, WebhookAuth};
+use crate::fetch_loop::STATS;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {
@@ -62,6 +63,13 @@ impl Statistics {
 			Incr::Timeouts => { self.timeouts += 1 }
 		}
 	}
+	pub fn reset(&mut self) {
+		self.fetch_counter = 0;
+		self.post_counter = 0;
+		self.new_news = 0;
+		self.errors = 0;
+		self.timeouts = 0;
+	}
 	pub async fn post(&mut self) {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
@@ -93,4 +101,9 @@ impl Statistics {
 
 		print_log("All statistics are posted", 1);
 	}
+}
+
+pub async fn increment(incr: Incr) {
+	let mut lock = STATS.lock().await;
+	lock.increment(incr);
 }

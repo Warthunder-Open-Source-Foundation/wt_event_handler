@@ -1,21 +1,25 @@
 use std::error::Error;
-use std::fs;
+
 use std::lazy::SyncLazy;
 use std::process::exit;
-use std::time::Duration;
+use std::time::{Duration};
+
 
 use tokio::sync::Mutex;
 
-use crate::{TOKEN_PATH, WebhookAuth};
+
+
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
-use crate::statistics::{Incr, Statistics};
+use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
 use crate::webhook_handler::print_log;
 
 const FETCH_DELAY: u64 = 48;
+// in seconds
+const STAT_COOL_DOWN: u64 = 60 * 60 * 3;
 
 pub static STATS: SyncLazy<Mutex<Statistics>> = SyncLazy::new(||
 	Mutex::new(Statistics::new())
@@ -30,13 +34,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 
 	// Spawn statistics thread
 	tokio::task::spawn(async {
-		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
 		loop {
-			tokio::time::sleep(Duration::from_secs(webhook_auth.statistics_hook.time_between_post * 60)).await;
+			tokio::time::sleep(Duration::from_secs(STAT_COOL_DOWN)).await;
 			let mut lock = STATS.lock().await;
 			lock.post().await;
+			lock.reset();
 			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
 			drop(lock);
 		}
@@ -45,7 +47,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	loop {
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
-				STATS.lock().await.increment(Incr::FetchCounter);
+				increment(Incr::FetchCounter).await;
 				match html_processor(source).await {
 					Ok(content) => {
 						if source.is_new(&content.url) {
@@ -55,11 +57,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 							if write_files {
 								source.append_latest(&content.url);
 							}
-							STATS.lock().await.increment(Incr::NewNews);
+							increment(Incr::NewNews).await;
 						}
 					}
 					Err(e) => {
-						STATS.lock().await.increment(Incr::Errors);
+						increment(Incr::Errors).await;
 						handle_err(e, source.scrape_type, source.name.clone(), &mut timeouts, hooks).await;
 					}
 				}
