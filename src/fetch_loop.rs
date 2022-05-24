@@ -115,7 +115,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 					time_out(true, format!("{status_text} reqwest_bad_redirect: {e}")).await;
 				}
 				_ if e.is_status() => {
-					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}", )).await;
+					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}")).await;
 				}
 				_ if e.is_timeout() => {
 					// Timeouts happen too often, they are no longer printed out status channels
@@ -142,7 +142,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 			match variant {
 				NewsError::NoUrlOnPost(name, html) => {
 					let now = chrono::Local::now().timestamp();
-					let sanitized_url = name.replace("/", "_").replace("_", "");
+					let sanitized_url = name.replace('/', "_").replace(':', "_");
 					drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
 					time_out(true, "no_url_on_post".to_owned()).await;
 				}
