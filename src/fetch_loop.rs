@@ -87,7 +87,6 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		if hooks {
 			error_webhook(&e, false).await;
 		}
-		print_log(&e.to_string(), 0);
 		panic!("{}", e);
 	};
 
@@ -121,7 +120,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}", )).await;
 				}
 				_ if e.is_timeout() => {
-					// Timeouts happen too often, they are no longer returned
+					// Timeouts happen too often, they are no longer printed out status channels
 					time_out(false, format!("{status_text} reqwest_timeout: {e}")).await;
 				}
 				_ if e.is_request() => {
@@ -155,4 +154,5 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 			crash_and_burn(e).await;
 		}
 	}
+	print_log(&e.to_string(), 0);
 }
