@@ -1,13 +1,10 @@
 use std::error::Error;
-
+use std::fs;
 use std::lazy::SyncLazy;
 use std::process::exit;
-use std::time::{Duration};
-
+use std::time::Duration;
 
 use tokio::sync::Mutex;
-
-
 
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
@@ -99,6 +96,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		let _ = &timeouts.time_out(source, then);
 	};
 
+	print_log(&e.to_string(), 0);
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;
@@ -142,7 +140,10 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		}
 		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
 			match variant {
-				NewsError::NoUrlOnPost(_) => {
+				NewsError::NoUrlOnPost(name, html) => {
+					let now = chrono::Local::now().timestamp();
+					let sanitized_url = name.replace("/", "_").replace("_", "");
+					drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
 					time_out(true, "no_url_on_post".to_owned()).await;
 				}
 				_ => {
@@ -154,5 +155,4 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 			crash_and_burn(e).await;
 		}
 	}
-	print_log(&e.to_string(), 0);
 }
