@@ -1,13 +1,10 @@
 use std::error::Error;
-
+use std::fs;
 use std::lazy::SyncLazy;
 use std::process::exit;
-use std::time::{Duration};
-
+use std::time::Duration;
 
 use tokio::sync::Mutex;
-
-
 
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Recent;
@@ -87,7 +84,6 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		if hooks {
 			error_webhook(&e, false).await;
 		}
-		print_log(&e.to_string(), 0);
 		panic!("{}", e);
 	};
 
@@ -100,6 +96,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		let _ = &timeouts.time_out(source, then);
 	};
 
+	print_log(&e.to_string(), 0);
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;
@@ -118,10 +115,10 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 					time_out(true, format!("{status_text} reqwest_bad_redirect: {e}")).await;
 				}
 				_ if e.is_status() => {
-					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}", )).await;
+					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}")).await;
 				}
 				_ if e.is_timeout() => {
-					// Timeouts happen too often, they are no longer returned
+					// Timeouts happen too often, they are no longer printed out status channels
 					time_out(false, format!("{status_text} reqwest_timeout: {e}")).await;
 				}
 				_ if e.is_request() => {
@@ -143,7 +140,10 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		}
 		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
 			match variant {
-				NewsError::NoUrlOnPost(_) => {
+				NewsError::NoUrlOnPost(name, html) => {
+					let now = chrono::Local::now().timestamp();
+					let sanitized_url = name.replace('/', "_").replace(':', "_");
+					drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
 					time_out(true, "no_url_on_post".to_owned()).await;
 				}
 				_ => {

@@ -10,7 +10,8 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Debug, Clone)]
 pub enum NewsError {
-	NoUrlOnPost(ScrapeType),
+	// URL which was fetched and the HTML returned
+	NoUrlOnPost(String, String),
 	MetaCannotBeScraped(ScrapeType),
 	SourceTimeout(ScrapeType, String, i64),
 }
@@ -18,14 +19,14 @@ pub enum NewsError {
 impl Display for NewsError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		match self {
-			NewsError::NoUrlOnPost(scrape_type) => {
-				write!(f, "{scrape_type} returned a document, but no URL was found")
+			NewsError::NoUrlOnPost(url, html) => {
+				write!(f, "NoUrlOnPost: {url} returned a document, but no URL was found.\nDocument: {html}")
 			}
 			NewsError::MetaCannotBeScraped(scrape_type) => {
-				write!(f, "The meta data for \'{scrape_type}\' cannot be collected, falling back to defaults")
+				write!(f, "MetaCannotBeScraped: The meta data for \'{scrape_type}\' cannot be collected, falling back to defaults")
 			}
 			NewsError::SourceTimeout(scrape_type, msg, timestamp) => {
-				write!(f, "Source \'{scrape_type}\' was timeouted and will not be fetched until <t:{timestamp}>. \nError message: \"{msg}\"")
+				write!(f, "SourceTimeout: Source \'{scrape_type}\' timed out and will not be fetched until <t:{timestamp}>. \nError message: \"{msg}\"")
 			}
 		}
 	}
@@ -65,5 +66,5 @@ pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
-	print_log(&format!("Posted webhook for {}", PANIC_INFO.name), 1);
+	print_log(&format!("Posted panic webhook for {}", PANIC_INFO.name), 1);
 }
