@@ -15,8 +15,10 @@ use crate::timeout::Timeout;
 use crate::webhook_handler::print_log;
 
 const FETCH_DELAY: u64 = 48;
+
+pub const STAT_COOLDOWN_HOURS: u64 = 24;
 // in seconds
-const STAT_COOL_DOWN: u64 = 60 * 60 * 3;
+const STAT_COOL_DOWN: u64 = 60 * 60 * STAT_COOLDOWN_HOURS;
 
 pub static STATS: SyncLazy<Mutex<Statistics>> = SyncLazy::new(||
 	Mutex::new(Statistics::new())

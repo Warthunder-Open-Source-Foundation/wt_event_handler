@@ -6,7 +6,7 @@ use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
 use crate::{print_log, TOKEN_PATH, WebhookAuth};
-use crate::fetch_loop::STATS;
+use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {
@@ -85,7 +85,7 @@ impl Statistics {
 		};
 
 		let embed = Embed::fake(|e| {
-			e.title("Statistics for the past time")
+			e.title(format!("Statistics for the past {} hours", STAT_COOLDOWN_HOURS))
 			 .color(Color::from_rgb(116, 16, 210))
 			 .field("Numbers", format!("{self}"), false)
 			 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
