@@ -21,7 +21,7 @@ const DEFAULT_KEYWORDS: [&str; 30] = [
 ];
 
 impl Channel {
-	pub async fn handle_webhook(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
+	pub async fn handle_webhooks(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
 		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
 

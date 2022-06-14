@@ -51,7 +51,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					Ok(content) => {
 						if source.is_new(&content.url) {
 							if hooks {
-								source.handle_webhook(&content, true, source.scrape_type).await;
+								source.handle_webhooks(&content, true, source.scrape_type).await;
 							}
 							if write_files {
 								source.append_latest(&content.url);
