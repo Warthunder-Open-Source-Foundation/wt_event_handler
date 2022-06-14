@@ -16,7 +16,7 @@ use crate::TOKEN_PATH;
 const DEFAULT_KEYWORDS: [&str; 30] = [
 	"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 	"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-	"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds",
+	"shop", "pass", "season", "operation", "pass", "summer", "2022", "planned", "bonds",
 	"issues", "technical", "servers", "christmas", "market", "camouflages"
 ];
 
