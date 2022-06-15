@@ -6,7 +6,7 @@ use std::{fs, io};
 use std::error::Error;
 use std::process::exit;
 
-use lazy_static::lazy_static;
+use lazy_static::{initialize, lazy_static};
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -38,15 +38,22 @@ pub const HANDLE_RESULT_FN: fn(Result<(), Box<dyn Error>>) = |e: Result<(), Box<
 };
 
 lazy_static! {
-	pub static ref PANIC_INFO: CrashHook = {
+	pub static ref WEBHOOK_AUTH: WebhookAuth = {
 		let raw = fs::read("assets/discord_token.json").unwrap();
 		let json: WebhookAuth = serde_json::from_slice(&raw).unwrap();
-		json.crash_hook[0].clone()
+		json
+	};
+	pub static ref PANIC_INFO: CrashHook = {
+		WEBHOOK_AUTH.crash_hook[0].clone()
 	};
 }
 
 #[tokio::main]
 async fn main() {
+	// Loads statics
+	initialize(&WEBHOOK_AUTH);
+	initialize(&PANIC_INFO);
+
 	let mut line = String::new();
 	let mut hooks = true;
 	let mut json_verification = true;

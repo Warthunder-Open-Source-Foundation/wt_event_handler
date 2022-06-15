@@ -1,5 +1,3 @@
-use std::fs;
-
 use log::{error, info, warn};
 use serenity::http::Http;
 use serenity::model::channel::Embed;
@@ -8,10 +6,10 @@ use serenity::utils::Color;
 use crate::embed::EmbedData;
 use crate::fetch_loop::STATS;
 use crate::json::recent::Channel;
-use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
+use crate::json::webhooks::{FilterType, Hooks};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::Incr;
-use crate::TOKEN_PATH;
+use crate::{WEBHOOK_AUTH};
 
 const DEFAULT_KEYWORDS: [&str; 30] = [
 	"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
@@ -22,10 +20,7 @@ const DEFAULT_KEYWORDS: [&str; 30] = [
 
 impl Channel {
 	pub async fn handle_webhooks(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
-		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
-		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
+		for (i, hook) in WEBHOOK_AUTH.hooks.iter().enumerate() {
 			if is_filtered {
 				if match_filter(&content.url, hook, scrape_type) {
 					deliver_webhook(content.clone(), i).await;
@@ -137,15 +132,12 @@ fn filter_forum(content: &str, hook: &Hooks) -> bool {
 
 //Finally sends the webhook to the servers
 pub async fn deliver_webhook(content: EmbedData, pos: usize) {
-	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
-	let uid = webhook_auth.hooks[pos].uid;
-	let token = &webhook_auth.hooks[pos].token;
+	let uid = &WEBHOOK_AUTH.hooks[pos].uid;
+	let token = &WEBHOOK_AUTH.hooks[pos].token;
 
 	let my_http_client = Http::new(token);
 
-	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
+	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
 			print_log(&format!("{why}"), 0);
 			std::panic::panic_any(why)
@@ -171,7 +163,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
-	print_log(&format!("Posted webhook for {}", webhook_auth.hooks[pos].name), 1);
+	print_log(&format!("Posted webhook for {}", WEBHOOK_AUTH.hooks[pos].name), 1);
 }
 
 pub fn print_log(input: &str, log_level: u8) {

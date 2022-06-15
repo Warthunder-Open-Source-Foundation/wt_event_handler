@@ -1,6 +1,6 @@
 {
   "meta": {
-    "timestamp": 1653094012
+    "timestamp": 1655256194
   },
   "sources": [
     {
@@ -10,7 +10,7 @@
       "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
       "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
       "recent_url": [
-        "https://warthunder.com/en/news/7692-video-thunder-show-bashing-bounce-en"
+        "https://warthunder.com/en/news/7739-planned-technical-works-15-06-2022-danger-zone-update-en"
       ]
     },
     {
@@ -20,7 +20,7 @@
       "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
       "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
       "recent_url": [
-        "https://warthunder.com/en/game/changelog/current/1372"
+        "https://warthunder.com/en/game/changelog/current/1379"
       ]
     },
     {
@@ -30,7 +30,7 @@
       "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
       "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
       "recent_url": [
-        "https://forum.warthunder.com/index.php?/topic/554235-server-update-19052022/"
+        "https://forum.warthunder.com/index.php?/topic/556182-server-update-09062022/"
       ]
     },
     {
@@ -40,7 +40,7 @@
       "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
       "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
       "recent_url": [
-        "https://forum.warthunder.com/index.php?/topic/554354-video-thunder-show-bashing-bounce/"
+        "https://forum.warthunder.com/index.php?/topic/556548-planned-technical-works-15062022-danger-zone-update/"
       ]
     },
     {
@@ -50,7 +50,7 @@
       "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
       "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
       "recent_url": [
-        "https://forum.warthunder.com/index.php?/topic/550967-suggestions-passed-to-the-developers-march-2022/"
+        "https://forum.warthunder.com/index.php?/topic/552942-suggestions-passed-to-the-developers-april-2022/"
       ]
     }
   ]
