@@ -1,8 +1,8 @@
 use std::error::Error;
 use std::fs;
-use std::lazy::SyncLazy;
 use std::process::exit;
 use std::time::Duration;
+use lazy_static::lazy_static;
 
 use tokio::sync::Mutex;
 
@@ -20,9 +20,10 @@ pub const STAT_COOLDOWN_HOURS: u64 = 24;
 // in seconds
 const STAT_COOL_DOWN: u64 = 60 * 60 * STAT_COOLDOWN_HOURS;
 
-pub static STATS: SyncLazy<Mutex<Statistics>> = SyncLazy::new(||
-	Mutex::new(Statistics::new())
-);
+
+lazy_static!{
+	pub static ref STATS: Mutex<Statistics> = Mutex::new(Statistics::new());
+}
 
 pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	// First run of the program will fetch everything with no delay
