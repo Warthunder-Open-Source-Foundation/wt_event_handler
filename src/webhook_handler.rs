@@ -1,4 +1,3 @@
-use log::{error, info, warn};
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
