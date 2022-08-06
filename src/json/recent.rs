@@ -27,12 +27,12 @@ pub struct Channel {
 	pub scrape_type: ScrapeType,
 	pub selector: String,
 	pub pin: String,
-	pub recent_url: Vec<String>,
+	pub recent_url: HashSet<String>,
 }
 
 impl Channel {
 	pub fn is_new(&self, value: &str) -> bool {
-		if self.recent_url.contains(&value.to_owned()) {
+		if self.recent_url.get(&value.to_owned()).is_some() {
 			print_log("Content was recently fetched and is not new", 2);
 			false
 		} else {
@@ -41,7 +41,7 @@ impl Channel {
 		}
 	}
 	pub fn store_recent(&mut self, value: &str) {
-		self.recent_url.push(value.to_owned());
+		self.recent_url.insert(value.to_owned());
 	}
 }
 
