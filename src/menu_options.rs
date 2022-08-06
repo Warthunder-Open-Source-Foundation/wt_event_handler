@@ -13,10 +13,11 @@ use log4rs::config::{Appender, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use log::LevelFilter;
 
-use crate::{print_log, RECENT_PATH, TOKEN_PATH};
+use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
 use crate::json::recent::Recent;
 use crate::json::webhooks::{Hooks, WebhookAuth};
+use crate::logging::print_log;
 use crate::webhook_handler::deliver_webhook;
 
 pub fn init_log() -> Result<(), Box<dyn Error>> {

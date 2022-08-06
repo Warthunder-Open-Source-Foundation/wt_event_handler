@@ -4,8 +4,9 @@ use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
-use crate::{print_log,WEBHOOK_AUTH};
+use crate::WEBHOOK_AUTH;
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
+use crate::logging::print_log;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {

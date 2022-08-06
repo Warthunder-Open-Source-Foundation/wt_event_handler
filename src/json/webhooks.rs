@@ -3,7 +3,7 @@ use std::process::exit;
 
 use serenity::http::Http;
 
-use crate::print_log;
+use crate::logging::print_log;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct WebhookAuth {

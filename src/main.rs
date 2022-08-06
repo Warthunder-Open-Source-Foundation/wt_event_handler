@@ -13,7 +13,7 @@ use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
-use crate::webhook_handler::print_log;
+use logging::print_log;
 
 mod webhook_handler;
 mod scrapers;
@@ -24,6 +24,7 @@ mod embed;
 mod error;
 mod timeout;
 mod statistics;
+mod logging;
 
 const RECENT_PATH: &str = "assets/recent.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
@@ -53,8 +54,7 @@ lazy_static! {
 async fn main() {
 	let (tx, rx) = channel();
 
-	ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel."))
-		.expect("Error setting Ctrl-C handler");
+	ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel.")).expect("Error setting Ctrl-C handler");
 
 	tokio::task::spawn(async move {
 		rx.recv().expect("Could not receive from channel.");

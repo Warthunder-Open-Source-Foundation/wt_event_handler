@@ -7,7 +7,7 @@ use scraper::Selector;
 
 use crate::RECENT_PATH;
 use crate::scrapers::scraper_resources::resources::{RecentHtmlTarget, ScrapeType};
-use crate::webhook_handler::print_log;
+use crate::logging::print_log;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {

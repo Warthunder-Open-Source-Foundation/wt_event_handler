@@ -12,7 +12,7 @@ use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
-use crate::webhook_handler::print_log;
+use crate::logging::print_log;
 
 const FETCH_DELAY: u64 = 48;
 

@@ -5,7 +5,8 @@ use serenity::http::Http;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
 
-use crate::{PANIC_INFO, print_log};
+use crate::PANIC_INFO;
+use crate::logging::print_log;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Debug, Clone)]
