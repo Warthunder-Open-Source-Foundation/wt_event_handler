@@ -6,7 +6,7 @@ use serenity::utils::Color;
 
 use crate::WEBHOOK_AUTH;
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
-use crate::logging::print_log;
+use crate::logging::{LogLevel, print_log};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {
@@ -75,7 +75,7 @@ impl Statistics {
 
 		let webhook = match my_http_client.get_webhook_with_token(WEBHOOK_AUTH.statistics_hook.uid, &WEBHOOK_AUTH.statistics_hook.token).await {
 			Err(why) => {
-				print_log(&format!("{why}"), 0);
+				print_log(&format!("{why}"), LogLevel::Error);
 				std::panic::panic_any(why)
 			}
 			Ok(hook) => hook,
@@ -96,7 +96,7 @@ impl Statistics {
 			w
 		}).await.unwrap();
 
-		print_log("All statistics are posted", 1);
+		print_log("All statistics are posted", LogLevel::Warning);
 	}
 }
 

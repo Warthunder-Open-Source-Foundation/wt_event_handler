@@ -6,7 +6,7 @@ use serenity::model::prelude::Embed;
 use serenity::utils::Color;
 
 use crate::PANIC_INFO;
-use crate::logging::print_log;
+use crate::logging::{LogLevel, print_log};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Debug, Clone)]
@@ -42,7 +42,7 @@ pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 
 	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid, &PANIC_INFO.token).await {
 		Err(why) => {
-			print_log(&format!("{why}"), 0);
+			print_log(&format!("{why}"), LogLevel::Error);
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
@@ -67,5 +67,5 @@ pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
-	print_log(&format!("Posted panic webhook for {}", PANIC_INFO.name), 1);
+	print_log(&format!("Posted panic webhook for {}", PANIC_INFO.name), LogLevel::Warning);
 }

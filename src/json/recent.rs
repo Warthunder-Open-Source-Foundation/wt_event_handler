@@ -7,7 +7,7 @@ use scraper::Selector;
 
 use crate::RECENT_PATH;
 use crate::scrapers::scraper_resources::resources::{RecentHtmlTarget, ScrapeType};
-use crate::logging::print_log;
+use crate::logging::{LogLevel, print_log};
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {
@@ -33,10 +33,10 @@ pub struct Channel {
 impl Channel {
 	pub fn is_new(&self, value: &str) -> bool {
 		if self.recent_url.get(&value.to_owned()).is_some() {
-			print_log("Content was recently fetched and is not new", 2);
+			print_log("Content was recently fetched and is not new", LogLevel::Info);
 			false
 		} else {
-			print_log("New post found, hooking now", 1);
+			print_log("New post found, hooking now", LogLevel::Warning);
 			true
 		}
 	}
@@ -51,7 +51,7 @@ impl Recent {
 
 		let write = serde_json::to_string_pretty(self).unwrap();
 		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
-		print_log("Saved recent to file", 1);
+		print_log("Saved recent to file", LogLevel::Warning);
 	}
 	fn update_timestamp(&mut self) {
 		self.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();

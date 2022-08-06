@@ -3,7 +3,7 @@ use std::process::exit;
 
 use serenity::http::Http;
 
-use crate::logging::print_log;
+use crate::logging::{LogLevel, print_log};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct WebhookAuth {
@@ -168,7 +168,7 @@ async fn send_test_hook(hook: &Hooks) {
 
 	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
-			print_log(&format!("{why}"), 0);
+			print_log(&format!("{why}"), LogLevel::Error);
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,

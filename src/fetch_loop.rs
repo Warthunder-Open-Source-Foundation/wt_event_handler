@@ -12,7 +12,7 @@ use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
-use crate::logging::print_log;
+use crate::logging::{LogLevel, print_log};
 
 const FETCH_DELAY: u64 = 48;
 
@@ -67,9 +67,9 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 				}
 			}
 			if oneshot {
-				print_log("Skipping sleep for oneshot", 2);
+				print_log("Skipping sleep for oneshot", LogLevel::Info);
 			} else {
-				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), 2);
+				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
 				tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 			}
 		}
@@ -99,7 +99,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		let _ = &timeouts.time_out(source, then);
 	};
 
-	print_log(&e.to_string(), 0);
+	print_log(&e.to_string(), LogLevel::Error);
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;

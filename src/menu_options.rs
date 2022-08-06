@@ -17,7 +17,7 @@ use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
 use crate::json::recent::Recent;
 use crate::json::webhooks::{Hooks, WebhookAuth};
-use crate::logging::print_log;
+use crate::logging::{LogLevel, print_log};
 use crate::webhook_handler::deliver_webhook;
 
 pub fn init_log() -> Result<(), Box<dyn Error>> {
@@ -137,7 +137,7 @@ pub fn clean_recent() -> Result<(), Box<dyn Error>> {
 	let write = serde_json::to_string_pretty(&cache)?;
 	fs::write(RECENT_PATH, write)?;
 
-	print_log("Cleared recent file", 1);
+	print_log("Cleared recent file", LogLevel::Warning);
 	Ok(())
 }
 

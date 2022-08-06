@@ -1,15 +1,21 @@
 use log::{error, info, warn};
 
-pub fn print_log(input: &str, log_level: u8) {
+pub enum LogLevel {
+	Info,
+	Warning,
+	Error,
+}
+
+pub fn print_log(input: &str, log_level: LogLevel) {
 	println!("{} {}", chrono::Local::now().naive_local(), input);
 	match log_level {
-		2 => {
+		LogLevel::Info => {
 			info!("{}", input);
 		}
-		1 => {
+		LogLevel::Warning => {
 			warn!("{}", input);
 		}
-		_ => {
+		LogLevel::Error => {
 			error!("{}", input);
 		}
 	}

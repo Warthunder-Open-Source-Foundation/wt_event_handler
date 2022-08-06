@@ -14,6 +14,7 @@ use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
 use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
 use logging::print_log;
+use crate::logging::LogLevel;
 
 mod webhook_handler;
 mod scrapers;
@@ -33,7 +34,7 @@ pub const HANDLE_RESULT_FN: fn(Result<(), Box<dyn Error>>) = |e: Result<(), Box<
 	match e {
 		Ok(_) => {}
 		Err(e) => {
-			print_log(&e.to_string(), 0);
+			print_log(&e.to_string(), LogLevel::Error);
 			panic!("{}", e);
 		}
 	}
@@ -58,7 +59,7 @@ async fn main() {
 
 	tokio::task::spawn(async move {
 		rx.recv().expect("Could not receive from channel.");
-		print_log("Received termination signal, saving progress to file and contacting status channels", 0);
+		print_log("Received termination signal, saving progress to file and contacting status channels", LogLevel::Error);
 		exit(0);
 	});
 
@@ -109,18 +110,18 @@ async fn main() {
 			Ok(result) => {
 				if result {
 					HANDLE_RESULT_FN(clean_recent());
-					print_log("Json prefetched and cleaned successfully", 1);
+					print_log("Json prefetched and cleaned successfully", LogLevel::Warning);
 				}
 			}
 			Err(e) => {
-				print_log(&e.to_string(), 0);
+				print_log(&e.to_string(), LogLevel::Error);
 				panic!("{}", e);
 			}
 		}
 	}
 
 	HANDLE_RESULT_FN(init_log());
-	print_log("Started client", 1);
+	print_log("Started client", LogLevel::Warning);
 
 	#[allow(clippy::semicolon_if_nothing_returned)]
 	fetch_loop(hooks, write_files).await; // For the love of god clippy
