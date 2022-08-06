@@ -5,6 +5,7 @@
 use std::{fs, io};
 use std::error::Error;
 use std::process::exit;
+use std::sync::mpsc::channel;
 
 use lazy_static::{initialize, lazy_static};
 
@@ -50,6 +51,17 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
+	let (tx, rx) = channel();
+
+	ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel."))
+		.expect("Error setting Ctrl-C handler");
+
+	tokio::task::spawn(async move {
+		rx.recv().expect("Could not receive from channel.");
+		print_log("Received termination signal, saving progress to file and contacting status channels", 0);
+		exit(0);
+	});
+
 	// Loads statics
 	initialize(&WEBHOOK_AUTH);
 	initialize(&PANIC_INFO);
