@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::convert::TryFrom;
 use std::fs;
 
@@ -39,7 +40,7 @@ impl Channel {
 			true
 		}
 	}
-	pub fn append_latest(&mut self, value: &str) {
+	pub fn store_recent(&mut self, value: &str) {
 		self.recent_url.push(value.to_owned());
 	}
 }

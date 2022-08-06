@@ -55,7 +55,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 								source.handle_webhooks(&content, true, source.scrape_type).await;
 							}
 							if write_files {
-								source.append_latest(&content.url);
+								source.store_recent(&content.url);
 							}
 							increment(Incr::NewNews).await;
 						}
