@@ -128,6 +128,5 @@ async fn main() {
 	HANDLE_RESULT_FN(init_log());
 	print_log("Started client", LogLevel::Warning);
 
-	#[allow(clippy::semicolon_if_nothing_returned)]
-	fetch_loop(hooks, write_files).await; // For the love of god clippy
+	fetch_loop(hooks, write_files).await;
 }

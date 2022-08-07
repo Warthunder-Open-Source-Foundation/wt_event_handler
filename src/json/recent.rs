@@ -66,10 +66,10 @@ impl Recent {
 pub fn format_selector(main: &Channel, which: &RecentHtmlTarget, index: u32) -> Selector {
 	return match which {
 		RecentHtmlTarget::Pin => {
-			Selector::parse(&*format!("{}{}{}", &*main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
+			Selector::parse(&format!("{}{}{}", main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
 		}
 		RecentHtmlTarget::Post => {
-			Selector::parse(&*format!("{}{}{}", &*main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, &*main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
+			Selector::parse(&format!("{}{}{}", main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
 		}
 	};
 }

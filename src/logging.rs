@@ -1,5 +1,6 @@
 use log::{error, info, warn};
 
+#[derive(Copy, Clone)]
 pub enum LogLevel {
 	Info,
 	Warning,
