@@ -3,10 +3,10 @@ use std::error::Error;
 use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;
-use crate::error::NewsError;
+use crate::error::{InputError, NewsError};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, Box<dyn Error>> {
+pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, InputError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
 			scrape_forum(html)?

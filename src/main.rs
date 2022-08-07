@@ -9,12 +9,14 @@ use std::sync::mpsc::channel;
 
 use lazy_static::{initialize, lazy_static};
 
+use logging::print_log;
+
+use crate::error::ship_error_webhook;
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
-use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
-use logging::print_log;
 use crate::logging::LogLevel;
+use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
 
 mod webhook_handler;
 mod scrapers;
@@ -55,13 +57,7 @@ lazy_static! {
 async fn main() {
 	let (tx, rx) = channel();
 
-	ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel.")).expect("Error setting Ctrl-C handler");
-
-	tokio::task::spawn(async move {
-		rx.recv().expect("Could not receive from channel.");
-		print_log("Received termination signal, saving progress to file and contacting status channels", LogLevel::Error);
-		exit(0);
-	});
+	ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on termination channel")).expect("Error setting Ctrl-C handler");
 
 	// Loads statics
 	initialize(&WEBHOOK_AUTH);
@@ -104,6 +100,15 @@ async fn main() {
 			exit(1);
 		}
 	}
+
+	tokio::task::spawn(async move {
+		rx.recv().expect("Could not receive from channel termination");
+		print_log("Received termination signal, saving progress to file and contacting status channels", LogLevel::Error);
+		if hooks {
+			ship_error_webhook("Received signal to terminate, shutting down safely...".to_owned(), false).await;
+		}
+		exit(1);
+	});
 
 	if json_verification {
 		match verify_json() {

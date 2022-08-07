@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 
 use tokio::sync::Mutex;
 
-use crate::error::{error_webhook, NewsError};
+use crate::error::{error_webhook, InputError, NewsError};
 use crate::json::recent::Recent;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -83,7 +83,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 }
 
 async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
-	let crash_and_burn = |e: Box<dyn Error>| async move {
+	let crash_and_burn = |e: InputError| async move {
 		if hooks {
 			error_webhook(&e, false).await;
 		}
