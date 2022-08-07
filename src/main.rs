@@ -101,6 +101,7 @@ async fn main() {
 		}
 	}
 
+	// Thread responsible for shutting down program on SIGTERM or equivalent
 	tokio::task::spawn(async move {
 		rx.recv().expect("Could not receive from channel termination");
 		print_log("Received termination signal, saving progress to file and contacting status channels", LogLevel::Error);

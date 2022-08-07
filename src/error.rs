@@ -44,6 +44,7 @@ pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 	print_log(&format!("Posted panic webhook for {}", PANIC_INFO.name), LogLevel::Warning);
 }
 
+// Broken up function signature to avoid runtime threat-passing of Error data, permitting direct calling from outside
 pub async fn ship_error_webhook(input: String, can_recover: bool) {
 	let my_http_client = Http::new(&PANIC_INFO.token);
 
