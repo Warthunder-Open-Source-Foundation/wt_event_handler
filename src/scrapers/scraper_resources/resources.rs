@@ -8,6 +8,7 @@ use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 
 use crate::json::recent::{Channel, format_selector};
+use crate::{LogLevel, print_log};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum ScrapeType {
@@ -38,8 +39,7 @@ pub enum RecentHtmlTarget {
 }
 
 pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
-	println!("{} Fetching data from {}", chrono::Local::now(), &url);
-	info!("{} Fetching data from {}", chrono::Local::now(), &url);
+	print_log(&format!("Fetching data from {}", &url), LogLevel::Info);
 
 	let client = Client::builder()
 		.timeout(Duration::from_secs(1))
