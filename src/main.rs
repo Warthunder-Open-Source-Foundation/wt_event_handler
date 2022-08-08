@@ -55,10 +55,6 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-	let (tx, rx) = channel();
-
-	ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on termination channel")).expect("Error setting Ctrl-C handler");
-
 	// Loads statics
 	initialize(&WEBHOOK_AUTH);
 	initialize(&PANIC_INFO);
@@ -100,16 +96,6 @@ async fn main() {
 			exit(1);
 		}
 	}
-
-	// Thread responsible for shutting down program on SIGTERM or equivalent
-	tokio::task::spawn(async move {
-		rx.recv().expect("Could not receive from channel termination");
-		print_log("Received termination signal, saving progress to file and contacting status channels", LogLevel::Error);
-		if hooks {
-			ship_error_webhook("Received signal to terminate, shutting down safely...".to_owned(), false).await;
-		}
-		exit(1);
-	});
 
 	if json_verification {
 		match verify_json() {

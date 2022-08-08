@@ -45,6 +45,7 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 	});
 
 	loop {
+		panic!("");
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
