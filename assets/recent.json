@@ -9,7 +9,7 @@
       "scrape_type": "Main",
       "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
       "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-      "recent_url": [
+      "old_urls": [
         "https://warthunder.com/en/news/7804-video-thunder-show-hidden-menace-en"
       ]
     },
@@ -19,7 +19,7 @@
       "scrape_type": "Changelog",
       "selector": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>a.widget__link",
       "pin": "#bodyRoot>div.content>div:nth-child(2)>div>div>section>div>div.showcase__content-wrapper>div:nth-child( )>div.widget__pin",
-      "recent_url": [
+      "old_urls": [
         "https://warthunder.com/en/game/changelog/current/1403"
       ]
     },
@@ -29,7 +29,7 @@
       "scrape_type": "Forum",
       "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
       "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-      "recent_url": [
+      "old_urls": [
         "https://forum.warthunder.com/index.php?/topic/560324-server-update-05082022/"
       ]
     },
@@ -39,7 +39,7 @@
       "scrape_type": "Forum",
       "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
       "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-      "recent_url": [
+      "old_urls": [
         "https://forum.warthunder.com/index.php?/topic/560347-video-thunder-show-hidden-menace/"
       ]
     },
@@ -49,7 +49,7 @@
       "scrape_type": "Forum",
       "selector": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )>div>h4>div>a",
       "pin": "body>main>div>div>div>div:nth-child(2)>div>ol>li:nth-child( )",
-      "recent_url": [
+      "old_urls": [
         "https://forum.warthunder.com/index.php?/topic/558034-suggestions-passed-to-the-developers-june-2022/"
       ]
     }
