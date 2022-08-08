@@ -131,7 +131,7 @@ pub fn clean_recent() -> Result<(), Box<dyn Error>> {
 	let mut cache: Recent = serde_json::from_str(&cache_raw)?;
 
 	for source in &mut cache.sources {
-		source.recent_url.clear();
+		source.old_urls.clear();
 	}
 
 	let write = serde_json::to_string_pretty(&cache)?;
