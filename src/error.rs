@@ -17,6 +17,9 @@ pub enum NewsError {
 	NoUrlOnPost(String, String),
 	MetaCannotBeScraped(ScrapeType),
 	SourceTimeout(ScrapeType, String, i64),
+	BadSelector(String),
+	MonthParse(String),
+	SelectedNothing(String, String)
 }
 
 impl Display for NewsError {
@@ -30,6 +33,15 @@ impl Display for NewsError {
 			}
 			NewsError::SourceTimeout(scrape_type, msg, timestamp) => {
 				write!(f, "SourceTimeout: Source \'{scrape_type}\' timed out and will not be fetched until <t:{timestamp}>. \nError message: \"{msg}\"")
+			}
+			NewsError::BadSelector(selector) => {
+				write!(f, "BadSelector: The selector \'{selector}\' failed to parse")
+			}
+			NewsError::MonthParse(input) => {
+				write!(f, "MonthParse: \'{input}\' failed to parse into month")
+			}
+			NewsError::SelectedNothing(selector, html) => {
+				write!(f, "SelectedNothing: Selector: \'{selector}\' found no item.\nDocument: {html}")
 			}
 		}
 	}

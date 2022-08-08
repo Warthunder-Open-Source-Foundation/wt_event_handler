@@ -87,7 +87,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		if hooks {
 			error_webhook(&e, false).await;
 		}
-		panic!("{}", e);
+		panic!("{:?}", e);
 	};
 
 	let time_out = |send, msg: String| async move {

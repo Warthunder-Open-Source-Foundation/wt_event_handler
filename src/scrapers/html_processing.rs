@@ -14,10 +14,11 @@ pub async fn html_processor(recent_value: &Channel) -> Result<EmbedData, Box<dyn
 
 	let html = request_html(url).await?;
 
-	let links = get_listed_links(scrape_type, &html);
+	let links = get_listed_links(scrape_type, &html)?;
+
 	dbg!(&links);
 
-	let post_url = format_result(&links[0], scrape_type);
+	let post_url = format_result(&links[0].0, scrape_type);
 
 	let post_html = request_html(&post_url).await?;
 
