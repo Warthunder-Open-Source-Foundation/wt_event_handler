@@ -49,50 +49,58 @@ pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
 	Ok(Html::parse_document(text.as_str()))
 }
 
-pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
-	let mut pin: Selector;
-
-	match selection {
-		ScrapeType::Main | ScrapeType::Changelog => {
-			loop {
-				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
-				if html.select(&pin).next().is_some() {
-					post += 1;
-				} else {
-					return post;
+pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Vec<String> {
+	return match scrape_type {
+		ScrapeType::Changelog | ScrapeType::Main => {
+			let sel_text = match scrape_type {
+				ScrapeType::Main => {
+					// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
+					"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(2) > div > section > div > div.showcase__content-wrapper > div > a.widget__link"
 				}
-				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
-					exit(-1);
+				ScrapeType::Changelog => {
+					// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
+					"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(3) > div > section > div > div.showcase__content-wrapper > div > a.widget__link"
+				}
+				_ => {
+					panic!("Impossible")
+				}
+			};
+			let sel = Selector::parse(sel_text).expect("Selector should be valid as it is static");
+
+			let selected = html.select(&sel);
+			let mut res = vec![];
+			for item in selected {
+				if let Some(url) = item.value().attr("href") {
+					res.push(url.to_owned())
 				}
 			}
+			res
 		}
 		ScrapeType::Forum => {
-			loop {
-				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
-				if let Some(top_url) = html.select(&pin).next() {
-					let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
-					if !is_pinned {
-						return post;
+			let sel = Selector::parse("body > main > div > div > div > div:nth-child(2) > div > ol > li").expect("Selector should be valid as it is static");
+
+			let selected = html.select(&sel);
+			let mut res = vec![];
+			for item in selected {
+				let lower_url = Selector::parse("div > h4 > div > a").expect("Selector should be valid as it is static");
+				if let Some(url_elem) = item.select(&lower_url).next() {
+					if let Some(url) = url_elem.value().attr("href") {
+						res.push(url.to_owned())
 					}
-					post += 1;
-				}
-				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
-					exit(-1);
 				}
 			}
+			res
 		}
 	}
 }
 
-pub fn format_result(top_url: ElementRef, selection: ScrapeType) -> String {
+pub fn format_result(top_url: &str, selection: ScrapeType) -> String {
 	return match selection {
 		ScrapeType::Main | ScrapeType::Changelog => {
-			format!("https://warthunder.com{}", top_url.value().attr("href").unwrap())
+			format!("https://warthunder.com{}", top_url)
 		}
 		ScrapeType::Forum => {
-			top_url.value().attr("href").unwrap().to_string()
+			top_url.to_owned()
 		}
 	};
 }
