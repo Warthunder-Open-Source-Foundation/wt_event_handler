@@ -5,13 +5,13 @@
 use std::{fs, io};
 use std::error::Error;
 use std::process::exit;
-use std::sync::mpsc::channel;
+
 
 use lazy_static::{initialize, lazy_static};
 
 use logging::print_log;
 
-use crate::error::ship_error_webhook;
+
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;

@@ -1,18 +1,18 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
-use std::process::exit;
+
 use std::str::FromStr;
 use std::time::Duration;
-use chrono::{Date, Month, NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{Month, NaiveDate, NaiveDateTime, NaiveTime};
 
-use log::info;
+
 use reqwest::Client;
-use scraper::{ElementRef, Html, Selector};
+use scraper::{Html, Selector};
 
-use crate::json::recent::{Channel, format_selector};
+
 use crate::{LogLevel, print_log};
 use crate::error::NewsError;
-use crate::error::NewsError::{BadSelector, MonthParse, NoUrlOnPost, SelectedNothing};
+use crate::error::NewsError::{BadSelector, MonthParse, SelectedNothing};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum ScrapeType {
@@ -103,7 +103,6 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<(Str
 				if let Some(url_elem) = item.select(&lower_url).next() {
 					if let Some(url) = url_elem.value().attr("href") {
 						if let Some(date_str) = item.select(&date_sel).next().ok_or(SelectedNothing(DATE_SEL_TEXT.to_owned(), item.inner_html()))?.value().attr("datetime").to_owned() {
-							println!("{}", date_str);
 							let date = NaiveDateTime::parse_from_str(&date_str.replace("Z", "").replace("T", ""), "%Y-%m-%d %H:%M:%S")?;
 							res.push((url.to_owned(), date.timestamp()));
 						}

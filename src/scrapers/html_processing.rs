@@ -1,12 +1,12 @@
 use std::error::Error;
-use std::process::exit;
-use scraper::Selector;
+
+
 
 use crate::embed::EmbedData;
-use crate::error::{error_webhook, NewsError};
-use crate::json::recent::{Channel, format_selector};
+use crate::error::{error_webhook};
+use crate::json::recent::{Channel};
 use crate::scrapers::scrape_meta::scrape_meta;
-use crate::scrapers::scraper_resources::resources::{format_result, get_listed_links, RecentHtmlTarget, request_html};
+use crate::scrapers::scraper_resources::resources::{format_result, get_listed_links, request_html};
 
 pub async fn html_processor(recent_value: &Channel) -> Result<EmbedData, Box<dyn Error>> {
 	let url = &recent_value.domain;

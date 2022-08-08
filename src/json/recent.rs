@@ -3,10 +3,10 @@ use std::convert::TryFrom;
 use std::fs;
 
 use chrono::Local;
-use scraper::Selector;
+
 
 use crate::RECENT_PATH;
-use crate::scrapers::scraper_resources::resources::{RecentHtmlTarget, ScrapeType};
+use crate::scrapers::scraper_resources::resources::{ScrapeType};
 use crate::logging::{LogLevel, print_log};
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
@@ -61,15 +61,4 @@ impl Recent {
 		let recent: Self = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
 		recent
 	}
-}
-
-pub fn format_selector(main: &Channel, which: &RecentHtmlTarget, index: u32) -> Selector {
-	return match which {
-		RecentHtmlTarget::Pin => {
-			Selector::parse(&format!("{}{}{}", main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
-		}
-		RecentHtmlTarget::Post => {
-			Selector::parse(&format!("{}{}{}", main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
-		}
-	};
 }
