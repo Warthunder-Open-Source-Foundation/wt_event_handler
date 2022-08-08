@@ -6,11 +6,9 @@ use std::{fs, io};
 use std::error::Error;
 use std::process::exit;
 
-
 use lazy_static::{initialize, lazy_static};
 
 use logging::print_log;
-
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;

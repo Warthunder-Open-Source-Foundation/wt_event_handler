@@ -2,14 +2,14 @@ use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
+use crate::{logging, WEBHOOK_AUTH};
 use crate::embed::EmbedData;
 use crate::fetch_loop::STATS;
 use crate::json::recent::Channel;
 use crate::json::webhooks::{FilterType, Hooks};
+use crate::logging::LogLevel;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::Incr;
-use crate::{logging, WEBHOOK_AUTH};
-use crate::logging::LogLevel;
 
 const DEFAULT_KEYWORDS: [&str; 30] = [
 	"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",

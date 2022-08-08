@@ -4,9 +4,9 @@ use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
 
-use crate::WEBHOOK_AUTH;
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
 use crate::logging::{LogLevel, print_log};
+use crate::WEBHOOK_AUTH;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Statistics {
@@ -51,7 +51,7 @@ impl Statistics {
 			post_counter: 0,
 			new_news: 0,
 			errors: 0,
-			timeouts: 0
+			timeouts: 0,
 		}
 	}
 	pub fn increment(&mut self, incr: Incr) {

@@ -5,8 +5,8 @@ use serenity::http::Http;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
 
-use crate::PANIC_INFO;
 use crate::logging::{LogLevel, print_log};
+use crate::PANIC_INFO;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 pub type InputError = Box<dyn Error>;
@@ -19,7 +19,7 @@ pub enum NewsError {
 	SourceTimeout(ScrapeType, String, i64),
 	BadSelector(String),
 	MonthParse(String),
-	SelectedNothing(String, String)
+	SelectedNothing(String, String),
 }
 
 impl Display for NewsError {

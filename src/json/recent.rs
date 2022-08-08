@@ -4,10 +4,9 @@ use std::fs;
 
 use chrono::Local;
 
-
-use crate::RECENT_PATH;
-use crate::scrapers::scraper_resources::resources::{ScrapeType};
 use crate::logging::{LogLevel, print_log};
+use crate::RECENT_PATH;
+use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
 pub struct Recent {

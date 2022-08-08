@@ -2,17 +2,17 @@ use std::error::Error;
 use std::fs;
 use std::process::exit;
 use std::time::Duration;
-use lazy_static::lazy_static;
 
+use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 
 use crate::error::{error_webhook, InputError, NewsError};
 use crate::json::recent::Recent;
+use crate::logging::{LogLevel, print_log};
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
-use crate::logging::{LogLevel, print_log};
 
 const FETCH_DELAY: u64 = 48;
 
@@ -21,7 +21,7 @@ pub const STAT_COOLDOWN_HOURS: u64 = 24;
 const STAT_COOL_DOWN: u64 = 60 * 60 * STAT_COOLDOWN_HOURS;
 
 
-lazy_static!{
+lazy_static! {
 	pub static ref STATS: Mutex<Statistics> = Mutex::new(Statistics::new());
 }
 
