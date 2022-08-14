@@ -1,9 +1,10 @@
 use std::collections::HashSet;
+use std::error::Error;
 use std::fs;
 
 use crate::logging::{LogLevel, print_log};
 use crate::RECENT_PATH;
-use crate::scrapers::html_processing::html_processor;
+use crate::scrapers::html_processing::{get_embed_data, html_processor, scrape_links};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -49,10 +50,10 @@ impl Sources {
 		print_log("Pre-fetching URLs", LogLevel::Info);
 		let mut new = self.clone();
 		for mut source in &mut new.sources {
-			match html_processor(&mut source, false).await {
-				Ok(news) => {
-					for news_embed in news {
-						source.store_recent(news_embed.url);
+			match scrape_links(&source).await {
+				Ok(news_urls) => {
+					for news_url in news_urls {
+						source.store_recent(news_url);
 					}
 				}
 				Err(e) => {

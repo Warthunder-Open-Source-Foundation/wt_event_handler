@@ -47,16 +47,14 @@ pub async fn fetch_loop(hooks: bool) {
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
-				match html_processor(source, true).await {
+				match html_processor(source).await {
 					Ok(news) => {
 						for news_embed in news {
-							if source.is_new(&news_embed.url, true) {
-								if hooks {
-									source.handle_webhooks(&news_embed, true, source.scrape_type).await;
-								}
-								increment(Incr::NewNews).await;
-								source.store_recent(news_embed.url);
+							if hooks {
+								source.handle_webhooks(&news_embed, true, source.scrape_type).await;
 							}
+							increment(Incr::NewNews).await;
+							source.store_recent(news_embed.url);
 						}
 					}
 					Err(e) => {
@@ -65,8 +63,8 @@ pub async fn fetch_loop(hooks: bool) {
 					}
 				}
 			}
-				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
-				tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
+			print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
+			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 		}
 		//Aborts program after running without hooks
 		if !hooks {
