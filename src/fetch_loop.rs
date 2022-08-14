@@ -7,7 +7,7 @@ use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 
 use crate::error::{error_webhook, InputError, NewsError};
-use crate::json::recent::Recent;
+use crate::json::recent::Sources;
 use crate::logging::{LogLevel, print_log};
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -25,10 +25,8 @@ lazy_static! {
 	pub static ref STATS: Mutex<Statistics> = Mutex::new(Statistics::new());
 }
 
-pub async fn fetch_loop(hooks: bool, write_files: bool) {
-	// First run of the program will fetch everything with no delay
-	let mut oneshot = true;
-	let mut recent_data = Recent::read_latest();
+pub async fn fetch_loop(hooks: bool) {
+	let mut recent_data = Sources::read_latest().await;
 
 	let mut timeouts = Timeout::new();
 
@@ -44,20 +42,21 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		}
 	});
 
+
 	loop {
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
-				match html_processor(source).await {
-					Ok(content) => {
-						if source.is_new(&content.url) {
-							if hooks {
-								source.handle_webhooks(&content, true, source.scrape_type).await;
+				match html_processor(source, true).await {
+					Ok(news) => {
+						for news_embed in news {
+							if source.is_new(&news_embed.url, true) {
+								if hooks {
+									source.handle_webhooks(&news_embed, true, source.scrape_type).await;
+								}
+								increment(Incr::NewNews).await;
+								source.store_recent(news_embed.url);
 							}
-							if write_files {
-								source.store_recent(&content.url);
-							}
-							increment(Incr::NewNews).await;
 						}
 					}
 					Err(e) => {
@@ -66,17 +65,11 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			if oneshot {
-				print_log("Skipping sleep for oneshot", LogLevel::Info);
-			} else {
 				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
 				tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
-			}
 		}
-		oneshot = false;
-		recent_data.save();
 		//Aborts program after running without hooks
-		if !hooks || !write_files {
+		if !hooks {
 			exit(0);
 		}
 	}

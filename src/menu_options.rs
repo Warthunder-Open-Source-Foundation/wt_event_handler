@@ -1,4 +1,3 @@
-use std::convert::TryFrom;
 use std::error::Error;
 use std::fs;
 use std::io;
@@ -15,7 +14,7 @@ use log::LevelFilter;
 
 use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
-use crate::json::recent::Recent;
+use crate::json::recent::Sources;
 use crate::json::webhooks::{Hooks, WebhookAuth};
 use crate::logging::{LogLevel, print_log};
 use crate::webhook_handler::deliver_webhook;
@@ -44,24 +43,7 @@ pub fn verify_json() -> Result<bool, Box<dyn Error>> {
 	println!("Verifying Json files...");
 
 	let recent_raw = fs::read_to_string(RECENT_PATH)?;
-	let mut recent: Recent = serde_json::from_str(&recent_raw)?;
-
-	let local_time = u64::try_from(Local::now().timestamp())?;
-
-	if (local_time - recent.meta.timestamp) > 60 * 60 {
-		recent.meta.timestamp = u64::try_from(Local::now().timestamp())?;
-		let write_recent = serde_json::to_string_pretty(&recent)?;
-		fs::write("assets/recent.json", write_recent)?;
-		return Ok(true);
-	} else if recent.meta.timestamp == 0 {
-		recent.meta.timestamp = local_time;
-		println!("The last fetch date was 0 and has been corrected");
-		let write_recent = serde_json::to_string_pretty(&recent)?;
-		fs::write("assets/recent.json", write_recent)?;
-		return Ok(true);
-	}
-
-	recent.meta.timestamp = local_time;
+	let recent: Sources = serde_json::from_str(&recent_raw)?;
 
 	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
 	let token: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
@@ -128,10 +110,10 @@ pub fn remove_webhook() -> Result<(), Box<dyn Error>> {
 
 pub fn clean_recent() -> Result<(), Box<dyn Error>> {
 	let cache_raw = fs::read_to_string(RECENT_PATH)?;
-	let mut cache: Recent = serde_json::from_str(&cache_raw)?;
+	let mut cache: Sources = serde_json::from_str(&cache_raw)?;
 
 	for source in &mut cache.sources {
-		source.old_urls.clear();
+		source.tracked_urls.clear();
 	}
 
 	let write = serde_json::to_string_pretty(&cache)?;
