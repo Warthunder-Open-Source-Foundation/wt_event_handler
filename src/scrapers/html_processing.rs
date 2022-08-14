@@ -2,7 +2,7 @@ use std::error::Error;
 
 use crate::embed::EmbedData;
 use crate::error::error_webhook;
-use crate::json::recent::{Channel};
+use crate::json::recent::Channel;
 use crate::scrapers::scrape_meta::scrape_meta;
 use crate::scrapers::scraper_resources::resources::{format_into_final_url, get_listed_links, request_html, ScrapeType};
 
@@ -13,15 +13,15 @@ pub async fn html_processor(channel: &mut Channel) -> Result<Vec<EmbedData>, Box
 	let mut links = scrape_links(channel).await?;
 
 	// Removes already known URLs
-	links = links.into_iter().filter(|link| channel.is_new(link, false)).collect();
+	links.retain(|link| channel.is_new(link, false));
 
 	let mut final_embeds = vec![];
 	for link in links {
 		let post_url = format_into_final_url(&link, scrape_type);
 
 
-			let embed = get_embed_data( &post_url, scrape_type).await?;
-			final_embeds.push(embed);
+		let embed = get_embed_data(&post_url, scrape_type).await?;
+		final_embeds.push(embed);
 	}
 
 	Ok(final_embeds)

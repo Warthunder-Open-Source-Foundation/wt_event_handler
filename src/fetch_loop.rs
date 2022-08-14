@@ -54,7 +54,7 @@ pub async fn fetch_loop(hooks: bool) {
 								source.handle_webhooks(&news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
-							source.store_recent(news_embed.url);
+							source.store_recent(&news_embed.url);
 						}
 					}
 					Err(e) => {

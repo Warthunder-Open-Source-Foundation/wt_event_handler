@@ -1,12 +1,13 @@
-use log::{error, info, LevelFilter, warn};
 use std::error::Error;
-use std::path::Path;
-use chrono::Local;
 use std::fs;
+use std::path::Path;
+
+use chrono::Local;
+use log::{error, info, LevelFilter, warn};
 use log4rs::append::file::FileAppender;
-use log4rs::encode::pattern::PatternEncoder;
 use log4rs::Config;
 use log4rs::config::{Appender, Root};
+use log4rs::encode::pattern::PatternEncoder;
 
 #[derive(Copy, Clone)]
 pub enum LogLevel {

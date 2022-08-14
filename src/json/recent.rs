@@ -3,7 +3,7 @@ use std::fs;
 
 use crate::logging::{LogLevel, print_log};
 use crate::RECENT_PATH;
-use crate::scrapers::html_processing::{scrape_links};
+use crate::scrapers::html_processing::scrape_links;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -34,7 +34,7 @@ impl Channel {
 			true
 		}
 	}
-	pub fn store_recent(&mut self, value: impl ToString) {
+	pub fn store_recent(&mut self, value: &impl ToString) {
 		self.tracked_urls.insert(value.to_string());
 	}
 }
@@ -50,10 +50,10 @@ impl Sources {
 		print_log("Pre-fetching URLs", LogLevel::Info);
 		let mut new = self.clone();
 		for source in &mut new.sources {
-			match scrape_links(&source).await {
+			match scrape_links(source).await {
 				Ok(news_urls) => {
 					for news_url in news_urls {
-						source.store_recent(news_url);
+						source.store_recent(&news_url);
 					}
 				}
 				Err(e) => {
