@@ -34,11 +34,6 @@ impl Display for ScrapeType {
 	}
 }
 
-pub enum RecentHtmlTarget {
-	Pin,
-	Post,
-}
-
 pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
 	print_log(&format!("Fetching data from {}", &url), LogLevel::Info);
 
