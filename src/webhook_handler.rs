@@ -130,7 +130,7 @@ fn filter_forum(content: &str, hook: &Hooks) -> bool {
 	}
 }
 
-//Finally sends the webhook to the servers
+/// Ships webhook and builds embed
 pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 	let uid = &WEBHOOK_AUTH.hooks[pos].uid;
 	let token = &WEBHOOK_AUTH.hooks[pos].token;

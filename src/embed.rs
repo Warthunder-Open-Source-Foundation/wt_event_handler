@@ -1,6 +1,6 @@
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct EmbedData {
 	pub scrape_type: ScrapeType,
 	pub title: String,

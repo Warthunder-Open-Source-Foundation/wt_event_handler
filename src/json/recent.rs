@@ -1,10 +1,9 @@
 use std::collections::HashSet;
-use std::error::Error;
 use std::fs;
 
 use crate::logging::{LogLevel, print_log};
 use crate::RECENT_PATH;
-use crate::scrapers::html_processing::{get_embed_data, html_processor, scrape_links};
+use crate::scrapers::html_processing::{scrape_links};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -25,12 +24,12 @@ impl Channel {
 	pub fn is_new(&self, value: &str, output: bool) -> bool {
 		if self.tracked_urls.get(&value.to_owned()).is_some() {
 			if output {
-				print_log("Content was recently fetched and is not new", LogLevel::Info);
+				print_log("Url is not new", LogLevel::Info);
 			}
 			false
 		} else {
 			if output {
-				print_log("New post found, hooking now", LogLevel::Warning);
+				print_log("Url is new", LogLevel::Warning);
 			}
 			true
 		}
@@ -41,15 +40,16 @@ impl Channel {
 }
 
 impl Sources {
-	pub async fn read_latest() -> Self {
+	/// Reads source URLs from drive and pre-loads URLs
+	pub async fn build_from_drive() -> Self {
 		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
-		let mut recent: Self = serde_json::from_str::<Self>(&cache_raw_recent).expect("Json cannot be read").pre_populate_urls().await;
+		let recent: Self = serde_json::from_str::<Self>(&cache_raw_recent).expect("Json cannot be read").pre_populate_urls().await;
 		recent
 	}
 	async fn pre_populate_urls(&self) -> Self {
 		print_log("Pre-fetching URLs", LogLevel::Info);
 		let mut new = self.clone();
-		for mut source in &mut new.sources {
+		for source in &mut new.sources {
 			match scrape_links(&source).await {
 				Ok(news_urls) => {
 					for news_url in news_urls {

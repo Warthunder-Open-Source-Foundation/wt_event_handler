@@ -1,16 +1,8 @@
 use std::error::Error;
 use std::fs;
 use std::io;
-use std::path::Path;
 use std::process::exit;
 use std::str::FromStr;
-
-use chrono::Local;
-use log4rs::append::file::FileAppender;
-use log4rs::Config;
-use log4rs::config::{Appender, Root};
-use log4rs::encode::pattern::PatternEncoder;
-use log::LevelFilter;
 
 use crate::{RECENT_PATH, TOKEN_PATH};
 use crate::embed::EmbedData;
@@ -18,26 +10,6 @@ use crate::json::recent::Sources;
 use crate::json::webhooks::{Hooks, WebhookAuth};
 use crate::logging::{LogLevel, print_log};
 use crate::webhook_handler::deliver_webhook;
-
-pub fn init_log() -> Result<(), Box<dyn Error>> {
-	if Path::new("log/latest.log").exists() {
-		let now = Local::now().format("%Y_%m_%d_%H-%M-%S").to_string();
-		fs::rename("log/latest.log", format!("log/old/{}.log", now))?;
-	}
-
-	let logfile = FileAppender::builder()
-		.encoder(Box::new(PatternEncoder::new("{l} {d(%Y-%m-%d %H:%M:%S)} {l} - {m}\n")))
-		.build("log/latest.log")?;
-
-	let config = Config::builder()
-		.appender(Appender::builder().build("logfile", Box::new(logfile)))
-		.build(Root::builder()
-			.appender("logfile")
-			.build(LevelFilter::Info))?;
-
-	log4rs::init_config(config).unwrap();
-	Ok(())
-}
 
 pub fn verify_json() -> Result<bool, Box<dyn Error>> {
 	println!("Verifying Json files...");

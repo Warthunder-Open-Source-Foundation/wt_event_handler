@@ -6,6 +6,7 @@ use serenity::http::Http;
 use crate::logging::{LogLevel, print_log};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Stores Discord tokens
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
 	pub crash_hook: Vec<CrashHook>,
@@ -13,6 +14,7 @@ pub struct WebhookAuth {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Channel where error messages go
 pub struct CrashHook {
 	pub name: String,
 	pub token: String,
@@ -21,6 +23,7 @@ pub struct CrashHook {
 
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Channel where news go
 pub struct Hooks {
 	pub name: String,
 	pub token: String,
@@ -32,6 +35,7 @@ pub struct Hooks {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Channel where statistics go
 pub struct StatisticsHook {
 	pub name: String,
 	pub token: String,
@@ -160,6 +164,7 @@ impl Hooks {
 	}
 }
 
+/// Tests a webhook token and channel
 async fn send_test_hook(hook: &Hooks) {
 	let token = &hook.token;
 	let uid = &hook.uid;

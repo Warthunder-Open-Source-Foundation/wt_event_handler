@@ -24,10 +24,10 @@ pub async fn html_processor(channel: &mut Channel) -> Result<Vec<EmbedData>, Box
 			final_embeds.push(embed);
 	}
 
-
 	Ok(final_embeds)
 }
 
+/// Returns embed-ready information per URL source
 pub async fn get_embed_data(url: &str, scrape_type: ScrapeType) -> Result<EmbedData, Box<dyn Error>> {
 	let post_html = request_html(url).await?;
 	Ok(match scrape_meta(&post_html, scrape_type, url) {
@@ -39,6 +39,7 @@ pub async fn get_embed_data(url: &str, scrape_type: ScrapeType) -> Result<EmbedD
 	})
 }
 
+/// Returns all URLs per channel
 pub async fn scrape_links(channel: &Channel) -> Result<Vec<String>, Box<dyn Error>> {
 	let html = request_html(&channel.domain).await?;
 

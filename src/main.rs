@@ -8,13 +8,13 @@ use std::process::exit;
 
 use lazy_static::{initialize, lazy_static};
 
-use logging::print_log;
+use logging::{init_log, print_log};
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
 use crate::logging::LogLevel;
-use crate::menu_options::{add_webhook, clean_recent, init_log, remove_webhook, test_hook, verify_json};
+use crate::menu_options::{add_webhook, clean_recent, remove_webhook, test_hook, verify_json};
 
 mod webhook_handler;
 mod scrapers;

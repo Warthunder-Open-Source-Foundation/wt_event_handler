@@ -26,7 +26,7 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let mut recent_data = Sources::read_latest().await;
+	let mut recent_data = Sources::build_from_drive().await;
 
 	let mut timeouts = Timeout::new();
 
@@ -73,6 +73,7 @@ pub async fn fetch_loop(hooks: bool) {
 	}
 }
 
+/// Throws error as webhook, times out pages accordingly and terminates program if unrecoverable
 async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
 	let crash_and_burn = |e: InputError| async move {
 		if hooks {

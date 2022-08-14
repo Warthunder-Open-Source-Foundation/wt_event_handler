@@ -4,6 +4,7 @@ use crate::fetch_loop::STATS;
 use crate::statistics::Incr;
 
 #[derive(Clone, Debug)]
+/// Hashmap counting when a URL was last timed out
 pub struct Timeout {
 	pub blocked: HashMap<String, i64>,
 }

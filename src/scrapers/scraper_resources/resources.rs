@@ -12,6 +12,7 @@ use crate::error::NewsError;
 use crate::error::NewsError::{BadSelector, MonthParse, SelectedNothing};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
+/// Defines the types of pages where news come from
 pub enum ScrapeType {
 	Forum,
 	Main,
@@ -31,12 +32,6 @@ impl Display for ScrapeType {
 				write!(f, "Changelog")
 			}
 		}
-	}
-}
-
-impl Default for ScrapeType {
-	fn default() -> Self {
-		Self::Main
 	}
 }
 
@@ -78,7 +73,7 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 				let date_elem = item.select(&date_sel).next().ok_or(SelectedNothing(DATE_SEL_TEXT.to_owned(), item.inner_html()))?;
 				let date_str = date_elem.inner_html().trim().to_owned();
 				let split = date_str.split(" ").collect::<Vec<&str>>();
-				let date = NaiveDate::from_ymd(i32::from_str(split[2])?, Month::from_str(split[1]).or_else(|_| Err(MonthParse(split[1].to_owned())))?.number_from_month(), u32::from_str(split[0])?).and_time(NaiveTime::from_hms(0, 0, 0));
+				let _date = NaiveDate::from_ymd(i32::from_str(split[2])?, Month::from_str(split[1]).or_else(|_| Err(MonthParse(split[1].to_owned())))?.number_from_month(), u32::from_str(split[0])?).and_time(NaiveTime::from_hms(0, 0, 0));
 				if let Some(url) = item.select(&Selector::parse("a").map_err(|_| NewsError::BadSelector(sel_text.to_owned()))?).next().ok_or(SelectedNothing(DATE_SEL_TEXT.to_owned(), item.inner_html()))?.value().attr("href") {
 					res.push(url.to_owned());
 				}
@@ -101,7 +96,7 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 				if let Some(url_elem) = item.select(&lower_url).next() {
 					if let Some(url) = url_elem.value().attr("href") {
 						if let Some(date_str) = item.select(&date_sel).next().ok_or(SelectedNothing(DATE_SEL_TEXT.to_owned(), item.inner_html()))?.value().attr("datetime").to_owned() {
-							let date = NaiveDateTime::parse_from_str(&date_str.replace("Z", "").replace("T", ""), "%Y-%m-%d %H:%M:%S")?;
+							let _date = NaiveDateTime::parse_from_str(&date_str.replace("Z", "").replace("T", ""), "%Y-%m-%d %H:%M:%S")?;
 							res.push(url.to_owned());
 						}
 					}

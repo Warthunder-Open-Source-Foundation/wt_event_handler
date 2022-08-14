@@ -9,6 +9,7 @@ use crate::logging::{LogLevel, print_log};
 use crate::WEBHOOK_AUTH;
 
 #[derive(Debug, Clone, Copy)]
+/// Counts statistics during runtime
 pub struct Statistics {
 	pub fetch_counter: usize,
 	pub post_counter: usize,
@@ -36,6 +37,7 @@ impl Display for Statistics {
 }
 
 #[derive(Debug, Clone, Copy)]
+/// Used to define which statistic to increment
 pub enum Incr {
 	FetchCounter,
 	PostCounter,
