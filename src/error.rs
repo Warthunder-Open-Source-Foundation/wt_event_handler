@@ -12,6 +12,7 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 pub type InputError = Box<dyn Error>;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum NewsError {
 	// URL which was fetched and the HTML returned
 	NoUrlOnPost(String, String),
