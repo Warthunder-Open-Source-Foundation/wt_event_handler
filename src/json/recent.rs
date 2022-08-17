@@ -1,75 +1,66 @@
 use std::collections::HashSet;
-use std::convert::TryFrom;
 use std::fs;
 
-use chrono::Local;
-use scraper::Selector;
-
-use crate::RECENT_PATH;
-use crate::scrapers::scraper_resources::resources::{RecentHtmlTarget, ScrapeType};
 use crate::logging::{LogLevel, print_log};
+use crate::RECENT_PATH;
+use crate::scrapers::html_processing::scrape_links;
+use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
-pub struct Recent {
-	pub meta: Meta,
+#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+pub struct Sources {
 	pub sources: Vec<Channel>,
 }
 
-#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
-pub struct Meta {
-	pub timestamp: u64,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Channel {
 	pub name: String,
 	pub domain: String,
 	pub scrape_type: ScrapeType,
-	pub selector: String,
-	pub pin: String,
-	pub recent_url: HashSet<String>,
+	#[serde(skip_serializing, skip_deserializing)]
+	pub tracked_urls: HashSet<String>,
 }
 
 impl Channel {
-	pub fn is_new(&self, value: &str) -> bool {
-		if self.recent_url.get(&value.to_owned()).is_some() {
-			print_log("Content was recently fetched and is not new", LogLevel::Info);
+	pub fn is_new(&self, value: &str, output: bool) -> bool {
+		if self.tracked_urls.get(&value.to_owned()).is_some() {
+			if output {
+				print_log("Url is not new", LogLevel::Info);
+			}
 			false
 		} else {
-			print_log("New post found, hooking now", LogLevel::Warning);
+			if output {
+				print_log("Url is new", LogLevel::Warning);
+			}
 			true
 		}
 	}
-	pub fn store_recent(&mut self, value: &str) {
-		self.recent_url.insert(value.to_owned());
+	pub fn store_recent(&mut self, value: &impl ToString) {
+		self.tracked_urls.insert(value.to_string());
 	}
 }
 
-impl Recent {
-	pub fn save(&mut self) {
-		self.update_timestamp();
-
-		let write = serde_json::to_string_pretty(self).unwrap();
-		fs::write(RECENT_PATH, write).expect("Couldn't write to recent file");
-		print_log("Saved recent to file", LogLevel::Warning);
-	}
-	fn update_timestamp(&mut self) {
-		self.meta.timestamp = u64::try_from(Local::now().timestamp()).unwrap();
-	}
-	pub fn read_latest() -> Self {
+impl Sources {
+	/// Reads source URLs from drive and pre-loads URLs
+	pub async fn build_from_drive() -> Self {
 		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
-		let recent: Self = serde_json::from_str(&cache_raw_recent).expect("Json cannot be read");
+		let recent: Self = serde_json::from_str::<Self>(&cache_raw_recent).expect("Json cannot be read").pre_populate_urls().await;
 		recent
 	}
-}
-
-pub fn format_selector(main: &Channel, which: &RecentHtmlTarget, index: u32) -> Selector {
-	return match which {
-		RecentHtmlTarget::Pin => {
-			Selector::parse(&format!("{}{}{}", main.pin.split_whitespace().collect::<Vec<&str>>()[0], index, main.pin.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
+	async fn pre_populate_urls(&self) -> Self {
+		print_log("Pre-fetching URLs", LogLevel::Info);
+		let mut new = self.clone();
+		for source in &mut new.sources {
+			match scrape_links(source).await {
+				Ok(news_urls) => {
+					for news_url in news_urls {
+						source.store_recent(&news_url);
+					}
+				}
+				Err(e) => {
+					panic!("Failed to prefetch source-data: {}", e);
+				}
+			}
 		}
-		RecentHtmlTarget::Post => {
-			Selector::parse(&format!("{}{}{}", main.selector.split_whitespace().collect::<Vec<&str>>()[0], index, main.selector.split_whitespace().collect::<Vec<&str>>()[1])).unwrap()
-		}
-	};
+		new.clone()
+	}
 }

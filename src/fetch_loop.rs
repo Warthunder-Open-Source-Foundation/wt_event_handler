@@ -2,17 +2,17 @@ use std::error::Error;
 use std::fs;
 use std::process::exit;
 use std::time::Duration;
-use lazy_static::lazy_static;
 
+use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 
 use crate::error::{error_webhook, InputError, NewsError};
-use crate::json::recent::Recent;
+use crate::json::recent::Sources;
+use crate::logging::{LogLevel, print_log};
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
-use crate::logging::{LogLevel, print_log};
 
 const FETCH_DELAY: u64 = 48;
 
@@ -21,14 +21,23 @@ pub const STAT_COOLDOWN_HOURS: u64 = 24;
 const STAT_COOL_DOWN: u64 = 60 * 60 * STAT_COOLDOWN_HOURS;
 
 
-lazy_static!{
+lazy_static! {
 	pub static ref STATS: Mutex<Statistics> = Mutex::new(Statistics::new());
 }
 
-pub async fn fetch_loop(hooks: bool, write_files: bool) {
-	// First run of the program will fetch everything with no delay
-	let mut oneshot = true;
-	let mut recent_data = Recent::read_latest();
+pub async fn fetch_loop(hooks: bool) {
+	let mut recent_data = Sources::build_from_drive().await;
+
+	//
+	#[cfg(debug_assertions)]
+	{
+		let to_remove_urls: &[&str] = &[];
+		for to_remove in to_remove_urls {
+			for source in &mut recent_data.sources {
+				source.tracked_urls.remove(to_remove.to_owned());
+			}
+		}
+	}
 
 	let mut timeouts = Timeout::new();
 
@@ -44,20 +53,19 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 		}
 	});
 
+
 	loop {
 		for source in &mut recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
 				match html_processor(source).await {
-					Ok(content) => {
-						if source.is_new(&content.url) {
+					Ok(news) => {
+						for news_embed in news {
 							if hooks {
-								source.handle_webhooks(&content, true, source.scrape_type).await;
-							}
-							if write_files {
-								source.store_recent(&content.url);
+								source.handle_webhooks(&news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
+							source.store_recent(&news_embed.url);
 						}
 					}
 					Err(e) => {
@@ -66,28 +74,23 @@ pub async fn fetch_loop(hooks: bool, write_files: bool) {
 					}
 				}
 			}
-			if oneshot {
-				print_log("Skipping sleep for oneshot", LogLevel::Info);
-			} else {
-				print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
-				tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
-			}
+			print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
+			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 		}
-		oneshot = false;
-		recent_data.save();
 		//Aborts program after running without hooks
-		if !hooks || !write_files {
+		if !hooks {
 			exit(0);
 		}
 	}
 }
 
+/// Throws error as webhook, times out pages accordingly and terminates program if unrecoverable
 async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
 	let crash_and_burn = |e: InputError| async move {
 		if hooks {
 			error_webhook(&e, false).await;
 		}
-		panic!("{}", e);
+		panic!("{:?}", e);
 	};
 
 	let time_out = |send, msg: String| async move {

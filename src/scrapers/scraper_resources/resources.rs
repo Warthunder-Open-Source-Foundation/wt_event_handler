@@ -1,15 +1,18 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
-use std::process::exit;
+use std::str::FromStr;
 use std::time::Duration;
 
-use log::info;
+use chrono::{Month, NaiveDate, NaiveDateTime, NaiveTime};
 use reqwest::Client;
-use scraper::{ElementRef, Html, Selector};
+use scraper::{Html, Selector};
 
-use crate::json::recent::{Channel, format_selector};
+use crate::{LogLevel, print_log};
+use crate::error::NewsError;
+use crate::error::NewsError::{BadSelector, MonthParse, SelectedNothing};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
+/// Defines the types of pages where news come from
 pub enum ScrapeType {
 	Forum,
 	Main,
@@ -32,14 +35,8 @@ impl Display for ScrapeType {
 	}
 }
 
-pub enum RecentHtmlTarget {
-	Pin,
-	Post,
-}
-
 pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
-	println!("{} Fetching data from {}", chrono::Local::now(), &url);
-	info!("{} Fetching data from {}", chrono::Local::now(), &url);
+	print_log(&format!("Fetching data from {}", &url), LogLevel::Info);
 
 	let client = Client::builder()
 		.timeout(Duration::from_secs(1))
@@ -49,50 +46,68 @@ pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
 	Ok(Html::parse_document(text.as_str()))
 }
 
-pub fn pin_loop(mut post: u32, html: &Html, recent_value: &Channel, selection: ScrapeType) -> u32 {
-	let mut pin: Selector;
+pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<String>, Box<dyn Error>> {
+	return match scrape_type {
+		ScrapeType::Changelog | ScrapeType::Main => {
+			let sel_text = if scrape_type == ScrapeType::Main {
+				// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
+				"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(2) > div > section > div > div.showcase__content-wrapper > div.showcase__item"
+			} else {
+				// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
+				"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(3) > div > section > div > div.showcase__content-wrapper > div.showcase__item"
+			};
+			let sel = Selector::parse(sel_text).map_err(|_| NewsError::BadSelector(sel_text.to_owned()))?;
 
-	match selection {
-		ScrapeType::Main | ScrapeType::Changelog => {
-			loop {
-				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
-				if html.select(&pin).next().is_some() {
-					post += 1;
-				} else {
-					return post;
-				}
-				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
-					exit(-1);
+			let date_sel_text = "div.widget__content > ul > li".to_owned();
+			let date_sel = Selector::parse(&date_sel_text).map_err(|_| NewsError::BadSelector(date_sel_text.clone()))?;
+
+			let selected = html.select(&sel);
+			let mut res = vec![];
+			for item in selected {
+				let date_elem = item.select(&date_sel).next().ok_or_else(|| SelectedNothing(date_sel_text.clone(), item.inner_html()))?;
+				let date_str = date_elem.inner_html().trim().to_owned();
+				let split = date_str.split(' ').collect::<Vec<&str>>();
+				let _date = NaiveDate::from_ymd(i32::from_str(split[2])?, Month::from_str(split[1]).map_err(|_| MonthParse(split[1].to_owned()))?.number_from_month(), u32::from_str(split[0])?).and_time(NaiveTime::from_hms(0, 0, 0));
+				if let Some(url) = item.select(&Selector::parse("a").map_err(|_| NewsError::BadSelector(sel_text.to_owned()))?).next().ok_or_else(|| SelectedNothing(date_sel_text.clone(), item.inner_html()))?.value().attr("href") {
+					res.push(url.to_owned());
 				}
 			}
+			Ok(res)
 		}
 		ScrapeType::Forum => {
-			loop {
-				pin = format_selector(recent_value, &RecentHtmlTarget::Pin, post);
-				if let Some(top_url) = html.select(&pin).next() {
-					let is_pinned = top_url.value().attr("class").unwrap().contains("pinned");
-					if !is_pinned {
-						return post;
+			static SEL_TEXT: &str = "body > main > div > div > div > div:nth-child(2) > div > ol > li";
+			let sel = Selector::parse(SEL_TEXT).map_err(|_| BadSelector(SEL_TEXT.to_owned()))?;
+
+			let lower_url_test = "div > h4 > div > a".to_owned();
+			let lower_url = Selector::parse(&lower_url_test).map_err(|_| BadSelector(lower_url_test.clone()))?;
+
+			let date_sel_text: String = "div > div > time".to_owned();
+			let date_sel = Selector::parse(&date_sel_text).map_err(|_| NewsError::BadSelector(date_sel_text.clone()))?;
+
+			let selected = html.select(&sel);
+			let mut res = vec![];
+			for item in selected {
+				if let Some(url_elem) = item.select(&lower_url).next() {
+					if let Some(url) = url_elem.value().attr("href") {
+						if let Some(date_str) = item.select(&date_sel).next().ok_or_else(|| SelectedNothing(date_sel_text.clone(), item.inner_html()))?.value().attr("datetime") {
+							let _date = NaiveDateTime::parse_from_str(&date_str.replace('Z', "").replace('T', ""), "%Y-%m-%d %H:%M:%S")?;
+							res.push(url.to_owned());
+						}
 					}
-					post += 1;
-				}
-				if post > 20 {
-					println!("Maximum pinned-post limit exceeded, aborting due to failure in finding unpinned post!");
-					exit(-1);
 				}
 			}
-		}
-	}
-}
-
-pub fn format_result(top_url: ElementRef, selection: ScrapeType) -> String {
-	return match selection {
-		ScrapeType::Main | ScrapeType::Changelog => {
-			format!("https://warthunder.com{}", top_url.value().attr("href").unwrap())
-		}
-		ScrapeType::Forum => {
-			top_url.value().attr("href").unwrap().to_string()
+			Ok(res)
 		}
 	};
+}
+
+pub fn format_into_final_url(top_url: &str, selection: ScrapeType) -> String {
+	match selection {
+		ScrapeType::Main | ScrapeType::Changelog => {
+			format!("https://warthunder.com{}", top_url)
+		}
+		ScrapeType::Forum => {
+			top_url.to_owned()
+		}
+	}
 }
