@@ -34,7 +34,7 @@ pub async fn fetch_loop(hooks: bool) {
 		let to_remove_urls: &[&str] = &[];
 		for to_remove in to_remove_urls {
 			for source in &mut recent_data.sources {
-				source.tracked_urls.remove(to_remove.to_owned())
+				source.tracked_urls.remove(to_remove.to_owned());
 			}
 		}
 	}
