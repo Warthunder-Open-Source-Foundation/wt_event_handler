@@ -28,6 +28,17 @@ lazy_static! {
 pub async fn fetch_loop(hooks: bool) {
 	let mut recent_data = Sources::build_from_drive().await;
 
+	//
+	#[cfg(debug_assertions)]
+	{
+		let to_remove_urls: &[&str] = &[];
+		for to_remove in to_remove_urls {
+			for source in &mut recent_data.sources {
+				source.tracked_urls.remove(to_remove.to_owned())
+			}
+		}
+	}
+
 	let mut timeouts = Timeout::new();
 
 	// Spawn statistics thread

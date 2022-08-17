@@ -17,10 +17,7 @@ pub async fn html_processor(channel: &mut Channel) -> Result<Vec<EmbedData>, Box
 
 	let mut final_embeds = vec![];
 	for link in links {
-		let post_url = format_into_final_url(&link, scrape_type);
-
-
-		let embed = get_embed_data(&post_url, scrape_type).await?;
+		let embed = get_embed_data(&link, scrape_type).await?;
 		final_embeds.push(embed);
 	}
 
@@ -43,5 +40,9 @@ pub async fn get_embed_data(url: &str, scrape_type: ScrapeType) -> Result<EmbedD
 pub async fn scrape_links(channel: &Channel) -> Result<Vec<String>, Box<dyn Error>> {
 	let html = request_html(&channel.domain).await?;
 
-	get_listed_links(channel.scrape_type, &html)
+	let mut urls =get_listed_links(channel.scrape_type, &html)?;
+	for url in &mut urls {
+		*url = format_into_final_url( url, channel.scrape_type);
+	}
+	Ok(urls)
 }
