@@ -1,5 +1,6 @@
 use serenity::http::Http;
 use serenity::model::channel::Embed;
+use serenity::model::Timestamp;
 use serenity::utils::Color;
 
 use crate::{logging, WEBHOOK_AUTH};
@@ -146,16 +147,17 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 	};
 
 	let embed = Embed::fake(|e| {
-		e.title(content.scrape_type.to_string())
+		e.title(&content.title)
 		 .color(Color::from_rgb(116, 16, 210))
-		 .field(&content.title, &content.preview_text, false)
-		 .description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
+		 .description(&content.preview_text)
 		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
 		 .image(&content.img_url)
 		 .url(&content.url)
+		 .field("Want these news for your server too?", "https://news.wt.flareflo.dev", true)
 		 .footer(|f| {
 			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
 		 })
+		 .timestamp(Timestamp::now())
 	});
 
 	webhook.execute(my_http_client, false, |w| {
