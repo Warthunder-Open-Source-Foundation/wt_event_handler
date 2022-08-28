@@ -2,8 +2,8 @@ use std::io;
 use std::process::exit;
 
 use serenity::http::Http;
+use tracing::error;
 
-use crate::logging::{LogLevel, print_log};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 /// Stores Discord tokens
@@ -156,7 +156,7 @@ impl Hooks {
 			}
 			"n" => {}
 			_ => {
-				println!("No option specified");
+				error!("Bad options - aborting");
 				exit(1);
 			}
 		};
@@ -173,7 +173,7 @@ async fn send_test_hook(hook: &Hooks) {
 
 	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
-			print_log(&format!("{why}"), LogLevel::Error);
+			error!("{why}");
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,

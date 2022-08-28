@@ -5,14 +5,15 @@ use std::time::Duration;
 
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
+use tracing::{error, info};
 
 use crate::error::{error_webhook, InputError, NewsError};
 use crate::json::recent::Sources;
-use crate::logging::{LogLevel, print_log};
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
+
 
 const FETCH_DELAY: u64 = 48;
 
@@ -31,7 +32,7 @@ pub async fn fetch_loop(hooks: bool) {
 	//
 	#[cfg(debug_assertions)]
 	{
-		let to_remove_urls: &[&str] = &[];
+		let to_remove_urls: &[&str] = &["https://warthunder.com/en/news/7833-development-skink-the-bird-eating-lizard-en"];
 		for to_remove in to_remove_urls {
 			for source in &mut recent_data.sources {
 				source.tracked_urls.remove(to_remove.to_owned());
@@ -74,7 +75,7 @@ pub async fn fetch_loop(hooks: bool) {
 					}
 				}
 			}
-			print_log(&format!("Waiting for {FETCH_DELAY} seconds"), LogLevel::Info);
+			info!("Waiting for {FETCH_DELAY} seconds");
 			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 		}
 		//Aborts program after running without hooks
@@ -102,7 +103,7 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		let _ = &timeouts.time_out(source, then);
 	};
 
-	print_log(&e.to_string(), LogLevel::Error);
+	error!(e);
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;

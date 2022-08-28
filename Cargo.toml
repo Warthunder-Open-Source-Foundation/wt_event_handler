@@ -23,9 +23,12 @@ tokio = { version = "^1.18.2", features = ['full'] }
 serenity = "^0.11.2"
 serde = "^1.0.137"
 serde_json = "^1.0.81"
-log = "^0.4.17"
 chrono = "^0.4.19"
 lazy_static = "^1.4.0"
+
+tracing = "0.1.36"
+tracing-appender = "0.2.2"
+tracing-subscriber = {version  = "0.3.15", features = ["tracing-log", "env-filter", "fmt", "std"]}
 
 [dependencies.log4rs]
 version = "^1.1.1"

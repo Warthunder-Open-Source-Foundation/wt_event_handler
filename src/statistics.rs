@@ -3,9 +3,9 @@ use std::fmt::{Display, Formatter};
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
+use tracing::{error, warn};
 
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
-use crate::logging::{LogLevel, print_log};
 use crate::WEBHOOK_AUTH;
 
 #[derive(Debug, Clone, Copy)]
@@ -77,7 +77,7 @@ impl Statistics {
 
 		let webhook = match my_http_client.get_webhook_with_token(WEBHOOK_AUTH.statistics_hook.uid, &WEBHOOK_AUTH.statistics_hook.token).await {
 			Err(why) => {
-				print_log(&format!("{why}"), LogLevel::Error);
+				error!("{why}");
 				std::panic::panic_any(why)
 			}
 			Ok(hook) => hook,
@@ -98,7 +98,7 @@ impl Statistics {
 			w
 		}).await.unwrap();
 
-		print_log("All statistics are posted", LogLevel::Warning);
+		warn!("All statistics are posted");
 	}
 }
 

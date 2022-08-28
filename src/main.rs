@@ -4,17 +4,20 @@
 
 use std::{fs, io};
 use std::error::Error;
+use std::io::stdout;
 use std::process::exit;
 
 use lazy_static::{initialize, lazy_static};
-
-use logging::{init_log, print_log};
+use tracing::{error, Level};
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
-use crate::logging::LogLevel;
-use crate::menu_options::{add_webhook, clean_recent, remove_webhook, test_hook, verify_json};
+use crate::menu_options::{add_webhook, remove_webhook, test_hook};
+
+use tracing_appender::rolling;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
+use tracing_subscriber::filter::EnvFilter;
 
 mod webhook_handler;
 mod scrapers;
@@ -25,7 +28,6 @@ mod embed;
 mod error;
 mod timeout;
 mod statistics;
-mod logging;
 
 const RECENT_PATH: &str = "assets/sources.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
@@ -34,7 +36,7 @@ pub const HANDLE_RESULT_FN: fn(Result<(), Box<dyn Error>>) = |e: Result<(), Box<
 	match e {
 		Ok(_) => {}
 		Err(e) => {
-			print_log(&e.to_string(), LogLevel::Error);
+			error!(e);
 			panic!("{}", e);
 		}
 	}
@@ -59,56 +61,59 @@ async fn main() {
 
 	let mut line = String::new();
 	let mut hooks = true;
-	let mut json_verification = true;
 
 	println!("Please select a start profile:\n\
 	1. Regular initialization\n\
-	2. Initialize without self-tests\n\
-	3. Boot without sending hooks\n\
-	4. Add new webhook-client\n\
-	5. Remove a webhook\n\
-	6. Clean and reload recent file\n\
-	7. Test webhook client");
+	2. Boot without sending hooks\n\
+	3. Add new webhook-client\n\
+	4. Remove a webhook\n\
+	5. Without hooks or file-verification\n\
+	6. Test webhook client / channel");
 	io::stdin().read_line(&mut line).expect("failed to read from stdin");
+
+	// LOGGING CONVENTION
+	// Trace - Typically unused
+	// Info - Used for things that happen in guaranteed intervals
+	// Warn - Used for irregular occurrences such as finding news
+	// Error - Any (un)recoverable error blocking part of regular execution or halting it entirely
+
+	let debug_file = rolling::daily("./log/debug", "debug").with_max_level(Level::INFO);
+	let warn_file = rolling::never("./log/warning", "warnings").with_min_level(Level::WARN);
+	let all_files = debug_file.and(warn_file);
+
+	let env_filter = EnvFilter::from_default_env()
+		.add_directive(Level::INFO.into())
+		.add_directive("wt_event_handler=debug".parse().unwrap());
+
+
+	tracing_subscriber::fmt()
+		.with_thread_names(true)
+		.with_env_filter(env_filter)
+		.with_file(true)
+		.with_line_number(true)
+		.with_writer(stdout.and(all_files))
+		.with_ansi(false)
+		.init();
+
+	tracing::info!("Started program");
 
 	match line.trim() {
 		"1" => {}
-		"2" => { json_verification = false; }
-		"3" => { hooks = false; }
-		"4" => { HANDLE_RESULT_FN(add_webhook().await) }
-		"5" => { HANDLE_RESULT_FN(remove_webhook()) }
-		"6" => {
+		"2" => { hooks = false; }
+		"3" => { HANDLE_RESULT_FN(add_webhook().await) }
+		"4" => { HANDLE_RESULT_FN(remove_webhook()) }
+		"5" => {
 			hooks = false;
-			json_verification = false;
-			HANDLE_RESULT_FN(clean_recent());
 		}
-		"7" => {
+		"6" => {
 			hooks = false;
 			HANDLE_RESULT_FN(test_hook().await);
 		}
 		_ => {
-			println!("No option specified");
+			tracing::error!("Bad options - aborting");
 			exit(1);
 		}
 	}
-
-	if json_verification {
-		match verify_json() {
-			Ok(result) => {
-				if result {
-					HANDLE_RESULT_FN(clean_recent());
-					print_log("Json prefetched and cleaned successfully", LogLevel::Warning);
-				}
-			}
-			Err(e) => {
-				print_log(&e.to_string(), LogLevel::Error);
-				panic!("{}", e);
-			}
-		}
-	}
-
-	HANDLE_RESULT_FN(init_log());
-	print_log("Started client", LogLevel::Warning);
 
 	fetch_loop(hooks).await;
 }

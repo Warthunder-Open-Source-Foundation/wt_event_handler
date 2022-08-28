@@ -6,8 +6,8 @@ use std::time::Duration;
 use chrono::{Month, NaiveDate, NaiveDateTime, NaiveTime};
 use reqwest::Client;
 use scraper::{Html, Selector};
+use tracing::info;
 
-use crate::{LogLevel, print_log};
 use crate::error::NewsError;
 use crate::error::NewsError::{BadSelector, MonthParse, SelectedNothing};
 
@@ -36,7 +36,7 @@ impl Display for ScrapeType {
 }
 
 pub async fn request_html(url: &str) -> Result<Html, Box<dyn Error>> {
-	print_log(&format!("Fetching data from {}", &url), LogLevel::Info);
+	info!("Fetching data from {}", &url);
 
 	let client = Client::builder()
 		.timeout(Duration::from_secs(1))

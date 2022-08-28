@@ -4,8 +4,8 @@ use std::fmt::{Debug, Display, Formatter};
 use serenity::http::Http;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
+use tracing::{error, warn};
 
-use crate::logging::{LogLevel, print_log};
 use crate::PANIC_INFO;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
@@ -54,7 +54,7 @@ impl Error for NewsError {}
 #[allow(clippy::borrowed_box)]
 pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
 	ship_error_webhook(error.to_string(), can_recover).await;
-	print_log(&format!("Posted panic webhook for {}", PANIC_INFO.name), LogLevel::Warning);
+	warn!("Posted panic webhook for {}", PANIC_INFO.name);
 }
 
 // Broken up function signature to avoid runtime threat-passing of Error data, permitting direct calling from outside
@@ -63,7 +63,7 @@ pub async fn ship_error_webhook(input: String, can_recover: bool) {
 
 	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid, &PANIC_INFO.token).await {
 		Err(why) => {
-			print_log(&format!("{why}"), LogLevel::Error);
+			error!("{why}");
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,

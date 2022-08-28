@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::fs;
+use tracing::{info, warn};
 
-use crate::logging::{LogLevel, print_log};
 use crate::RECENT_PATH;
 use crate::scrapers::html_processing::scrape_links;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -24,12 +24,12 @@ impl Channel {
 	pub fn is_new(&self, value: &str, output: bool) -> bool {
 		if self.tracked_urls.get(&value.to_owned()).is_some() {
 			if output {
-				print_log("Url is not new", LogLevel::Info);
+				info!("Url is not new");
 			}
 			false
 		} else {
 			if output {
-				print_log("Url is new", LogLevel::Warning);
+				warn!("Url is new");
 			}
 			true
 		}
@@ -47,7 +47,7 @@ impl Sources {
 		recent
 	}
 	async fn pre_populate_urls(&self) -> Self {
-		print_log("Pre-fetching URLs", LogLevel::Info);
+		warn!("Pre-fetching URLs");
 		let mut new = self.clone();
 		for source in &mut new.sources {
 			match scrape_links(source).await {
