@@ -3,10 +3,11 @@ use std::error::Error;
 use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;
-use crate::error::NewsError;
+use crate::error::{InputError, NewsError};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, Box<dyn Error>> {
+/// Collects embed information from page
+pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, InputError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
 			scrape_forum(html)?
@@ -49,6 +50,7 @@ fn scrape_changelog(html: &Html) -> Result<(String, String, String), Box<dyn Err
 	))
 }
 
+/// Returns sufficiently long string as description for embed
 fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Result<String, Box<dyn Error>> {
 	let selector = Selector::parse(selector).unwrap();
 	let selected = html.select(&selector);
@@ -60,6 +62,7 @@ fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Res
 	Err(Box::new(NewsError::MetaCannotBeScraped(scape_type)))
 }
 
+// Builds discord ready embed URL from html anchors
 fn sanitize_html(html: &str) -> String {
 	static SPECIAL_DELIM: char = '🦆'; // Quack quack :D
 
@@ -123,6 +126,7 @@ fn sanitize_html(html: &str) -> String {
 	constructed
 }
 
+/// Collects meta image to display for embed
 fn scrape_news_image(html: &Html) -> String {
 	let mut actual = "".to_owned();
 	for item in html.select(&Selector::parse("meta, img").unwrap()) {

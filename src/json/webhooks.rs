@@ -2,10 +2,10 @@ use std::io;
 use std::process::exit;
 
 use serenity::http::Http;
-
-use crate::print_log;
+use tracing::error;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Stores Discord tokens
 pub struct WebhookAuth {
 	pub hooks: Vec<Hooks>,
 	pub crash_hook: Vec<CrashHook>,
@@ -13,6 +13,7 @@ pub struct WebhookAuth {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Channel where error messages go
 pub struct CrashHook {
 	pub name: String,
 	pub token: String,
@@ -21,6 +22,7 @@ pub struct CrashHook {
 
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Channel where news go
 pub struct Hooks {
 	pub name: String,
 	pub token: String,
@@ -32,6 +34,7 @@ pub struct Hooks {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+/// Channel where statistics go
 pub struct StatisticsHook {
 	pub name: String,
 	pub token: String,
@@ -152,7 +155,7 @@ impl Hooks {
 			}
 			"n" => {}
 			_ => {
-				println!("No option specified");
+				error!("Bad options - aborting");
 				exit(1);
 			}
 		};
@@ -160,6 +163,7 @@ impl Hooks {
 	}
 }
 
+/// Tests a webhook token and channel
 async fn send_test_hook(hook: &Hooks) {
 	let token = &hook.token;
 	let uid = &hook.uid;
@@ -168,7 +172,7 @@ async fn send_test_hook(hook: &Hooks) {
 
 	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
-			print_log(&format!("{why}"), 0);
+			error!("{why}");
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,

@@ -1,0 +1,29 @@
+{
+  "sources": [
+    {
+      "name": "warthunder_news",
+      "domain": "https://warthunder.com/en/news",
+      "scrape_type": "Main"
+    },
+    {
+      "name": "warthunder_changelog",
+      "domain": "https://warthunder.com/en/game/changelog/",
+      "scrape_type": "Changelog"
+    },
+    {
+      "name": "forums_updates_information",
+      "domain": "https://forum.warthunder.com/index.php?/forum/126-updates-information-read-only/&ct=1626882238",
+      "scrape_type": "Forum"
+    },
+    {
+      "name": "forums_project_news",
+      "domain": "https://forum.warthunder.com/index.php?/forum/26-project-news-read-only/&ct=1630343851",
+      "scrape_type": "Forum"
+    },
+    {
+      "name": "forums_notice_board",
+      "domain": "https://forum.warthunder.com/index.php?/forum/1500-notice-board-announcements-information/",
+      "scrape_type": "Forum"
+    }
+  ]
+}

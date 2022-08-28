@@ -1,14 +1,15 @@
 use std::fmt::{Display, Formatter};
-use std::fs;
 
 use serenity::http::Http;
 use serenity::model::channel::Embed;
 use serenity::utils::Color;
+use tracing::{error, warn};
 
-use crate::{print_log, TOKEN_PATH, WebhookAuth};
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
+use crate::WEBHOOK_AUTH;
 
 #[derive(Debug, Clone, Copy)]
+/// Counts statistics during runtime
 pub struct Statistics {
 	pub fetch_counter: usize,
 	pub post_counter: usize,
@@ -36,6 +37,7 @@ impl Display for Statistics {
 }
 
 #[derive(Debug, Clone, Copy)]
+/// Used to define which statistic to increment
 pub enum Incr {
 	FetchCounter,
 	PostCounter,
@@ -51,7 +53,7 @@ impl Statistics {
 			post_counter: 0,
 			new_news: 0,
 			errors: 0,
-			timeouts: 0
+			timeouts: 0,
 		}
 	}
 	pub fn increment(&mut self, incr: Incr) {
@@ -71,14 +73,11 @@ impl Statistics {
 		self.timeouts = 0;
 	}
 	pub async fn post(&mut self) {
-		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
+		let my_http_client = Http::new(&WEBHOOK_AUTH.statistics_hook.token);
 
-		let my_http_client = Http::new(&webhook_auth.statistics_hook.token);
-
-		let webhook = match my_http_client.get_webhook_with_token(webhook_auth.statistics_hook.uid, &webhook_auth.statistics_hook.token).await {
+		let webhook = match my_http_client.get_webhook_with_token(WEBHOOK_AUTH.statistics_hook.uid, &WEBHOOK_AUTH.statistics_hook.token).await {
 			Err(why) => {
-				print_log(&format!("{why}"), 0);
+				error!("{why}");
 				std::panic::panic_any(why)
 			}
 			Ok(hook) => hook,
@@ -99,7 +98,7 @@ impl Statistics {
 			w
 		}).await.unwrap();
 
-		print_log("All statistics are posted", 1);
+		warn!("Posted statistics");
 	}
 }
 

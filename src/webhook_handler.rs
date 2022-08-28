@@ -1,31 +1,27 @@
-use std::fs;
-
-use log::{error, info, warn};
 use serenity::http::Http;
 use serenity::model::channel::Embed;
+use serenity::model::Timestamp;
 use serenity::utils::Color;
+use tracing::{error, warn};
 
 use crate::embed::EmbedData;
 use crate::fetch_loop::STATS;
 use crate::json::recent::Channel;
-use crate::json::webhooks::{FilterType, Hooks, WebhookAuth};
+use crate::json::webhooks::{FilterType, Hooks};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::Incr;
-use crate::TOKEN_PATH;
+use crate::WEBHOOK_AUTH;
 
 const DEFAULT_KEYWORDS: [&str; 30] = [
 	"devblog", "event", "maintenance", "major", "trailer", "teaser", "developers",
 	"fix", "vehicles", "economy", "changes", "sale", "twitch", "bundles", "development",
-	"shop", "pass", "season", "operation", "pass", "summer", "2021", "planned", "bonds",
+	"shop", "pass", "season", "operation", "pass", "summer", "2022", "planned", "bonds",
 	"issues", "technical", "servers", "christmas", "market", "camouflages"
 ];
 
 impl Channel {
-	pub async fn handle_webhook(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
-		let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-		let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
-		for (i, hook) in webhook_auth.hooks.iter().enumerate() {
+	pub async fn handle_webhooks(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
+		for (i, hook) in WEBHOOK_AUTH.hooks.iter().enumerate() {
 			if is_filtered {
 				if match_filter(&content.url, hook, scrape_type) {
 					deliver_webhook(content.clone(), i).await;
@@ -56,37 +52,37 @@ fn filter_main(content: &str, hook: &Hooks) -> bool {
 		FilterType::Default => {
 			for keyword in DEFAULT_KEYWORDS {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with default main keyword {}", content, keyword), 1);
+					warn!("URL {} matched with default main keyword {}", content, keyword);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in main default list", content), 1);
+			warn!("URL {} did not match any whitelist in main default list", content);
 			false
 		}
 		FilterType::Blacklist => {
 			let blacklist = &hook.main_keywords;
 			if blacklist.is_empty() {
-				print_log(&format!("URL {} matched empty blacklist for main", content), 1);
+				warn!("URL {} matched empty blacklist for main", content);
 				return true;
 			}
 			for keyword in blacklist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} found in blacklist for main", content), 1);
+					warn!("URL {} found in blacklist for main", content);
 					return false;
 				}
 			}
-			print_log(&format!("{} is not in main blacklist", content), 1);
+			warn!("{} is not in main blacklist", content);
 			true
 		}
 		FilterType::Whitelist => {
 			let whitelist = &hook.main_keywords;
 			for keyword in whitelist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with whitelisted keyword {} from main list", content, keyword), 1);
+					warn!("URL {} matched with whitelisted keyword {} from main list", content, keyword);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in main list", content), 1);
+			warn!("URL {} did not match any whitelist in main list", content);
 			false
 		}
 	}
@@ -99,71 +95,69 @@ fn filter_forum(content: &str, hook: &Hooks) -> bool {
 		FilterType::Default => {
 			for keyword in DEFAULT_KEYWORDS {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with default forum keyword {}", content, keyword), 1);
+					warn!("URL {} matched with default forum keyword {}", content, keyword);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in forum default list", content), 1);
+			warn!("URL {} did not match any whitelist in forum default list", content);
 			false
 		}
 		FilterType::Blacklist => {
 			let blacklist = &hook.forum_keywords;
 			if blacklist.is_empty() {
-				print_log(&format!("URL {} matched empty blacklist for forum", content), 1);
+				warn!("URL {} matched empty blacklist for forum", content);
 				return true;
 			}
 			for keyword in blacklist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} found in blacklist for forum", content), 1);
+					warn!("URL {} found in blacklist for forum", content);
 					return false;
 				}
 			}
-			print_log(&format!("{} is not in forum blacklist", content), 1);
+			warn!("{} is not in forum blacklist", content);
 			true
 		}
 		FilterType::Whitelist => {
 			let whitelist = &hook.forum_keywords;
 			for keyword in whitelist {
 				if content.contains(keyword) {
-					print_log(&format!("URL {} matched with whitelisted keyword {} from forum list", content, keyword), 1);
+					warn!("URL {} matched with whitelisted keyword {} from forum list", content, keyword);
 					return true;
 				}
 			}
-			print_log(&format!("URL {} did not match any whitelist in forum list", content), 1);
+			warn!("URL {} did not match any whitelist in forum list", content);
 			false
 		}
 	}
 }
 
-//Finally sends the webhook to the servers
+/// Ships webhook and builds embed
 pub async fn deliver_webhook(content: EmbedData, pos: usize) {
-	let token_raw = fs::read_to_string(TOKEN_PATH).expect("Cannot read file");
-	let webhook_auth: WebhookAuth = serde_json::from_str(&token_raw).expect("Json cannot be read");
-
-	let uid = webhook_auth.hooks[pos].uid;
-	let token = &webhook_auth.hooks[pos].token;
+	let uid = &WEBHOOK_AUTH.hooks[pos].uid;
+	let token = &WEBHOOK_AUTH.hooks[pos].token;
 
 	let my_http_client = Http::new(token);
 
-	let webhook = match my_http_client.get_webhook_with_token(uid, token).await {
+	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
 		Err(why) => {
-			print_log(&format!("{why}"), 0);
+			error!("{why}");
 			std::panic::panic_any(why)
 		}
 		Ok(hook) => hook,
 	};
 
 	let embed = Embed::fake(|e| {
-		e.title(content.scrape_type.to_string())
+		e.title(&content.title)
 		 .color(Color::from_rgb(116, 16, 210))
-		 .field(&content.title, &content.preview_text, false)
-		 .description(format!("Fetched on: <t:{}>", chrono::offset::Local::now().timestamp()))
+		 .description(&content.preview_text)
 		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
 		 .image(&content.img_url)
 		 .url(&content.url)
+		 .field("Want these news for your server too?", "https://news.wt.flareflo.dev", true)
 		 .footer(|f| {
 			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
 		 })
+		 .timestamp(Timestamp::now())
 	});
 
 	webhook.execute(my_http_client, false, |w| {
@@ -171,22 +165,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
-	print_log(&format!("Posted webhook for {}", webhook_auth.hooks[pos].name), 1);
-}
-
-pub fn print_log(input: &str, log_level: u8) {
-	println!("{} {}", chrono::Local::now().naive_local(), input);
-	match log_level {
-		2 => {
-			info!("{}", input);
-		}
-		1 => {
-			warn!("{}", input);
-		}
-		_ => {
-			error!("{}", input);
-		}
-	}
+	warn!("Posted webhook for {}", WEBHOOK_AUTH.hooks[pos].name);
 }
 
 // Tests  -----------------------------------------------------------------------
