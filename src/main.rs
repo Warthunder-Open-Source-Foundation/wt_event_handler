@@ -75,14 +75,16 @@ async fn main() {
 	// Warn - Used for irregular occurrences such as finding news
 	// Error - Any (un)recoverable error blocking part of regular execution or halting it entirely
 
+	// Both trace and Debug are not logged to files or stdout
+
 	let debug_file = rolling::daily("./log/debug", "debug").with_filter(|x| *x.level() == Level::INFO);
 	let warn_file = rolling::never("./log/warning", "warnings").with_filter(|x| *x.level() <= Level::WARN);
 	let all_files = debug_file.and(warn_file);
 
 
 	tracing_subscriber::fmt()
+		.with_thread_ids(true)
 		.with_thread_names(true)
-		.with_file(true)
 		.with_line_number(true)
 		.with_writer(stdout.and(all_files))
 		.with_ansi(false)

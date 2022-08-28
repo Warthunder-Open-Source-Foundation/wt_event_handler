@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 use crate::error::{error_webhook, InputError, NewsError};
 use crate::json::recent::Sources;
@@ -31,7 +31,7 @@ pub async fn fetch_loop(hooks: bool) {
 	//
 	#[cfg(debug_assertions)]
 	{
-		let to_remove_urls: &[&str] = &["https://warthunder.com/en/news/7833-development-skink-the-bird-eating-lizard-en"];
+		let to_remove_urls: &[&str] = &[];
 		for to_remove in to_remove_urls {
 			for source in &mut recent_data.sources {
 				source.tracked_urls.remove(to_remove.to_owned());
@@ -43,6 +43,7 @@ pub async fn fetch_loop(hooks: bool) {
 
 	// Spawn statistics thread
 	tokio::task::spawn(async {
+		warn!("Spawned logging thread");
 		loop {
 			tokio::time::sleep(Duration::from_secs(STAT_COOL_DOWN)).await;
 			let mut lock = STATS.lock().await;
@@ -86,6 +87,7 @@ pub async fn fetch_loop(hooks: bool) {
 
 /// Throws error as webhook, times out pages accordingly and terminates program if unrecoverable
 async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
+	error!(e);
 	let crash_and_burn = |e: InputError| async move {
 		if hooks {
 			error_webhook(&e, false).await;
@@ -102,7 +104,6 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 		let _ = &timeouts.time_out(source, then);
 	};
 
-	error!(e);
 	match () {
 		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
 			let e: &reqwest::Error = e;

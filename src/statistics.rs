@@ -98,7 +98,7 @@ impl Statistics {
 			w
 		}).await.unwrap();
 
-		warn!("All statistics are posted");
+		warn!("Posted statistics");
 	}
 }
 
