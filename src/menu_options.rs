@@ -4,7 +4,7 @@ use std::io;
 use std::process::exit;
 use std::str::FromStr;
 
-use crate::{TOKEN_PATH};
+use crate::TOKEN_PATH;
 use crate::embed::EmbedData;
 use crate::json::webhooks::{Hooks, WebhookAuth};
 use crate::webhook_handler::deliver_webhook;

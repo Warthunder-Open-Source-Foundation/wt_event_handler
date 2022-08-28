@@ -8,17 +8,14 @@ use std::io::stdout;
 use std::process::exit;
 
 use lazy_static::{initialize, lazy_static};
-use tracing::{debug, error, info, Level, trace, warn};
+use tracing::{error, Level, warn};
+use tracing_appender::rolling;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
 use crate::menu_options::{add_webhook, remove_webhook, test_hook};
-
-use tracing_appender::rolling;
-use tracing_subscriber::fmt::writer::MakeWriterExt;
-use tracing_subscriber::filter::{EnvFilter, Filtered};
-use tracing_subscriber::Layer;
 
 mod webhook_handler;
 mod scrapers;
@@ -68,8 +65,7 @@ async fn main() {
 	2. Boot without sending hooks\n\
 	3. Add new webhook-client\n\
 	4. Remove a webhook\n\
-	5. Without hooks or file-verification\n\
-	6. Test webhook client / channel");
+	5. Test webhook client / channel");
 	io::stdin().read_line(&mut line).expect("failed to read from stdin");
 
 	// LOGGING CONVENTION
@@ -79,8 +75,8 @@ async fn main() {
 	// Warn - Used for irregular occurrences such as finding news
 	// Error - Any (un)recoverable error blocking part of regular execution or halting it entirely
 
-	let debug_file = rolling::daily("./log/debug", "debug").with_filter(|x|*x.level() == Level::INFO);
-	let warn_file = rolling::never("./log/warning", "warnings").with_filter(|x|*x.level() <= Level::WARN);
+	let debug_file = rolling::daily("./log/debug", "debug").with_filter(|x| *x.level() == Level::INFO);
+	let warn_file = rolling::never("./log/warning", "warnings").with_filter(|x| *x.level() <= Level::WARN);
 	let all_files = debug_file.and(warn_file);
 
 
@@ -98,9 +94,6 @@ async fn main() {
 		"3" => { HANDLE_RESULT_FN(add_webhook().await) }
 		"4" => { HANDLE_RESULT_FN(remove_webhook()) }
 		"5" => {
-			hooks = false;
-		}
-		"6" => {
 			hooks = false;
 			HANDLE_RESULT_FN(test_hook().await);
 		}

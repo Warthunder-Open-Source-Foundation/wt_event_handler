@@ -4,7 +4,6 @@ use std::process::exit;
 use serenity::http::Http;
 use tracing::error;
 
-
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 /// Stores Discord tokens
 pub struct WebhookAuth {

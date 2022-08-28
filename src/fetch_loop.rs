@@ -14,7 +14,6 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
 use crate::timeout::Timeout;
 
-
 const FETCH_DELAY: u64 = 48;
 
 pub const STAT_COOLDOWN_HOURS: u64 = 24;
