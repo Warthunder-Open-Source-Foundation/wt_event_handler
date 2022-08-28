@@ -8,7 +8,7 @@ use std::io::stdout;
 use std::process::exit;
 
 use lazy_static::{initialize, lazy_static};
-use tracing::{error, Level};
+use tracing::{debug, error, info, Level, trace, warn};
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -17,7 +17,8 @@ use crate::menu_options::{add_webhook, remove_webhook, test_hook};
 
 use tracing_appender::rolling;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
-use tracing_subscriber::filter::EnvFilter;
+use tracing_subscriber::filter::{EnvFilter, Filtered};
+use tracing_subscriber::Layer;
 
 mod webhook_handler;
 mod scrapers;
@@ -72,30 +73,24 @@ async fn main() {
 	io::stdin().read_line(&mut line).expect("failed to read from stdin");
 
 	// LOGGING CONVENTION
-	// Trace - Typically unused
+	// Trace - unused
+	// Debug - Typically Unused
 	// Info - Used for things that happen in guaranteed intervals
 	// Warn - Used for irregular occurrences such as finding news
 	// Error - Any (un)recoverable error blocking part of regular execution or halting it entirely
 
-	let debug_file = rolling::daily("./log/debug", "debug").with_max_level(Level::INFO);
-	let warn_file = rolling::never("./log/warning", "warnings").with_min_level(Level::WARN);
+	let debug_file = rolling::daily("./log/debug", "debug").with_filter(|x|*x.level() == Level::INFO);
+	let warn_file = rolling::never("./log/warning", "warnings").with_filter(|x|*x.level() <= Level::WARN);
 	let all_files = debug_file.and(warn_file);
-
-	let env_filter = EnvFilter::from_default_env()
-		.add_directive(Level::INFO.into())
-		.add_directive("wt_event_handler=debug".parse().unwrap());
 
 
 	tracing_subscriber::fmt()
 		.with_thread_names(true)
-		.with_env_filter(env_filter)
 		.with_file(true)
 		.with_line_number(true)
 		.with_writer(stdout.and(all_files))
 		.with_ansi(false)
 		.init();
-
-	tracing::info!("Started program");
 
 	match line.trim() {
 		"1" => {}
@@ -115,5 +110,6 @@ async fn main() {
 		}
 	}
 
+	warn!("Started core loop");
 	fetch_loop(hooks).await;
 }
