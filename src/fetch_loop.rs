@@ -52,11 +52,9 @@ pub async fn fetch_loop(hooks: bool) {
 		warn!("Spawned logging thread");
 		loop {
 			tokio::time::sleep(Duration::from_secs(STAT_COOL_DOWN)).await;
-			let mut lock = STATS.lock().await;
-			lock.post().await;
-			lock.reset();
-			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
-			drop(lock);
+			let mut stats = STATS.lock().await;
+			stats.post().await;
+			stats.reset();
 		}
 	});
 

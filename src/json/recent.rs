@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::fs;
+use tokio::sync::RwLock;
 
 use tracing::{info, warn};
 
@@ -7,7 +8,7 @@ use crate::RECENT_PATH;
 use crate::scrapers::html_processing::scrape_links;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-#[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Default, serde::Serialize, serde::Deserialize, Debug)]
 pub struct Sources {
 	pub sources: Vec<Source>,
 }
@@ -18,7 +19,7 @@ pub struct Source {
 	pub domain: String,
 	pub scrape_type: ScrapeType,
 	#[serde(skip_serializing, skip_deserializing)]
-	pub tracked_urls: HashSet<String>,
+	pub tracked_urls: RwLock<HashSet<String>>,
 }
 
 impl Source {
@@ -43,7 +44,7 @@ impl Sources {
 	}
 	async fn pre_populate_urls(self) -> Self {
 		warn!("Pre-fetching URLs");
-		let mut new = self.clone();
+		let mut new = self;
 		for source in &mut new.sources {
 			match scrape_links(source).await {
 				Ok(news_urls) => {
@@ -56,6 +57,7 @@ impl Sources {
 				}
 			}
 		}
-		new.clone()
+
+		new
 	}
 }

@@ -10,7 +10,7 @@ use crate::scrapers::scraper_resources::resources::{format_into_final_url, get_l
 pub async fn html_processor(source: &Source) -> Result<Vec<EmbedData>, Box<dyn Error>> {
 	let scrape_type = source.scrape_type;
 
-	let mut links = scrape_links(channel).await?;
+	let mut links = scrape_links(source).await?;
 
 	// Removes already known URLs
 	let mut positions = vec![];
