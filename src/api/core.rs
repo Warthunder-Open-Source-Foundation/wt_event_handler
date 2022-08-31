@@ -1,6 +1,5 @@
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{get, web, Responder};
 use crate::json::recent::Sources;
-use tokio::sync::RwLock;
 
 #[get("/news/latest/{source}")]
 pub async fn greet(source: web::Path<String>) -> impl Responder {

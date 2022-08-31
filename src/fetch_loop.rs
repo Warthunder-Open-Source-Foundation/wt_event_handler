@@ -4,9 +4,9 @@ use std::process::exit;
 use std::sync::Arc;
 use std::time::Duration;
 
-use actix_web::{App, get, HttpServer, Responder, web};
+use actix_web::{App, HttpServer, web};
 use lazy_static::lazy_static;
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{Mutex};
 use tracing::{error, info, warn};
 
 use actix_cors::Cors;
@@ -32,9 +32,8 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let mut recent_data_raw = Sources::build_from_drive().await;
+	let recent_data_raw = Sources::build_from_drive().await.expect("I fucked up my soup");
 
-	//
 	#[cfg(debug_assertions)]
 	{
 		let to_remove_urls: &[&str] = &[];
@@ -95,7 +94,9 @@ pub async fn fetch_loop(hooks: bool) {
 							increment(Incr::NewNews).await;
 						}
 
-						source.tracked_urls.write().await.extend(news.into_iter().map(|new| new.url));
+						if let Err(why) = source.store_recent(news.into_iter().map(|new| new.url)).await {
+							error_webhook(&why, true).await; // it's recoverable, but the API is fucked up then (Outdated Data)
+						}
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;
