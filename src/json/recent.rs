@@ -24,11 +24,7 @@ pub struct Source {
 
 impl Source {
 	pub async fn is_new(&self, value: &str) -> bool {
-		if self.tracked_urls.read().await.get(value).is_some() {
-			false
-		} else {
-			true
-		}
+		!self.tracked_urls.read().await.get(value).is_some()
 	}
 	pub async fn store_recent(&mut self, value: &impl ToString) {
 		self.tracked_urls.write().await.insert(value.to_string());
