@@ -9,11 +9,11 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Sources {
-	pub sources: Vec<Channel>,
+	pub sources: Vec<Source>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
-pub struct Channel {
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct Source {
 	pub name: String,
 	pub domain: String,
 	pub scrape_type: ScrapeType,
@@ -21,22 +21,16 @@ pub struct Channel {
 	pub tracked_urls: HashSet<String>,
 }
 
-impl Channel {
-	pub fn is_new(&self, value: &str, output: bool) -> bool {
-		if self.tracked_urls.get(&value.to_owned()).is_some() {
-			if output {
-				info!("Url is not new");
-			}
+impl Source {
+	pub async fn is_new(&self, value: &str) -> bool {
+		if self.tracked_urls.read().await.get(value).is_some() {
 			false
 		} else {
-			if output {
-				warn!("Url is new");
-			}
 			true
 		}
 	}
-	pub fn store_recent(&mut self, value: &impl ToString) {
-		self.tracked_urls.insert(value.to_string());
+	pub async fn store_recent(&mut self, value: &impl ToString) {
+		self.tracked_urls.write().await.insert(value.to_string());
 	}
 }
 
@@ -47,14 +41,14 @@ impl Sources {
 		let recent: Self = serde_json::from_str::<Self>(&cache_raw_recent).expect("Json cannot be read").pre_populate_urls().await;
 		recent
 	}
-	async fn pre_populate_urls(&self) -> Self {
+	async fn pre_populate_urls(self) -> Self {
 		warn!("Pre-fetching URLs");
 		let mut new = self.clone();
 		for source in &mut new.sources {
 			match scrape_links(source).await {
 				Ok(news_urls) => {
 					for news_url in news_urls {
-						source.store_recent(&news_url);
+						source.store_recent(&news_url).await;
 					}
 				}
 				Err(e) => {

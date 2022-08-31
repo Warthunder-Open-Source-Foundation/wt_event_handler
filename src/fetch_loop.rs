@@ -1,12 +1,18 @@
 use std::error::Error;
 use std::fs;
 use std::process::exit;
+use std::sync::Arc;
 use std::time::Duration;
 
+use actix_web::{App, get, HttpServer, Responder, web};
 use lazy_static::lazy_static;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 use tracing::{error, info, warn};
 
+use actix_cors::Cors;
+
+use crate::api::core::get_latest_news;
+use crate::api::core::greet;
 use crate::error::{error_webhook, InputError, NewsError};
 use crate::json::recent::Sources;
 use crate::scrapers::html_processing::html_processor;
@@ -26,15 +32,15 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let mut recent_data = Sources::build_from_drive().await;
+	let mut recent_data_raw = Sources::build_from_drive().await;
 
 	//
 	#[cfg(debug_assertions)]
 	{
 		let to_remove_urls: &[&str] = &[];
 		for to_remove in to_remove_urls {
-			for source in &mut recent_data.sources {
-				source.tracked_urls.remove(to_remove.to_owned());
+			for source in &mut recent_data_raw.sources {
+				source.tracked_urls.write().await.remove(to_remove.to_owned());
 			}
 		}
 	}
@@ -54,20 +60,44 @@ pub async fn fetch_loop(hooks: bool) {
 		}
 	});
 
+	let recent_data = Arc::new(recent_data_raw);
+	let temp = recent_data.clone();
+	let test_struct_data = web::Data::from(temp);
+
+	// Spawn API thread
+	tokio::task::spawn({
+		info!("Spawned API thread");
+		HttpServer::new(move || {
+			let cors = Cors::default()
+				.allow_any_origin()
+				.allowed_methods(vec!["GET", "POST"]);
+
+			App::new()
+				.wrap(cors)
+				.app_data(test_struct_data.clone())
+				.service(greet)
+				.service(get_latest_news)
+		})
+			.bind(("127.0.0.1", 8080))
+			.expect("Cant bind local host on port 8080")
+			.run()
+	});
+
 
 	loop {
-		for source in &mut recent_data.sources {
+		for source in &recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
 				match html_processor(source).await {
 					Ok(news) => {
-						for news_embed in news {
+						for news_embed in &news {
 							if hooks {
 								source.handle_webhooks(&news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
-							source.store_recent(&news_embed.url);
 						}
+
+						source.tracked_urls.write().await.extend(news.into_iter().map(|new| new.url));
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;
@@ -78,6 +108,8 @@ pub async fn fetch_loop(hooks: bool) {
 			info!("Waiting for {FETCH_DELAY} seconds");
 			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 		}
+
+
 		//Aborts program after running without hooks
 		if !hooks {
 			exit(0);

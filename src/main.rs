@@ -1,6 +1,7 @@
 #![feature(if_let_guard)]
 #![feature(once_cell)]
 #![allow(clippy::module_name_repetitions)]
+#![feature(async_closure)]
 
 use std::{fs, io};
 use std::error::Error;
@@ -26,6 +27,7 @@ mod embed;
 mod error;
 mod timeout;
 mod statistics;
+mod api;
 
 const RECENT_PATH: &str = "assets/sources.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
