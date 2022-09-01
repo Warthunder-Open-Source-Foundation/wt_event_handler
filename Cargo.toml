@@ -27,6 +27,8 @@ chrono = "^0.4.22"
 lazy_static = "^1.4.0"
 thiserror = "^1.0.33"
 
+cssparser = "^0.29.6"
+
 actix-cors = "^0.6.1"
 actix-web = "^4.1.0"
 

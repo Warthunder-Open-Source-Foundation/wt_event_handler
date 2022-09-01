@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::process::exit;
 use std::sync::Arc;
@@ -12,7 +11,7 @@ use tracing::{error, info, warn};
 
 use crate::api::core::get_latest_news;
 use crate::api::core::greet;
-use crate::error::{error_webhook, InputError, NewsError};
+use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Sources;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -87,7 +86,7 @@ pub async fn fetch_loop(hooks: bool) {
 						}
 
 						if let Err(why) = source.store_recent(news.into_iter().map(|new| new.url)).await {
-							error_webhook(&why, true).await; // it's recoverable, but the API is fucked up then (Outdated Data)
+							error_webhook(&why, "The api will not return valid data now", true).await; // it's recoverable, but the API is fucked up then (Outdated Data)
 						}
 					}
 					Err(e) => {
@@ -109,28 +108,50 @@ pub async fn fetch_loop(hooks: bool) {
 }
 
 /// Throws error as webhook, times out pages accordingly and terminates program if unrecoverable
-async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
-	error!(e);
-	let crash_and_burn = |e: InputError| async move {
+async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
+	error!("{e}");
+	let crash_and_burn = |e: NewsError| async move {
 		if hooks {
-			error_webhook(&e, false).await;
+			error_webhook(&e, "The bot is now offline and needs investigation", false).await;
 		}
 		panic!("{:?}", e);
 	};
 
-	let time_out = |send, msg: String| async move {
+	let time_out = |send_webhook_error_message, msg: String| async move {
 		let now = chrono::offset::Utc::now().timestamp();
 		let then = now + (60 * 30);
-		if send {
-			error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, msg, then)).into(), true).await;
+		if send_webhook_error_message {
+			error_webhook(&NewsError::SourceTimeout(scrape_type, msg, then), "", true).await;
 		}
 		let _ = &timeouts.time_out(source, then);
 	};
 
-	match () {
-		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
-			let e: &reqwest::Error = e;
-
+	match e {
+		NewsError::NoUrlOnPost(name, html) => {
+			let now = chrono::Local::now().timestamp();
+			let sanitized_url = name.replace('/', "_").replace(':', "_");
+			drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
+			time_out(true, "no_url_on_post".to_owned()).await;
+		}
+		NewsError::MetaCannotBeScraped(scrape_type) => {
+			error_webhook(&e, &scrape_type.to_string(), true).await;
+		}
+		NewsError::SourceTimeout(_, _, _) => {
+			// Dont do anything as it should've been handled earlier
+		}
+		NewsError::BadSelector(ref selector) => {
+			error_webhook(&e, &format!("Selector: {selector}"), true).await;
+		}
+		NewsError::MonthParse(_) => {
+			time_out(true, e.to_string());
+		}
+		NewsError::SelectedNothing(source, _) => {
+			time_out(true, source);
+		}
+		NewsError::SerenityError(_) => {
+			error_webhook(&e, "", true).await;
+		}
+		NewsError::Reqwest(e) => {
 			let status = e.status();
 			let status_text = if let Some(status) = status {
 				format!("status: {status} was returned and initiated:")
@@ -168,21 +189,12 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 				}
 			}
 		}
-		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
-			match variant {
-				NewsError::NoUrlOnPost(name, html) => {
-					let now = chrono::Local::now().timestamp();
-					let sanitized_url = name.replace('/', "_").replace(':', "_");
-					drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
-					time_out(true, "no_url_on_post".to_owned()).await;
-				}
-				_ => {
-					crash_and_burn(e).await;
-				}
-			}
+		NewsError::SerdeJson(e) => {
+			todo!("Impelent this!");
 		}
 		_ => {
 			crash_and_burn(e).await;
 		}
 	}
+
 }

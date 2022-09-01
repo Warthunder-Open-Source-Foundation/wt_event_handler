@@ -4,6 +4,7 @@ use serde_json::Value;
 use tokio::sync::RwLock;
 
 use tracing::{warn};
+use crate::error::NewsError;
 
 use crate::RECENT_PATH;
 use crate::scrapers::html_processing::scrape_links;
@@ -30,7 +31,7 @@ impl Source {
 		!self.tracked_urls.read().await.get(value).is_some()
 	}
 
-	pub async fn store_recent<I>(&self, value: I) -> Result<(), Box<dyn std::error::Error>>
+	pub async fn store_recent<I>(&self, value: I) -> Result<(), NewsError>
 		where I: IntoIterator,
 			  I::Item: ToString
 	{
@@ -41,7 +42,7 @@ impl Source {
 		self.update_json().await
 	}
 
-	async fn update_json(&self) -> Result<(), Box<dyn std::error::Error>> {
+	async fn update_json(&self) -> Result<(), NewsError> {
 		let json_value = match serde_json::to_value(&self)? {
 			Value::Object(mut map) => {
 				let tracked_urls = self.tracked_urls.read().await;
@@ -63,7 +64,7 @@ impl Source {
 
 impl Sources {
 	/// Reads source URLs from drive and pre-loads URLs
-	pub async fn build_from_drive() -> Result<Self, Box<dyn std::error::Error>> {
+	pub async fn build_from_drive() -> Result<Self, NewsError> {
 		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
 		let recent: Self = serde_json::from_str::<Self>(&cache_raw_recent)
 			.expect("Json cannot be read")
@@ -73,7 +74,7 @@ impl Sources {
 		Ok(recent)
 	}
 
-	async fn pre_populate_urls(self) -> Result<Self, Box<dyn std::error::Error>> {
+	async fn pre_populate_urls(self) -> Result<Self, NewsError> {
 		warn!("Pre-fetching URLs");
 		let mut new = self;
 		for source in &mut new.sources {

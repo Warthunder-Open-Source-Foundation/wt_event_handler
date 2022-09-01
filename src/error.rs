@@ -1,64 +1,65 @@
-use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
+use std::error::Error as StdError;
+use std::fmt::{Debug, Display};
+use thiserror::Error as ThisError;
 
 use serenity::http::Http;
+use serenity::model;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
 use tracing::{error, warn};
+use tracing::Value;
+use cssparser;
 
-use crate::PANIC_INFO;
+use crate::{PANIC_INFO, scrapers};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-pub type InputError = Box<dyn Error>;
-
-#[derive(Debug, Clone)]
+#[derive(Debug, ThisError)]
 #[allow(dead_code)]
 pub enum NewsError {
 	// URL which was fetched and the HTML returned
+	#[error("NoUrlOnPost: {0} returned a document, but no URL was found.\nDocument: {1}")]
 	NoUrlOnPost(String, String),
+
+	#[error("MetaCannotBeScraped: The meta data for \'{0}\' cannot be collected, falling back to defaults")]
 	MetaCannotBeScraped(ScrapeType),
+
+	#[error("SourceTimeout: Source \'{0}\' timed out and will not be fetched until <t:{1}>. \nError message: \"{2}\"")]
 	SourceTimeout(ScrapeType, String, i64),
+
+	#[error("BadSelector: The selector \'{0}\' failed to parse")]
 	BadSelector(String),
+
+	#[error("MonthParse: \'{0}\' failed to parse into month")]
 	MonthParse(String),
+
+	#[error("SelectedNothing: Selector: \'{0}\' found no item.\nDocument: {1}")]
 	SelectedNothing(String, String),
+
+	#[error(transparent)]
+	SerenityError(#[from] serenity::Error),
+
+	#[error(transparent)]
+	Reqwest(#[from] reqwest::Error),
+
+	#[error(transparent)]
+	SerdeJson(#[from] serde_json::Error),
+
+	#[error(transparent)]
+	IOError(#[from] std::io::Error),
 }
 
-impl Display for NewsError {
-	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		match self {
-			NewsError::NoUrlOnPost(url, html) => {
-				write!(f, "NoUrlOnPost: {url} returned a document, but no URL was found.\nDocument: {html}")
-			}
-			NewsError::MetaCannotBeScraped(scrape_type) => {
-				write!(f, "MetaCannotBeScraped: The meta data for \'{scrape_type}\' cannot be collected, falling back to defaults")
-			}
-			NewsError::SourceTimeout(scrape_type, msg, timestamp) => {
-				write!(f, "SourceTimeout: Source \'{scrape_type}\' timed out and will not be fetched until <t:{timestamp}>. \nError message: \"{msg}\"")
-			}
-			NewsError::BadSelector(selector) => {
-				write!(f, "BadSelector: The selector \'{selector}\' failed to parse")
-			}
-			NewsError::MonthParse(input) => {
-				write!(f, "MonthParse: \'{input}\' failed to parse into month")
-			}
-			NewsError::SelectedNothing(selector, html) => {
-				write!(f, "SelectedNothing: Selector: \'{selector}\' found no item.\nDocument: {html}")
-			}
-		}
-	}
-}
-
-impl Error for NewsError {}
-
-// Clippy error
-#[allow(clippy::borrowed_box)]
-pub async fn error_webhook(error: &Box<dyn Error>, can_recover: bool) {
-	ship_error_webhook(error.to_string(), can_recover).await;
+// Extra text is not an option thanks to type-system fuckery not permitting the type Option contain a impl statement
+pub async fn error_webhook<T>(error: &NewsError, extra_text: &T, can_recover: bool)
+where T: ToString + ?Sized
+{
+	ship_error_webhook(error.to_string(), extra_text,can_recover).await;
 	warn!("Posted panic webhook for {}", PANIC_INFO.name);
 }
 
-// Broken up function signature to avoid runtime threat-passing of Error data, permitting direct calling from outside
-pub async fn ship_error_webhook(input: String, can_recover: bool) {
+// Extra text is not an option thanks to type-system fuckery not permitting the type Option contain a impl statement
+pub async fn ship_error_webhook<T>(input: String, extra_text: &T, can_recover: bool)
+	where T: ToString + ?Sized
+{
 	let my_http_client = Http::new(&PANIC_INFO.token);
 
 	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid, &PANIC_INFO.token).await {
@@ -70,18 +71,22 @@ pub async fn ship_error_webhook(input: String, can_recover: bool) {
 	};
 
 	let embed = Embed::fake(|e| {
-		e.title(if can_recover {
+		let e= e.title(if can_recover {
 			"A recoverable error occurred"
 		} else {
 			"A non-recoverable error occurred"
 		}
 		)
-		 .field("More information", input, false)
-		 .description(format!("Timestamp: <t:{}>", chrono::offset::Local::now().timestamp()))
+		 .field("Core error information", input, false)
 		 .color(Color::from_rgb(116, 16, 210))
+			.timestamp(model::Timestamp::now())
 		 .footer(|f| {
 			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-		 })
+		 });
+		if  extra_text.to_string() != "" {
+			e.field("Hint / details", extra_text.to_string(), false);
+		};
+		e
 	});
 
 	webhook.execute(my_http_client, false, |w| {

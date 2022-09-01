@@ -4,12 +4,12 @@ use std::io;
 use std::process::exit;
 use std::str::FromStr;
 
-use crate::TOKEN_PATH;
+use crate::{NewsError, TOKEN_PATH};
 use crate::embed::EmbedData;
 use crate::json::webhooks::{Hooks, WebhookAuth};
 use crate::webhook_handler::deliver_webhook;
 
-pub async fn add_webhook() -> Result<(), Box<dyn Error>> {
+pub async fn add_webhook() -> Result<(), NewsError> {
 	let token_raw = fs::read_to_string(TOKEN_PATH)?;
 	let mut webhook_auth: WebhookAuth = serde_json::from_str(&token_raw)?;
 
@@ -20,21 +20,21 @@ pub async fn add_webhook() -> Result<(), Box<dyn Error>> {
 	exit(0);
 }
 
-pub async fn test_hook() -> Result<(), Box<dyn Error>> {
+pub async fn test_hook() -> Result<(), NewsError> {
 	let mut line = String::new();
 
 	println!("Choose the webhook order in the array to test\n");
 
 	io::stdin().read_line(&mut line)?;
 
-	let pos = usize::from_str(line.trim())?;
+	let pos = usize::from_str(line.trim()).expect("Expected integer");
 
 	deliver_webhook(EmbedData::test(), pos).await;
 
 	exit(0);
 }
 
-pub fn remove_webhook() -> Result<(), Box<dyn Error>> {
+pub fn remove_webhook() -> Result<(), NewsError> {
 	let token_raw = fs::read_to_string(TOKEN_PATH)?;
 	let mut webhook_auth: WebhookAuth = serde_json::from_str(&token_raw)?;
 	let mut line = String::new();
@@ -46,7 +46,7 @@ pub fn remove_webhook() -> Result<(), Box<dyn Error>> {
 	println!("Choose the webhook to remove \n");
 
 	io::stdin().read_line(&mut line)?;
-	let index = line.trim().parse()?;
+	let index = line.trim().parse().expect("Expected integer");
 
 	webhook_auth.hooks.remove(index);
 

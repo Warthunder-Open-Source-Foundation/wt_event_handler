@@ -2,16 +2,18 @@
 #![feature(once_cell)]
 #![allow(clippy::module_name_repetitions)]
 #![feature(async_closure)]
+#![feature(type_ascription)]
 
 use std::{fs, io};
 use std::error::Error;
 use std::io::stdout;
-use std::process::exit;
+use std::process::{exit, ExitCode, ExitStatus};
 
 use lazy_static::{initialize, lazy_static};
 use tracing::{error, Level, warn};
 use tracing_appender::rolling;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
+use crate::error::NewsError;
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -32,16 +34,6 @@ mod api;
 const RECENT_PATH: &str = "assets/sources.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
 
-pub const HANDLE_RESULT_FN: fn(Result<(), Box<dyn Error>>) = |e: Result<(), Box<dyn Error>>| {
-	match e {
-		Ok(_) => {}
-		Err(e) => {
-			error!(e);
-			panic!("{}", e);
-		}
-	}
-};
-
 lazy_static! {
 	pub static ref WEBHOOK_AUTH: WebhookAuth = {
 		let raw = fs::read(TOKEN_PATH).unwrap();
@@ -54,7 +46,7 @@ lazy_static! {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), NewsError> {
 	// Loads statics
 	initialize(&WEBHOOK_AUTH);
 	initialize(&PANIC_INFO);
@@ -95,18 +87,19 @@ async fn main() {
 	match line.trim() {
 		"1" => {}
 		"2" => { hooks = false; }
-		"3" => { HANDLE_RESULT_FN(add_webhook().await) }
-		"4" => { HANDLE_RESULT_FN(remove_webhook()) }
+		"3" => { add_webhook().await? }
+		"4" => { remove_webhook()? }
 		"5" => {
 			hooks = false;
-			HANDLE_RESULT_FN(test_hook().await);
+			test_hook().await?;
 		}
 		_ => {
 			tracing::error!("Bad options - aborting");
 			exit(1);
 		}
-	}
+	};
 
 	warn!("Started core loop");
 	fetch_loop(hooks).await;
+	Ok(())
 }
