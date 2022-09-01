@@ -4,12 +4,11 @@ use std::process::exit;
 use std::sync::Arc;
 use std::time::Duration;
 
+use actix_cors::Cors;
 use actix_web::{App, HttpServer, web};
 use lazy_static::lazy_static;
-use tokio::sync::{Mutex};
+use tokio::sync::Mutex;
 use tracing::{error, info, warn};
-
-use actix_cors::Cors;
 
 use crate::api::core::get_latest_news;
 use crate::api::core::greet;
@@ -35,14 +34,7 @@ pub async fn fetch_loop(hooks: bool) {
 	let recent_data_raw = Sources::build_from_drive().await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
-	{
-		let to_remove_urls: &[&str] = &[];
-		for to_remove in to_remove_urls {
-			for source in &mut recent_data_raw.sources {
-				source.tracked_urls.write().await.remove(to_remove.to_owned());
-			}
-		}
-	}
+	recent_data_raw.debug_remove_tracked_urls(&["a"]).await;
 
 	let mut timeouts = Timeout::new();
 

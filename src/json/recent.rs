@@ -91,4 +91,16 @@ impl Sources {
 
 		Ok(new)
 	}
+
+	/// Removes any URL from all tracked URLs
+	pub async fn debug_remove_tracked_urls<I>(&self, to_remove_urls: I)
+		where I: IntoIterator,
+			  I::Item: ToString
+	{
+		for to_remove in to_remove_urls.into_iter() {
+			for source in &self.sources {
+				source.tracked_urls.write().await.remove(&to_remove.to_string());
+			}
+		}
+	}
 }
