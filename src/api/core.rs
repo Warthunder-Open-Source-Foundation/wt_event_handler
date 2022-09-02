@@ -10,5 +10,5 @@ pub async fn greet(source: web::Path<String>) -> impl Responder {
 #[get("/news/latest")]
 #[allow(clippy::unused_async)]
 pub async fn get_latest_news(sources: web::Data<Sources>) -> impl Responder {
-	format!{"{:#?}", sources}
+	serde_json::to_string(&sources.get_latest().await)
 }

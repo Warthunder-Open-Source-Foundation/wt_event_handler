@@ -48,7 +48,7 @@ pub async fn fetch_loop(hooks: bool) {
 		}
 	});
 
-	let recent_data = Arc::new(recent_data_raw);
+	let mut recent_data = Arc::new(recent_data_raw);
 	let temp = recent_data.clone();
 	let test_struct_data = web::Data::from(temp);
 
@@ -73,6 +73,9 @@ pub async fn fetch_loop(hooks: bool) {
 
 
 	loop {
+		// State for updating inner fields when news are pushed
+		let mut found_news = false;
+
 		for source in &recent_data.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
@@ -83,6 +86,7 @@ pub async fn fetch_loop(hooks: bool) {
 								source.handle_webhooks(news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
+							found_news = true;
 						}
 
 						if let Err(why) = source.store_recent(news.into_iter().map(|new| new.url)).await {
@@ -94,6 +98,10 @@ pub async fn fetch_loop(hooks: bool) {
 						handle_err(e, source.scrape_type, source.name.clone(), &mut timeouts, hooks).await;
 					}
 				}
+			}
+			if found_news {
+				recent_data.update_latest();
+				found_news = false;
 			}
 			info!("Waiting for {FETCH_DELAY} seconds");
 			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
