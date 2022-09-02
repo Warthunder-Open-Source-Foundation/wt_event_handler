@@ -29,10 +29,10 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let recent_data_raw = Sources::build_from_drive().await.expect("I fucked up my soup");
+	let mut sources = Sources::build_from_drive().await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
-	recent_data_raw.debug_remove_tracked_urls(&["a"]).await;
+	sources.debug_remove_tracked_urls(&["a"]);
 
 	let mut timeouts = Timeout::new();
 
@@ -47,10 +47,6 @@ pub async fn fetch_loop(hooks: bool) {
 		}
 	});
 
-	let mut recent_data = Arc::new(recent_data_raw);
-	let temp = recent_data.clone();
-	let test_struct_data = web::Data::from(temp);
-
 	// Spawn API thread
 	tokio::task::spawn({
 		info!("Spawned API thread");
@@ -61,7 +57,6 @@ pub async fn fetch_loop(hooks: bool) {
 
 			App::new()
 				.wrap(cors)
-				.app_data(test_struct_data.clone())
 				.service(greet)
 				.service(get_latest_news)
 		})
@@ -72,10 +67,7 @@ pub async fn fetch_loop(hooks: bool) {
 
 
 	loop {
-		// State for updating inner fields when news are pushed
-		let mut found_news = false;
-
-		for source in &recent_data.sources {
+		for source in &mut sources.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
 				match html_processor(source).await {
@@ -85,22 +77,15 @@ pub async fn fetch_loop(hooks: bool) {
 								source.handle_webhooks(news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
-							found_news = true;
 						}
 
-						if let Err(why) = source.store_recent(news.into_iter().map(|new| new.url)).await {
-							error_webhook(&why, "The api will not return valid data now", true).await; // it's recoverable, but the API is fucked up then (Outdated Data)
-						}
+						source.store_recent(news.into_iter().map(|new| new.url));
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;
 						handle_err(e, source.scrape_type, source.name.clone(), &mut timeouts, hooks).await;
 					}
 				}
-			}
-			if found_news {
-				recent_data.update_latest();
-				found_news = false;
 			}
 			info!("Waiting for {FETCH_DELAY} seconds");
 			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;

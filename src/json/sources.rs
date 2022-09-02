@@ -25,47 +25,25 @@ pub struct Source {
 	pub domain: String,
 	pub scrape_type: ScrapeType,
 	#[serde(skip_serializing, skip_deserializing)]
-	tracked_urls: RwLock<NewsArticle>,
-	#[serde(skip_serializing, skip_deserializing)]
-	pub json: RwLock<String>,
-	#[serde(skip_serializing, skip_deserializing)]
-	latest_news: RwLock<(String, i64)>,
+	tracked_urls: NewsArticle,
 }
 
 impl Source {
-	pub async fn is_new(&self, value: &str) -> bool {
-		self.tracked_urls.read().await.get(value).is_none()
+	pub fn is_new(&self, value: &str) -> bool {
+		self.tracked_urls.get(value).is_none()
 	}
 
-	pub async fn store_recent<I>(&self, value: I) -> Result<(), NewsError>
+	pub fn store_recent<I>(&mut self, value: I)
 		where I: IntoIterator,
 			  I::Item: ToString
 	{
 		let iter = value.into_iter().map(|s| (s.to_string(), chrono::Utc::now().timestamp()));
 		{
-			self.tracked_urls.write().await.extend(iter);
+			self.tracked_urls.extend(iter);
 		}
-		self.update_json().await
 	}
 
-	async fn update_json(&self) -> Result<(), NewsError> {
-		let json_value = match serde_json::to_value(&self)? {
-			Value::Object(mut map) => {
-				let tracked_urls = self.tracked_urls.read().await;
-				map.insert("tracked_urls".to_owned(), serde_json::to_value(&*tracked_urls)?);
 
-				serde_json::to_value(map)?
-			}
-			_ => { unreachable!() } // unreachable because we know it can't happen. We just passed in a struct ("Object") to get the value
-		};
-		let json = serde_json::to_string(&json_value)?;
-
-		{
-			*self.json.write().await = json;
-		}
-
-		Ok(())
-	}
 }
 
 impl Sources {
@@ -89,7 +67,7 @@ impl Sources {
 			match scrape_links(source).await {
 				Ok(news_urls) => {
 					for news_url in news_urls {
-						source.store_recent(&[&news_url]).await?;
+						source.store_recent(&[&news_url]);
 					}
 				}
 				Err(e) => {
@@ -102,13 +80,13 @@ impl Sources {
 	}
 
 	/// Removes any URL from all tracked URLs
-	pub async fn debug_remove_tracked_urls<I>(&self, to_remove_urls: I)
+	pub fn debug_remove_tracked_urls<I>(&mut self, to_remove_urls: I)
 		where I: IntoIterator,
 			  I::Item: ToString
 	{
 		for to_remove in to_remove_urls {
-			for source in &self.sources {
-				source.tracked_urls.write().await.remove(&to_remove.to_string());
+			for source in &mut self.sources {
+				source.tracked_urls.remove(&to_remove.to_string());
 			}
 		}
 	}
@@ -118,7 +96,7 @@ impl Sources {
 		let mut latest = vec![];
 		for source in &self.sources {
 			let mut latest_item = ("No news yet".to_owned(), i64::MIN);
-			for item in &*source.tracked_urls.read().await {
+			for item in &source.tracked_urls {
 				if *item.1 > latest_item.1 {
 					latest_item = (item.0.clone(), *item.1);
 				}

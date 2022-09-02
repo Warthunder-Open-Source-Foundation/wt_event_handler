@@ -13,7 +13,7 @@ pub async fn html_processor(source: &Source) -> Result<Vec<EmbedData>, NewsError
 	// Removes already known URLs
 	let mut positions = vec![];
 	for (position, link) in links.iter().enumerate() {
-		if !source.is_new(link).await {
+		if !source.is_new(link) {
 			positions.push(position);
 		}
 	}
