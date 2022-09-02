@@ -6,7 +6,7 @@ use tracing::{error, warn};
 
 use crate::embed::EmbedData;
 use crate::fetch_loop::STATS;
-use crate::json::recent::Source;
+use crate::json::sources::Source;
 use crate::json::webhooks::{FilterType, Hooks};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::Incr;

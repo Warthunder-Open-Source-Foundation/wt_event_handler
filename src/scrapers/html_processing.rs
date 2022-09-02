@@ -1,6 +1,6 @@
 use crate::embed::EmbedData;
 use crate::error::{error_webhook, NewsError};
-use crate::json::recent::Source;
+use crate::json::sources::Source;
 use crate::scrapers::scrape_meta::scrape_meta;
 use crate::scrapers::scraper_resources::resources::{format_into_final_url, get_listed_links, request_html, ScrapeType};
 

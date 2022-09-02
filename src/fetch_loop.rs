@@ -11,7 +11,7 @@ use tracing::{error, info, warn};
 use crate::api::endpoints::{get_latest_news, greet};
 
 use crate::error::{error_webhook, NewsError};
-use crate::json::recent::Sources;
+use crate::json::sources::Sources;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
