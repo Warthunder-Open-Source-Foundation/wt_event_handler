@@ -5,12 +5,11 @@
 #![feature(type_ascription)]
 
 use std::{fs, io};
-use std::error::Error;
 use std::io::stdout;
-use std::process::{exit, ExitCode, ExitStatus};
+use std::process::{exit};
 
 use lazy_static::{initialize, lazy_static};
-use tracing::{error, Level, warn};
+use tracing::{Level, warn};
 use tracing_appender::rolling;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use crate::error::NewsError;

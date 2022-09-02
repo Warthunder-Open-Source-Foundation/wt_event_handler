@@ -80,7 +80,7 @@ pub async fn fetch_loop(hooks: bool) {
 					Ok(news) => {
 						for news_embed in &news {
 							if hooks {
-								source.handle_webhooks(&news_embed, true, source.scrape_type).await;
+								source.handle_webhooks(news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
 						}
@@ -126,6 +126,7 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 		let _ = &timeouts.time_out(source, then);
 	};
 
+	#[allow(clippy::match_wildcard_for_single_variants)]
 	match e {
 		NewsError::NoUrlOnPost(name, html) => {
 			let now = chrono::Local::now().timestamp();
@@ -143,10 +144,10 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 			error_webhook(&e, &format!("Selector: {selector}"), true).await;
 		}
 		NewsError::MonthParse(_) => {
-			time_out(true, e.to_string());
+			time_out(true, e.to_string()).await;
 		}
 		NewsError::SelectedNothing(source, _) => {
-			time_out(true, source);
+			time_out(true, source).await;
 		}
 		NewsError::SerenityError(_) => {
 			error_webhook(&e, "", true).await;
@@ -189,7 +190,7 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 				}
 			}
 		}
-		NewsError::SerdeJson(e) => {
+		NewsError::SerdeJson(_) => {
 			todo!("Impelent this!");
 		}
 		_ => {

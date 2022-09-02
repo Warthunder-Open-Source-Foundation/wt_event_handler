@@ -27,16 +27,10 @@ chrono = "^0.4.22"
 lazy_static = "^1.4.0"
 thiserror = "^1.0.33"
 
-cssparser = "^0.29.6"
-
 actix-cors = "^0.6.1"
 actix-web = "^4.1.0"
 
 tracing = "^0.1.36"
 tracing-appender = "^0.2.2"
 tracing-subscriber = {version  = "^0.3.15", features = ["tracing-log", "env-filter", "fmt", "std"]}
-
-[dependencies.log4rs]
-version = "^1.1.1"
-features = ["file_appender"]
 

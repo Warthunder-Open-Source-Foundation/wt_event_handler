@@ -1,5 +1,4 @@
-use std::error::Error as StdError;
-use std::fmt::{Debug, Display};
+use std::fmt::{Debug};
 use thiserror::Error as ThisError;
 
 use serenity::http::Http;
@@ -7,10 +6,8 @@ use serenity::model;
 use serenity::model::prelude::Embed;
 use serenity::utils::Color;
 use tracing::{error, warn};
-use tracing::Value;
-use cssparser;
 
-use crate::{PANIC_INFO, scrapers};
+use crate::{PANIC_INFO};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[derive(Debug, ThisError)]

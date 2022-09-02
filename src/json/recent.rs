@@ -28,7 +28,7 @@ pub struct Source {
 
 impl Source {
 	pub async fn is_new(&self, value: &str) -> bool {
-		!self.tracked_urls.read().await.get(value).is_some()
+		self.tracked_urls.read().await.get(value).is_none()
 	}
 
 	pub async fn store_recent<I>(&self, value: I) -> Result<(), NewsError>
@@ -98,7 +98,7 @@ impl Sources {
 		where I: IntoIterator,
 			  I::Item: ToString
 	{
-		for to_remove in to_remove_urls.into_iter() {
+		for to_remove in to_remove_urls {
 			for source in &self.sources {
 				source.tracked_urls.write().await.remove(&to_remove.to_string());
 			}

@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;

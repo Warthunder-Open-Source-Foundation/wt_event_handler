@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use crate::embed::EmbedData;
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Source;
