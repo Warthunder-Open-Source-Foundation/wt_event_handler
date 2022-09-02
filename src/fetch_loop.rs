@@ -8,6 +8,7 @@ use actix_web::{App, HttpServer, web};
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
+use crate::api::db::Database;
 use crate::api::endpoints::{get_latest_news, greet};
 
 use crate::error::{error_webhook, NewsError};
@@ -30,6 +31,7 @@ lazy_static! {
 
 pub async fn fetch_loop(hooks: bool) {
 	let mut sources = Sources::build_from_drive().await.expect("I fucked up my soup");
+	let mut database = Database::new().await;
 
 	#[cfg(debug_assertions)]
 	sources.debug_remove_tracked_urls(&["a"]);
