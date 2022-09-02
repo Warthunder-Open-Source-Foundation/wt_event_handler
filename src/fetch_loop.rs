@@ -8,9 +8,8 @@ use actix_web::{App, HttpServer, web};
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
+use crate::api::endpoints::{get_latest_news, greet};
 
-use crate::api::core::get_latest_news;
-use crate::api::core::greet;
 use crate::error::{error_webhook, NewsError};
 use crate::json::recent::Sources;
 use crate::scrapers::html_processing::html_processor;
