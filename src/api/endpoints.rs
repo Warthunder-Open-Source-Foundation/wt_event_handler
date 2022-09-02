@@ -1,5 +1,5 @@
 use actix_web::{get, web, Responder};
-use crate::json::recent::Sources;
+use crate::json::sources::Sources;
 
 #[get("/news/latest/{source}")]
 #[allow(clippy::unused_async)]
