@@ -1,5 +1,8 @@
+use std::process::exit;
+use std::thread::sleep;
+use std::time::Duration;
 use actix_web::{get, web, Responder};
-use crate::api::db::Database;
+use crate::api::database::Database;
 use crate::json::sources::Sources;
 
 #[get("/news/latest/{source}")]
@@ -12,5 +15,13 @@ pub async fn greet(source: web::Path<String>, db: web::Data<Database>) -> impl R
 #[get("/news/latest")]
 #[allow(clippy::unused_async)]
 pub async fn get_latest_news(db: web::Data<Database>) -> impl Responder {
+	""
+}
+
+
+#[get("/settings/shutdown")]
+#[allow(clippy::unused_async)]
+pub async fn shutdown() -> impl Responder {
+	exit(1);
 	""
 }
