@@ -13,6 +13,7 @@ use tracing::{Level, warn};
 use tracing_appender::rolling;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use crate::error::NewsError;
+use rand::Rng;
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -33,6 +34,7 @@ mod api;
 const RECENT_PATH: &str = "assets/sources.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
 
+
 lazy_static! {
 	pub static ref WEBHOOK_AUTH: WebhookAuth = {
 		let raw = fs::read(TOKEN_PATH).unwrap();
@@ -42,6 +44,13 @@ lazy_static! {
 	pub static ref PANIC_INFO: CrashHook = {
 		WEBHOOK_AUTH.crash_hook[0].clone()
 	};
+	pub static ref SHUTDOWN_KEY: String =  {
+		rand::thread_rng()
+        .sample_iter(&rand::distributions::Alphanumeric)
+        .take(20)
+        .map(char::from)
+        .collect()
+	};
 }
 
 #[tokio::main]
@@ -49,6 +58,9 @@ async fn main() -> Result<(), NewsError> {
 	// Loads statics
 	initialize(&WEBHOOK_AUTH);
 	initialize(&PANIC_INFO);
+	initialize(&SHUTDOWN_KEY);
+
+	println!("Emergency shutdown param: localhost:8082/settings/shutdown/{}", *SHUTDOWN_KEY);
 
 	let mut line = String::new();
 	let mut hooks = true;
