@@ -1,13 +1,8 @@
 use std::collections::{HashMap};
-use std::fs;
-use serde_json::Value;
-use tokio::sync::RwLock;
-
-use tracing::{error, warn};
+use tracing::{ warn};
 use crate::api::database::Database;
 use crate::error::NewsError;
 
-use crate::RECENT_PATH;
 use crate::scrapers::html_processing::scrape_links;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
@@ -47,7 +42,7 @@ impl Source {
 
 impl Sources {
 	pub async fn build(db: &Database) -> Result<Self, NewsError> {
-		let mut recent = Self::new()
+		let recent = Self::new()
 			.pre_populate_urls(db.clone())
 			.await?;
 

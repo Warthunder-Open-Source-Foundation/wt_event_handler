@@ -1,10 +1,9 @@
 use std::fs;
 use std::process::exit;
-use std::sync::Arc;
 use std::time::Duration;
 
 use actix_cors::Cors;
-use actix_web::{App, HttpServer, web};
+use actix_web::{App, HttpServer};
 use actix_web::web::Data;
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
@@ -31,7 +30,7 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let mut database = Database::new().await.expect("Cannot initiate DB");
+	let database = Database::new().await.expect("Cannot initiate DB");
 	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]

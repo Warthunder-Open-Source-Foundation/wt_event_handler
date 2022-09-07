@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use crate::json::sources::{Source, Sources};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-impl Sources {
+impl Sources  {
 	pub(crate) fn new() -> Self {
 		Self {
 			sources: vec![

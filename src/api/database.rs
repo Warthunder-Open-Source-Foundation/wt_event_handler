@@ -1,9 +1,8 @@
-use sqlx::{ConnectOptions, Encode, Executor, Pool, query, query_file, query_file_as_unchecked, query_file_unchecked, Row, Sqlite, SqliteConnection, SqlitePool};
 use std::str::FromStr;
-use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqliteRow};
+use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode};
 use crate::api::db_error::DatabaseError;
 
-use sqlx::migrate::Migrator;
+use sqlx::{Executor, SqlitePool};
 
 #[derive(Clone)]
 pub struct Database {
@@ -18,7 +17,7 @@ impl Database {
 			.create_if_missing(true)
 			.shared_cache(true)
 			.journal_mode(SqliteJournalMode::Wal);
-		let mut db = SqlitePool::connect_with(options).await?;
+		let db = SqlitePool::connect_with(options).await?;
 
 		db.execute(include_str!("../../assets/setup_db.sql")).await?;
 
