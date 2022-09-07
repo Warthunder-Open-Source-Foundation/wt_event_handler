@@ -6,6 +6,7 @@ use actix_cors::Cors;
 use actix_web::{App, HttpServer};
 use actix_web::web::Data;
 use lazy_static::lazy_static;
+use tokio::signal;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
 use crate::api::database::Database;
@@ -68,6 +69,12 @@ pub async fn fetch_loop(hooks: bool) {
 			.bind(("127.0.0.1", 8082))
 			.expect("Cant bind local host on port 8080")
 			.run()
+	});
+
+	// Responsible for shutting down tokio-parent / sibling processes
+	tokio::spawn(async move {
+		tokio::signal::ctrl_c().await.unwrap();
+		exit(-1);
 	});
 
 
