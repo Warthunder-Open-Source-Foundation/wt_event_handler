@@ -14,8 +14,6 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 #[derive(Default, serde::Serialize, serde::Deserialize, Debug)]
 pub struct Sources {
 	pub sources: Vec<Source>,
-	#[serde(skip_serializing, skip_deserializing)]
-	latest_news: RwLock<Vec<(String, String, i64)>>,
 }
 
 pub type NewsArticle = HashMap<String, i64>;
@@ -26,7 +24,7 @@ pub struct Source {
 	pub domain: String,
 	pub scrape_type: ScrapeType,
 	#[serde(skip_serializing, skip_deserializing)]
-	tracked_urls: NewsArticle,
+	pub(crate) tracked_urls: NewsArticle,
 }
 
 impl Source {
@@ -48,15 +46,10 @@ impl Source {
 }
 
 impl Sources {
-	/// Reads source URLs from drive and pre-loads URLs
-	pub async fn build_from_drive(db: &Database) -> Result<Self, NewsError> {
-		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
-		let mut recent: Self = serde_json::from_str::<Self>(&cache_raw_recent)
-			.expect("Json cannot be read")
+	pub async fn build(db: &Database) -> Result<Self, NewsError> {
+		let mut recent = Self::new()
 			.pre_populate_urls(db.clone())
 			.await?;
-
-		recent.update_latest().await;
 
 		Ok(recent)
 	}
@@ -91,26 +84,5 @@ impl Sources {
 				source.tracked_urls.remove(&to_remove.to_string());
 			}
 		}
-	}
-
-	// Source-name, URL, timestamp
-	pub async fn update_latest(&self) {
-		let mut latest = vec![];
-		for source in &self.sources {
-			let mut latest_item = ("No news yet".to_owned(), i64::MIN);
-			for item in &source.tracked_urls {
-				if *item.1 > latest_item.1 {
-					latest_item = (item.0.clone(), *item.1);
-				}
-			}
-			latest.push((source.name.clone(), latest_item.0, latest_item.1));
-		}
-		*self.latest_news.write().await = latest;
-	}
-
-	// Source-name, URL, timestamp
-	pub async fn get_latest(&self) -> Vec<(String, String, i64)> {
-		// self.latest_news.read().await.iter().map(|(source, url, timestamp)|(source.as_str(), url.as_str(), *timestamp)).collect::<Vec<(&'a str, &'a str, i64)>>()
-		self.latest_news.read().await.clone()
 	}
 }

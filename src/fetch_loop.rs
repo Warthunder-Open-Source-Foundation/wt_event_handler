@@ -32,7 +32,7 @@ lazy_static! {
 
 pub async fn fetch_loop(hooks: bool) {
 	let mut database = Database::new().await.expect("Cannot initiate DB");
-	let mut sources = Sources::build_from_drive(&database).await.expect("I fucked up my soup");
+	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
 	sources.debug_remove_tracked_urls(&["a"]);
