@@ -4,6 +4,7 @@ use serde_json::Value;
 use tokio::sync::RwLock;
 
 use tracing::{error, warn};
+use crate::api::db::Database;
 use crate::error::NewsError;
 
 use crate::RECENT_PATH;
@@ -48,11 +49,11 @@ impl Source {
 
 impl Sources {
 	/// Reads source URLs from drive and pre-loads URLs
-	pub async fn build_from_drive() -> Result<Self, NewsError> {
+	pub async fn build_from_drive(db: &Database) -> Result<Self, NewsError> {
 		let cache_raw_recent = fs::read_to_string(RECENT_PATH).expect("Cannot read file");
 		let mut recent: Self = serde_json::from_str::<Self>(&cache_raw_recent)
 			.expect("Json cannot be read")
-			.pre_populate_urls()
+			.pre_populate_urls(db.clone())
 			.await?;
 
 		recent.update_latest().await;
@@ -60,14 +61,15 @@ impl Sources {
 		Ok(recent)
 	}
 
-	async fn pre_populate_urls(self) -> Result<Self, NewsError> {
+	async fn pre_populate_urls(self, db: Database) -> Result<Self, NewsError> {
 		warn!("Pre-fetching URLs");
 		let mut new = self;
 		for source in &mut new.sources {
 			match scrape_links(source).await {
 				Ok(news_urls) => {
-					for news_url in news_urls {
+					for news_url in &news_urls {
 						source.store_recent(&[&news_url]);
+							db.store_recent(&[&news_url], &source.name).await;
 					}
 				}
 				Err(e) => {

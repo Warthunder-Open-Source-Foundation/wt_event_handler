@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use actix_cors::Cors;
 use actix_web::{App, HttpServer, web};
+use actix_web::web::Data;
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
@@ -30,8 +31,8 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let mut sources = Sources::build_from_drive().await.expect("I fucked up my soup");
-	let mut database = Database::new().await;
+	let mut database = Database::new().await.expect("Cannot initiate DB");
+	let mut sources = Sources::build_from_drive(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
 	sources.debug_remove_tracked_urls(&["a"]);
@@ -51,6 +52,7 @@ pub async fn fetch_loop(hooks: bool) {
 
 	// Spawn API thread
 	tokio::task::spawn({
+		let cloned_database = Data::new( database.clone());
 		info!("Spawned API thread");
 		HttpServer::new(move || {
 			let cors = Cors::default()
@@ -59,10 +61,11 @@ pub async fn fetch_loop(hooks: bool) {
 
 			App::new()
 				.wrap(cors)
+				.app_data(Data::clone(&cloned_database))
 				.service(greet)
 				.service(get_latest_news)
 		})
-			.bind(("127.0.0.1", 8080))
+			.bind(("127.0.0.1", 8082))
 			.expect("Cant bind local host on port 8080")
 			.run()
 	});
@@ -81,7 +84,8 @@ pub async fn fetch_loop(hooks: bool) {
 							increment(Incr::NewNews).await;
 						}
 
-						source.store_recent(news.into_iter().map(|new| new.url));
+						source.store_recent(news.iter().map(|new| &new.url));
+						database.store_recent(news.iter().map(|new| &new.url), &source.name).await;
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;
