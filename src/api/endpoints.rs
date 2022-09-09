@@ -40,5 +40,5 @@ pub async fn shutdown(key: web::Path<String>) -> impl Responder {
 #[get("/news/timestamp")]
 #[allow(clippy::unused_async)]
 pub async fn get_latest_timestamp(db: web::Data<Database>) -> impl Responder {
-	db.get_latest_timestamp().await.expect("uh").to_string()
+	serde_json::to_string(&db.get_latest_timestamp().await.expect("uh")).expect("uh")
 }
