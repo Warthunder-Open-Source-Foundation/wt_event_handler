@@ -30,4 +30,11 @@ impl Database {
 						ORDER BY fetch_date DESC", source_name);
 		Ok(self.connection.fetch_one(q).await?.get(0))
 	}
+
+	pub async fn get_latest_timestamp(&self) -> Result<i64, DatabaseError> {
+		let q = query!("SELECT  fetch_date
+								 FROM sources
+								 ORDER BY fetch_date DESC ");
+		Ok(self.connection.fetch_one(q).await?.get(0))
+	}
 }

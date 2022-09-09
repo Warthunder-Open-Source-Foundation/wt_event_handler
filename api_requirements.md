@@ -1,6 +1,9 @@
+UNLESS POLL A ROUTE IF IT EXPLICITLY STATES THAT POLLING IS PERMITTED
+
 Required API routes (without authorization):
 - ~~GET the latest news, one of each source `/news/latest` DONE~~
 - ~~GET specific sources latest news `/news/latest/{source}` DONE~~
+- ~~GET the latest date of news `/news/timestamp` (Polling allowed)~~
 - GET statistics-struct `/statistics`
 - GET uptime `/statistics/uptime`
  
