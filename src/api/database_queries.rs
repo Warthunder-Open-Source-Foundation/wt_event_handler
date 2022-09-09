@@ -6,8 +6,9 @@ impl Database {
 	pub async fn store_recent_single(&self, value: &str, source: &str) -> Result<(), DatabaseError>
 	{
 		let now = chrono::Utc::now().timestamp();
-		let q = query!("INSERT INTO sources (url, fetch_date, source)
-						VALUES (?, ?, ?);",
+		let q = query!(// language=SQL
+			"INSERT INTO sources (url, fetch_date, source)
+			VALUES (?, ?, ?);",
 						value, now, source);
 		self.connection.execute(q).await?;
 		Ok(())
@@ -24,21 +25,21 @@ impl Database {
 	}
 
 	pub async fn get_latest_news_from_source(&self, source_name: &str) -> Result<String, DatabaseError> {
-		let q = query!("SELECT url
-						FROM sources
-						WHERE source = ?
-						ORDER BY fetch_date DESC", source_name);
+		let q = query!(// language=SQL
+			"SELECT url
+			FROM sources
+			WHERE source = ?
+			ORDER BY fetch_date DESC", source_name);
 		Ok(self.connection.fetch_one(q).await?.get(0))
 	}
 
 	pub async fn get_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
-		let q = query!("SELECT fetch_date, source
-								 FROM sources
-								 ORDER BY fetch_date DESC ");
+		let q = query!(// language=SQL
+			"SELECT fetch_date, source
+			 FROM sources
+			 ORDER BY fetch_date DESC ");
 		let res = 	self.connection.fetch_one(q).await?;
 		Ok((
-		res.get(0),
-			res.get(1)
-			))
+		res.get(0), res.get(1)))
 	}
 }
