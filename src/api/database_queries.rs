@@ -36,7 +36,7 @@ impl Database {
 	// Should prevent too many calls to DB when not directly required, not sure how smart this function is
 	pub async fn get_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
 		let ts = &mut *self.latest_timestamp.lock().await;
-		// triggers if the latest timestamp is older than 10 seconds
+		// triggers if the latest timestamp is older than 10 seconds, otherwise the buffered result is returned
 		if ts.0 < (chrono::Utc::now().timestamp() + 10000) {
 			let latest = self.query_latest_timestamp().await?;
 			ts.0 = latest.0;
