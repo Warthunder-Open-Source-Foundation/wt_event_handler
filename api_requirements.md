@@ -1,4 +1,5 @@
 ONLY POLL A ROUTE IF IT EXPLICITLY STATES THAT POLLING IS PERMITTED
+API IS UNSECURED AT THIS POINT IN TIME
 
 Required API routes (without authorization):
 - ~~GET the latest news, one of each source `/news/latest`~~
