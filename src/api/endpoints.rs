@@ -5,7 +5,7 @@ use actix_web::http::StatusCode;
 use crate::api::database::Database;
 use crate::error::{error_webhook, ship_error_webhook};
 use crate::json::sources::Sources;
-use crate::SHUTDOWN_KEY;
+use crate::{BOOT_TIME, SHUTDOWN_KEY};
 
 #[get("/news/latest/{source}")]
 #[allow(clippy::unused_async)]
@@ -41,4 +41,10 @@ pub async fn shutdown(key: web::Path<String>) -> impl Responder {
 #[allow(clippy::unused_async)]
 pub async fn get_latest_timestamp(db: web::Data<Database>) -> impl Responder {
 	serde_json::to_string(&db.get_latest_timestamp().await.expect("uh")).expect("uh")
+}
+
+#[get("/statistics/uptime")]
+#[allow(clippy::unused_async)]
+pub async fn get_uptime() -> impl Responder {
+	BOOT_TIME.elapsed().as_secs().to_string()
 }

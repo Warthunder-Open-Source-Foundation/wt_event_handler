@@ -10,7 +10,7 @@ use tokio::signal;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
 use crate::api::database::Database;
-use crate::api::endpoints::{get_latest_news, get_latest_timestamp, greet, shutdown};
+use crate::api::endpoints::{get_latest_news, get_latest_timestamp, get_uptime, greet, shutdown};
 
 use crate::error::{error_webhook, NewsError};
 use crate::json::sources::Sources;
@@ -66,6 +66,7 @@ pub async fn fetch_loop(hooks: bool) {
 				.service(get_latest_news)
 				.service(shutdown)
 				.service(get_latest_timestamp)
+				.service(get_uptime)
 		})
 			.bind(("127.0.0.1", 8082))
 			.expect("Cant bind local host on port 8080")

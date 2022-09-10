@@ -14,6 +14,7 @@ use tracing_appender::rolling;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 use crate::error::NewsError;
 use rand::Rng;
+use std::time::Instant;
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -50,6 +51,9 @@ lazy_static! {
         .take(20)
         .map(char::from)
         .collect()
+	};
+	pub static ref BOOT_TIME: Instant =  {
+		Instant::now()
 	};
 }
 
