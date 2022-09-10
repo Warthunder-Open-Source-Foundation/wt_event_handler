@@ -33,7 +33,19 @@ impl Database {
 		Ok(self.connection.fetch_one(q).await?.get(0))
 	}
 
+	// Should prevent too many calls to DB when not directly required, not sure how smart this function is
 	pub async fn get_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
+		let ts = &mut *self.latest_timestamp.lock().await;
+		// triggers if the latest timestamp is older than 10 seconds
+		if ts.0 < (chrono::Utc::now().timestamp() + 10000) {
+			let latest = self.query_latest_timestamp().await?;
+			ts.0 = latest.0;
+			ts.1 = latest.1;
+		}
+		Ok(ts.clone())
+	}
+
+	async fn query_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
 		let q = query!(// language=SQL
 			"SELECT fetch_date, source
 			 FROM sources

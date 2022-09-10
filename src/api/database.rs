@@ -1,12 +1,15 @@
 use std::str::FromStr;
+use std::sync::Arc;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode};
 use crate::api::db_error::DatabaseError;
 
 use sqlx::{Executor, SqlitePool};
+use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct Database {
 	pub connection: SqlitePool,
+	pub(crate) latest_timestamp: Arc<Mutex<(i64, String)>>,
 }
 
 
@@ -22,7 +25,8 @@ impl Database {
 		db.execute(include_str!("../../assets/setup_db.sql")).await?;
 
 		Ok(Self {
-			connection: db
+			connection: db,
+			latest_timestamp: Arc::new(Mutex::new((0, "".to_string())))
 		})
 	}
 }
