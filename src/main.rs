@@ -15,6 +15,7 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 use crate::error::NewsError;
 use rand::Rng;
 use std::time::Instant;
+use tracing_subscriber::EnvFilter;
 
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -90,8 +91,13 @@ async fn main() -> Result<(), NewsError> {
 	let warn_file = rolling::never("./log/warning", "warnings").with_filter(|x| *x.level() <= Level::WARN);
 	let all_files = debug_file.and(warn_file);
 
+	let env_filter = EnvFilter::from_default_env()
+		.add_directive(Level::INFO.into())
+		.add_directive("sqlx=warn".parse().unwrap());
+
 
 	tracing_subscriber::fmt()
+		.with_env_filter(env_filter)
 		.with_thread_ids(true)
 		.with_thread_names(true)
 		.with_line_number(true)

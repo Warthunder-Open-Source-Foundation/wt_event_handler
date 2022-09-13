@@ -1,6 +1,6 @@
 use std::fs;
 use std::process::exit;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use actix_cors::Cors;
 use actix_web::{App, HttpServer};
@@ -68,7 +68,7 @@ pub async fn fetch_loop(hooks: bool) {
 				.service(get_latest_timestamp)
 				.service(get_uptime)
 		})
-			.bind(("127.0.0.1", 8082))
+			.bind(("0.0.0.0", 8082))
 			.expect("Cant bind local host on port 8080")
 			.run()
 	});
@@ -79,6 +79,16 @@ pub async fn fetch_loop(hooks: bool) {
 		exit(-1);
 	});
 
+	// let cloned_database = database.clone();
+	// tokio::spawn( async move {
+	// 	let start = Instant::now();
+	// 	let sources = Sources::new().sources;
+	// 	for _ in 0..10000 {
+	// 		cloned_database.get_all_latest_news().await.unwrap();
+	// 	}
+	// 	println!("{:?}", start.elapsed());
+	// 	exit(0);
+	// });
 
 	loop {
 		for source in &mut sources.sources {
@@ -94,7 +104,7 @@ pub async fn fetch_loop(hooks: bool) {
 						}
 
 						source.store_recent(news.iter().map(|new| &new.url));
-						database.store_recent(news.iter().map(|new| &new.url), &source.name).await;
+						database.store_recent(news.iter().map(|new| &new.url), source.id).await;
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;

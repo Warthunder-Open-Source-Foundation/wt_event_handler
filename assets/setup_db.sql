@@ -5,5 +5,5 @@ create table sources
         unique,
     url        TEXT    not null,
     fetch_date INTEGER not null,
-    source     TEXT    not null
+    source     INT    not null
 );

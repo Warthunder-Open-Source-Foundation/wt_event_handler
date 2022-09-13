@@ -17,6 +17,7 @@ pub type NewsArticle = HashMap<String, i64>;
 pub struct Source {
 	pub name: String,
 	pub domain: String,
+	pub id: u8,
 	pub scrape_type: ScrapeType,
 	#[serde(skip_serializing, skip_deserializing)]
 	pub(crate) tracked_urls: NewsArticle,
@@ -36,8 +37,6 @@ impl Source {
 			self.tracked_urls.extend(iter);
 		}
 	}
-
-
 }
 
 impl Sources {
@@ -57,7 +56,7 @@ impl Sources {
 				Ok(news_urls) => {
 					for news_url in &news_urls {
 						source.store_recent(&[&news_url]);
-							db.store_recent(&[&news_url], &source.name).await;
+							db.store_recent(&[&news_url], source.id).await;
 					}
 				}
 				Err(e) => {

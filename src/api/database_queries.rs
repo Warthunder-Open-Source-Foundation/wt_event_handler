@@ -3,7 +3,7 @@ use crate::api::database::Database;
 use crate::api::db_error::DatabaseError;
 
 impl Database {
-	pub async fn store_recent_single(&self, value: &str, source: &str) -> Result<(), DatabaseError>
+	pub async fn store_recent_single(&self, value: &str, source: u8) -> Result<(), DatabaseError>
 	{
 		let now = chrono::Utc::now().timestamp();
 		let q = query!(// language=SQL
@@ -14,7 +14,7 @@ impl Database {
 		Ok(())
 	}
 
-	pub async fn store_recent<I>(&self, values: I, source: &str) -> Result<(), DatabaseError>
+	pub async fn store_recent<I>(&self, values: I, source: u8) -> Result<(), DatabaseError>
 		where I: IntoIterator,
 			  I::Item: ToString
 	{
@@ -24,16 +24,26 @@ impl Database {
 		Ok(())
 	}
 
-	pub async fn get_latest_news_from_source(&self, source_name: &str) -> Result<String, DatabaseError> {
+	pub async fn get_latest_news_from_source(&self, source_id: u8) -> Result<String, DatabaseError> {
 		let q = query!(// language=SQL
 			"SELECT url
 			FROM sources
 			WHERE source = ?
-			ORDER BY fetch_date DESC", source_name);
+			ORDER BY fetch_date DESC", source_id);
 		Ok(self.connection.fetch_one(q).await?.get(0))
 	}
 
+	pub async fn get_all_latest_news(&self) -> Result<Vec<String>, DatabaseError> {
+		let q = query!(// language=SQL
+			"SELECT url
+			FROM sources
+			GROUP BY source
+			HAVING MAX(fetch_date) == fetch_date");
+		Ok(self.connection.fetch_all(q).await?.into_iter().map(|x|x.get(0)).collect())
+	}
+
 	// Should prevent too many calls to DB when not directly required, not sure how smart this function is
+	// Benchmarks show this runs around 2-3 times faster than querying the entire DB for timestamps
 	pub async fn get_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
 		let ts = &mut *self.latest_timestamp.lock().await;
 		// triggers if the latest timestamp is older than 10 seconds, otherwise the buffered result is returned
@@ -51,7 +61,6 @@ impl Database {
 			 FROM sources
 			 ORDER BY fetch_date DESC ");
 		let res = 	self.connection.fetch_one(q).await?;
-		Ok((
-		res.get(0), res.get(1)))
+		Ok((res.get(0), res.get(1)))
 	}
 }
