@@ -82,11 +82,10 @@ pub async fn fetch_loop(hooks: bool) {
 	// let cloned_database = database.clone();
 	// tokio::spawn( async move {
 	// 	let start = Instant::now();
-	// 	let sources = Sources::new().sources;
-	// 	for _ in 0..10000 {
-	// 		cloned_database.get_all_latest_news().await.unwrap();
+	// 	for _ in 0..100000 {
+	// 		cloned_database.get_latest_timestamp();
 	// 	}
-	// 	println!("{:?}", start.elapsed());
+	// 	println!("Requests per second: {:.2}", 100000.0 / start.elapsed().as_millis() as f64 * 1000.0);
 	// 	exit(0);
 	// });
 

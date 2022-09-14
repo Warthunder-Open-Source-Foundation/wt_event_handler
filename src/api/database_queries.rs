@@ -1,4 +1,6 @@
+use std::sync::atomic::Ordering;
 use sqlx::{Executor, query, Row};
+use tokio::time::Instant;
 use crate::api::database::Database;
 use crate::api::db_error::DatabaseError;
 
@@ -11,6 +13,11 @@ impl Database {
 			VALUES (?, ?, ?);",
 						value, now, source);
 		self.connection.execute(q).await?;
+		let mut to_write = self.latest_timestamp.load(Ordering::Acquire);
+		if to_write < now {
+			to_write = now;
+		}
+		self.latest_timestamp.store(to_write, Ordering::Release);
 		Ok(())
 	}
 
@@ -42,25 +49,16 @@ impl Database {
 		Ok(self.connection.fetch_all(q).await?.into_iter().map(|x|x.get(0)).collect())
 	}
 
-	// Should prevent too many calls to DB when not directly required, not sure how smart this function is
-	// Benchmarks show this runs around 2-3 times faster than querying the entire DB for timestamps
-	pub async fn get_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
-		let ts = &mut *self.latest_timestamp.lock().await;
-		// triggers if the latest timestamp is older than 10 seconds, otherwise the buffered result is returned
-		if ts.0 < (chrono::Utc::now().timestamp() + 10000) {
-			let latest = self.query_latest_timestamp().await?;
-			ts.0 = latest.0;
-			ts.1 = latest.1;
-		}
-		Ok(ts.clone())
+	pub fn get_latest_timestamp(&self) ->i64 {
+		self.latest_timestamp.load(Ordering::Relaxed)
 	}
 
-	async fn query_latest_timestamp(&self) -> Result<(i64, String), DatabaseError> {
+	async fn query_latest_timestamp(&self) -> Result<(i64), DatabaseError> {
 		let q = query!(// language=SQL
-			"SELECT fetch_date, source
+			"SELECT fetch_date
 			 FROM sources
 			 ORDER BY fetch_date DESC ");
 		let res = 	self.connection.fetch_one(q).await?;
-		Ok((res.get(0), res.get(1)))
+		Ok(res.get(0))
 	}
 }
