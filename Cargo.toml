@@ -7,6 +7,17 @@ license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+# Optimized for decent speed yet good compile times
+[profile.dev]
+opt-level = 0
+debug-assertions = true
+overflow-checks = true
+lto = false
+incremental = true
+codegen-units = 256
+
+# I prefer having overflow checks, as it is crucial to validate integers even in production
+# LINKS FOR AROUND 2 MINUTES ON A 5900X, BEWARE!
 [profile.release]
 lto = true
 opt-level = 3
@@ -15,6 +26,15 @@ debug-assertions = false
 overflow-checks = true
 incremental = true
 codegen-units = 4
+
+# Use this for performing "regular" runs, but closer to what a production run would be like, without 2 minutes of linking
+[profile.bench]
+opt-level = 3
+debug = true
+debug-assertions = false
+overflow-checks = true
+incremental = true
+codegen-units = 32
 
 [dependencies]
 scraper = "^0.13.0"
