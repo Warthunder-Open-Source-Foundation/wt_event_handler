@@ -1,8 +1,8 @@
 FROM archlinux
 RUN pacman -Syu --noconfirm rustup git base-devel
 RUN pacman --noconfirm -Scc
-RUN rustup install --profile minimal nightly
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+RUN rustup default nightly
 RUN git clone https://github.com/Warthunder-Open-Source-Foundation/wt_event_handler.git
 WORKDIR ./wt_event_handler
 RUN cargo build --release
