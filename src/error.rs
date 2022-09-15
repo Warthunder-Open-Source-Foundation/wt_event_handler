@@ -13,22 +13,27 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 #[derive(Debug, ThisError)]
 #[allow(dead_code)]
 pub enum NewsError {
-	// URL which was fetched and the HTML returned
+	// LHS: Url, RHS: Post Url
 	#[error("NoUrlOnPost: {0} returned a document, but no URL was found.\nDocument: {1}")]
 	NoUrlOnPost(String, String),
 
+	/// LHS: ScrapeType, RHS: Post URL
 	#[error("MetaCannotBeScraped: The meta data for \'{0}\' cannot be collected, falling back to defaults")]
-	MetaCannotBeScraped(ScrapeType),
+	MetaCannotBeScraped(ScrapeType, String),
 
+	/// ScrapeType, Error message, Timestamp until retiming
 	#[error("SourceTimeout: Source \'{0}\' timed out and will not be fetched until <t:{1}>. \nError message: \"{2}\"")]
 	SourceTimeout(ScrapeType, String, i64),
 
+	/// Selector in question
 	#[error("BadSelector: The selector \'{0}\' failed to parse")]
 	BadSelector(String),
 
+	/// Month in string form pre-parse
 	#[error("MonthParse: \'{0}\' failed to parse into month")]
 	MonthParse(String),
 
+	/// LHS: Selector, RHS: Url
 	#[error("SelectedNothing: Selector: \'{0}\' found no item.\nDocument: {1}")]
 	SelectedNothing(String, String),
 

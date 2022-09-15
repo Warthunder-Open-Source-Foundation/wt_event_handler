@@ -32,6 +32,9 @@ codegen-units = 4
 inherits = "dev"
 opt-level = 3
 
+[features]
+api = []
+
 [dependencies]
 scraper = "^0.13.0"
 reqwest = "^0.11.11"
