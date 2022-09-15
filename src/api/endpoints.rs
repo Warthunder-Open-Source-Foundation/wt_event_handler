@@ -1,7 +1,8 @@
 use std::process::exit;
-use actix_web::{get, web, Responder};
+use actix_web::{get, web, Responder, post};
 use actix_web::error::{ErrorForbidden, ErrorGone, ErrorUnauthorized};
 use actix_web::http::StatusCode;
+use serde::{Deserialize, Serialize};
 use serenity::futures::future::join_all;
 use crate::api::database::Database;
 use crate::error::{error_webhook, ship_error_webhook};
@@ -49,4 +50,14 @@ pub async fn get_latest_timestamp(db: web::Data<Database>) -> impl Responder {
 #[allow(clippy::unused_async)]
 pub async fn get_uptime() -> impl Responder {
 	BOOT_TIME.elapsed().as_secs().to_string()
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ManualPost {
+	pub save_to_db: bool,
+	pub url: String,
+}
+#[post("/news/post")]
+pub async fn post_manual(post: web::Json<ManualPost>) -> impl Responder {
+	post
 }
