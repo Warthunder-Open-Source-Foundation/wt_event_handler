@@ -2,10 +2,22 @@
 name = "wt_event_handler"
 version = "0.1.2"
 edition = "2021"
-rust-version = "1.62"
+rust-version = "1.64"
+license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+# Optimized for decent speed yet good compile times
+[profile.dev]
+opt-level = 0
+debug-assertions = true
+overflow-checks = true
+lto = false
+incremental = true
+codegen-units = 256
+
+# I prefer having overflow checks, as it is crucial to validate integers even in production
+# LINKS FOR AROUND 2 MINUTES ON A 5900X, BEWARE!
 [profile.release]
 lto = true
 opt-level = 3
@@ -15,22 +27,28 @@ overflow-checks = true
 incremental = true
 codegen-units = 4
 
+# Use this for performing "regular" runs, but closer to what a production run would be like, without 2 minutes of linking
+[profile.benchmark]
+inherits = "dev"
+opt-level = 3
 
 [dependencies]
 scraper = "^0.13.0"
-reqwest = "^0.11.10"
-tokio = { version = "^1.18.2", features = ['full'] }
-serenity = "^0.11.2"
-serde = "^1.0.137"
-serde_json = "^1.0.81"
-chrono = "^0.4.19"
+reqwest = "^0.11.11"
+tokio = { version = "^1.20.1", features = ["rt-multi-thread"] }
+serenity = "^0.11.5"
+serde = "^1.0.144"
+serde_json = "^1.0.85"
+chrono = "^0.4.22"
 lazy_static = "^1.4.0"
+thiserror = "^1.0.33"
+sqlx = { version = "^0.6.1", features = ["runtime-tokio-rustls", "sqlite", "chrono", "macros", "offline", "migrate"]}
+rand = "^0.8.5"
 
-tracing = "0.1.36"
-tracing-appender = "0.2.2"
-tracing-subscriber = {version  = "0.3.15", features = ["tracing-log", "env-filter", "fmt", "std"]}
+actix-cors = "^0.6.1"
+actix-web = "^4.1.0"
 
-[dependencies.log4rs]
-version = "^1.1.1"
-features = ["file_appender"]
+tracing = "^0.1.36"
+tracing-appender = "^0.2.2"
+tracing-subscriber = {version  = "^0.3.15", features = ["tracing-log", "env-filter", "fmt", "std"]}
 
