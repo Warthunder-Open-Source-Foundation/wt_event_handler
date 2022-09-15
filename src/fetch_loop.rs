@@ -35,7 +35,7 @@ pub async fn fetch_loop(hooks: bool) {
 	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
-	sources.debug_remove_tracked_urls(&["a"]);
+	sources.debug_remove_tracked_urls(&["_"]);
 
 	let mut timeouts = Timeout::new();
 
@@ -51,6 +51,7 @@ pub async fn fetch_loop(hooks: bool) {
 	});
 
 	// Spawn API thread
+	#[cfg(feature = "api")]
 	tokio::task::spawn({
 		let cloned_database = Data::new( database.clone());
 		info!("Spawned API thread");
@@ -187,7 +188,7 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 					time_out(true, format!("{status_text} reqwest_bad_status_{e}: {e}")).await;
 				}
 				_ if e.is_timeout() => {
-					// Timeouts happen too often, they are no longer printed out status channels
+					// Timeouts happen too often, they are no longer printed out to status channels
 					time_out(false, format!("{status_text} reqwest_timeout: {e}")).await;
 				}
 				_ if e.is_request() => {
