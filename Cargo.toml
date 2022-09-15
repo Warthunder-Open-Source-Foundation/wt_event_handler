@@ -2,7 +2,7 @@
 name = "wt_event_handler"
 version = "0.1.2"
 edition = "2021"
-rust-version = "1.62"
+rust-version = "1.64"
 license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
