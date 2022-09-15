@@ -1,5 +1,5 @@
 use std::collections::{HashMap};
-use tracing::{ warn};
+use tracing::{error, warn};
 use crate::api::database::Database;
 use crate::error::NewsError;
 
@@ -60,6 +60,7 @@ impl Sources {
 					}
 				}
 				Err(e) => {
+					error!("Failed to prefetch source-data: {}", e);
 					panic!("Failed to prefetch source-data: {}", e);
 				}
 			}
