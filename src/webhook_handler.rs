@@ -6,7 +6,7 @@ use tracing::{error, warn};
 
 use crate::embed::EmbedData;
 use crate::fetch_loop::STATS;
-use crate::json::recent::Channel;
+use crate::json::sources::Source;
 use crate::json::webhooks::{FilterType, Hooks};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::Incr;
@@ -19,7 +19,7 @@ const DEFAULT_KEYWORDS: [&str; 30] = [
 	"issues", "technical", "servers", "christmas", "market", "camouflages"
 ];
 
-impl Channel {
+impl Source {
 	pub async fn handle_webhooks(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
 		for (i, hook) in WEBHOOK_AUTH.hooks.iter().enumerate() {
 			if is_filtered {

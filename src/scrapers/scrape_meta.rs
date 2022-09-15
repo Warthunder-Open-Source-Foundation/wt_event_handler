@@ -1,13 +1,11 @@
-use std::error::Error;
-
 use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;
-use crate::error::{InputError, NewsError};
+use crate::error::{ NewsError};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 /// Collects embed information from page
-pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, InputError> {
+pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, NewsError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
 			scrape_forum(html)?
@@ -23,7 +21,7 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 	Ok(EmbedData::new(&title, post_url, &img_url, &preview_text, scrape_type))
 }
 
-fn scrape_forum(html: &Html) -> Result<(String, String, String), Box<dyn Error>> {
+fn scrape_forum(html: &Html) -> Result<(String, String, String), NewsError> {
 	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Forum);
 	Ok((
 		html.select(&Selector::parse("head>meta:nth-child(5)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
@@ -32,7 +30,7 @@ fn scrape_forum(html: &Html) -> Result<(String, String, String), Box<dyn Error>>
 	))
 }
 
-fn scrape_main(html: &Html) -> Result<(String, String, String), Box<dyn Error>> {
+fn scrape_main(html: &Html) -> Result<(String, String, String), NewsError> {
 	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Main);
 	Ok((
 		html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
@@ -41,7 +39,7 @@ fn scrape_main(html: &Html) -> Result<(String, String, String), Box<dyn Error>> 
 	))
 }
 
-fn scrape_changelog(html: &Html) -> Result<(String, String, String), Box<dyn Error>> {
+fn scrape_changelog(html: &Html) -> Result<(String, String, String), NewsError> {
 	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Changelog);
 	Ok((
 		html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
@@ -51,15 +49,15 @@ fn scrape_changelog(html: &Html) -> Result<(String, String, String), Box<dyn Err
 }
 
 /// Returns sufficiently long string as description for embed
-fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Result<String, Box<dyn Error>> {
-	let selector = Selector::parse(selector).unwrap();
+fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Result<String, NewsError> {
+	let selector = Selector::parse(selector).map_err(|_|NewsError::BadSelector(selector.to_owned()))?;
 	let selected = html.select(&selector);
 	for item in selected {
 		if item.inner_html().len() >= 5 {
 			return Ok(item.inner_html());
 		}
 	}
-	Err(Box::new(NewsError::MetaCannotBeScraped(scape_type)))
+	Err(NewsError::MetaCannotBeScraped(scape_type))
 }
 
 // Builds discord ready embed URL from html anchors

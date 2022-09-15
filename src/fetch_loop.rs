@@ -1,14 +1,19 @@
-use std::error::Error;
 use std::fs;
 use std::process::exit;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
+use actix_cors::Cors;
+use actix_web::{App, HttpServer};
+use actix_web::web::Data;
 use lazy_static::lazy_static;
+use tokio::signal;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
+use crate::api::database::Database;
+use crate::api::endpoints::{get_latest_news, get_latest_timestamp, get_uptime, greet, post_manual, shutdown};
 
-use crate::error::{error_webhook, InputError, NewsError};
-use crate::json::recent::Sources;
+use crate::error::{error_webhook, NewsError};
+use crate::json::sources::Sources;
 use crate::scrapers::html_processing::html_processor;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 use crate::statistics::{Incr, increment, Statistics};
@@ -26,18 +31,11 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let mut recent_data = Sources::build_from_drive().await;
+	let database = Database::new().await.expect("Cannot initiate DB");
+	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
-	//
 	#[cfg(debug_assertions)]
-	{
-		let to_remove_urls: &[&str] = &[];
-		for to_remove in to_remove_urls {
-			for source in &mut recent_data.sources {
-				source.tracked_urls.remove(to_remove.to_owned());
-			}
-		}
-	}
+	sources.debug_remove_tracked_urls(&["a"]);
 
 	let mut timeouts = Timeout::new();
 
@@ -46,28 +44,67 @@ pub async fn fetch_loop(hooks: bool) {
 		warn!("Spawned logging thread");
 		loop {
 			tokio::time::sleep(Duration::from_secs(STAT_COOL_DOWN)).await;
-			let mut lock = STATS.lock().await;
-			lock.post().await;
-			lock.reset();
-			// Not sure if a loops end counts as termination here, dropping juuuuuuuuuust to make sure
-			drop(lock);
+			let mut stats = STATS.lock().await;
+			stats.post().await;
+			stats.reset();
 		}
 	});
 
+	// Spawn API thread
+	tokio::task::spawn({
+		let cloned_database = Data::new( database.clone());
+		info!("Spawned API thread");
+		HttpServer::new(move || {
+			let cors = Cors::default()
+				.allow_any_origin()
+				.allowed_methods(vec!["GET", "POST"]);
+
+			App::new()
+				.wrap(cors)
+				.app_data(Data::clone(&cloned_database))
+				.service(greet)
+				.service(get_latest_news)
+				.service(shutdown)
+				.service(get_latest_timestamp)
+				.service(get_uptime)
+				.service(post_manual)
+		})
+			.bind(("0.0.0.0", 8082))
+			.expect("Cant bind local host on port 8080")
+			.run()
+	});
+
+	// Responsible for shutting down tokio-parent / sibling processes
+	tokio::spawn(async move {
+		tokio::signal::ctrl_c().await.unwrap();
+		exit(-1);
+	});
+
+	// let cloned_database = database.clone();
+	// tokio::spawn( async move {
+	// 	let start = Instant::now();
+	// 	for _ in 0..100000 {
+	// 		cloned_database.get_latest_timestamp();
+	// 	}
+	// 	println!("Requests per second: {:.2}", 100000.0 / start.elapsed().as_millis() as f64 * 1000.0);
+	// 	exit(0);
+	// });
 
 	loop {
-		for source in &mut recent_data.sources {
+		for source in &mut sources.sources {
 			if !timeouts.is_timed_out(&source.name) {
 				increment(Incr::FetchCounter).await;
 				match html_processor(source).await {
 					Ok(news) => {
-						for news_embed in news {
+						for news_embed in &news {
 							if hooks {
-								source.handle_webhooks(&news_embed, true, source.scrape_type).await;
+								source.handle_webhooks(news_embed, true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
-							source.store_recent(&news_embed.url);
 						}
+
+						source.store_recent(news.iter().map(|new| &new.url));
+						database.store_recent(news.iter().map(|new| &new.url), source.id).await;
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;
@@ -78,6 +115,8 @@ pub async fn fetch_loop(hooks: bool) {
 			info!("Waiting for {FETCH_DELAY} seconds");
 			tokio::time::sleep(Duration::from_secs(FETCH_DELAY)).await;
 		}
+
+
 		//Aborts program after running without hooks
 		if !hooks {
 			exit(0);
@@ -86,28 +125,51 @@ pub async fn fetch_loop(hooks: bool) {
 }
 
 /// Throws error as webhook, times out pages accordingly and terminates program if unrecoverable
-async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
-	error!(e);
-	let crash_and_burn = |e: InputError| async move {
+async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeouts: &mut Timeout, hooks: bool) {
+	error!("{e}");
+	let crash_and_burn = |e: NewsError| async move {
 		if hooks {
-			error_webhook(&e, false).await;
+			error_webhook(&e, "The bot is now offline and needs investigation", false).await;
 		}
 		panic!("{:?}", e);
 	};
 
-	let time_out = |send, msg: String| async move {
+	let time_out = |send_webhook_error_message, msg: String| async move {
 		let now = chrono::offset::Utc::now().timestamp();
 		let then = now + (60 * 30);
-		if send {
-			error_webhook(&Box::new(NewsError::SourceTimeout(scrape_type, msg, then)).into(), true).await;
+		if send_webhook_error_message {
+			error_webhook(&NewsError::SourceTimeout(scrape_type, msg, then), "", true).await;
 		}
 		let _ = &timeouts.time_out(source, then);
 	};
 
-	match () {
-		_ if let Some(e) = e.downcast_ref::<reqwest::Error>() => {
-			let e: &reqwest::Error = e;
-
+	#[allow(clippy::match_wildcard_for_single_variants)]
+	match e {
+		NewsError::NoUrlOnPost(name, html) => {
+			let now = chrono::Local::now().timestamp();
+			let sanitized_url = name.replace('/', "_").replace(':', "_");
+			drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
+			time_out(true, "no_url_on_post".to_owned()).await;
+		}
+		NewsError::MetaCannotBeScraped(scrape_type) => {
+			error_webhook(&e, &scrape_type.to_string(), true).await;
+		}
+		NewsError::SourceTimeout(_, _, _) => {
+			// Dont do anything as it should've been handled earlier
+		}
+		NewsError::BadSelector(ref selector) => {
+			error_webhook(&e, &format!("Selector: {selector}"), true).await;
+		}
+		NewsError::MonthParse(_) => {
+			time_out(true, e.to_string()).await;
+		}
+		NewsError::SelectedNothing(source, _) => {
+			time_out(true, source).await;
+		}
+		NewsError::SerenityError(_) => {
+			error_webhook(&e, "", true).await;
+		}
+		NewsError::Reqwest(e) => {
 			let status = e.status();
 			let status_text = if let Some(status) = status {
 				format!("status: {status} was returned and initiated:")
@@ -145,21 +207,12 @@ async fn handle_err(e: Box<dyn Error>, scrape_type: ScrapeType, source: String, 
 				}
 			}
 		}
-		_ if let Some(variant) = e.downcast_ref::<NewsError>() => {
-			match variant {
-				NewsError::NoUrlOnPost(name, html) => {
-					let now = chrono::Local::now().timestamp();
-					let sanitized_url = name.replace('/', "_").replace(':', "_");
-					drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
-					time_out(true, "no_url_on_post".to_owned()).await;
-				}
-				_ => {
-					crash_and_burn(e).await;
-				}
-			}
+		NewsError::SerdeJson(_) => {
+			todo!("Impelent this!");
 		}
 		_ => {
 			crash_and_burn(e).await;
 		}
 	}
+
 }
