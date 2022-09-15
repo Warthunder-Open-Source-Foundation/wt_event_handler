@@ -151,8 +151,8 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 			drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
 			time_out(true, "no_url_on_post".to_owned()).await;
 		}
-		NewsError::MetaCannotBeScraped(scrape_type) => {
-			error_webhook(&e, &scrape_type.to_string(), true).await;
+		NewsError::MetaCannotBeScraped(_, ref url) => {
+			error_webhook(&e, &format!("The [URL]({url}) did not return meta-data"), true).await;
 		}
 		NewsError::SourceTimeout(_, _, _) => {
 			// Dont do anything as it should've been handled earlier

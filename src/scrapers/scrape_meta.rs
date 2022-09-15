@@ -8,48 +8,39 @@ use crate::scrapers::scraper_resources::resources::ScrapeType;
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, NewsError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
-			scrape_forum(html)?
+			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
+			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(n)".to_owned(), post_url.to_owned());
+			(
+				html.select(&Selector::parse("head>meta:nth-child(5)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
+				"".to_string(),
+				html.select(&Selector::parse("head>meta:nth-child(8)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string()
+			)
 		}
 		ScrapeType::Main => {
-			scrape_main(html)?
+			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
+			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(13)".to_owned(), post_url.to_owned());
+			(
+				html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
+				scrape_news_image(html),
+				sanitize_html(&get_next_selector(html, "p", ScrapeType::Main, post_url)?)
+			)
 		}
 		ScrapeType::Changelog => {
-			scrape_changelog(html)?
+			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
+			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(13)".to_owned(), post_url.to_owned());
+			(
+				html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
+				scrape_news_image(html),
+				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
+			)
 		}
 	};
 
 	Ok(EmbedData::new(&title, post_url, &img_url, &preview_text, scrape_type))
 }
 
-fn scrape_forum(html: &Html) -> Result<(String, String, String), NewsError> {
-	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Forum);
-	Ok((
-		html.select(&Selector::parse("head>meta:nth-child(5)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
-		"".to_string(),
-		html.select(&Selector::parse("head>meta:nth-child(8)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string()
-	))
-}
-
-fn scrape_main(html: &Html) -> Result<(String, String, String), NewsError> {
-	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Main);
-	Ok((
-		html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
-		scrape_news_image(html),
-		sanitize_html(&get_next_selector(html, "p", ScrapeType::Main)?)
-	))
-}
-
-fn scrape_changelog(html: &Html) -> Result<(String, String, String), NewsError> {
-	const FAIL: NewsError = NewsError::MetaCannotBeScraped(ScrapeType::Changelog);
-	Ok((
-		html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|_| FAIL)?).next().ok_or(FAIL)?.value().attr("content").ok_or(FAIL)?.to_string(),
-		scrape_news_image(html),
-		"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
-	))
-}
-
 /// Returns sufficiently long string as description for embed
-fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Result<String, NewsError> {
+fn get_next_selector(html: &Html, selector: &str, scrape_type: ScrapeType, post_url: &str) -> Result<String, NewsError> {
 	let selector = Selector::parse(selector).map_err(|_|NewsError::BadSelector(selector.to_owned()))?;
 	let selected = html.select(&selector);
 	for item in selected {
@@ -57,7 +48,7 @@ fn get_next_selector(html: &Html, selector: &str, scape_type: ScrapeType) -> Res
 			return Ok(item.inner_html());
 		}
 	}
-	Err(NewsError::MetaCannotBeScraped(scape_type))
+	Err(NewsError::MetaCannotBeScraped(scrape_type, post_url.to_owned()))
 }
 
 // Builds discord ready embed URL from html anchors

@@ -19,7 +19,7 @@ pub enum NewsError {
 
 	/// LHS: ScrapeType, RHS: Post URL
 	#[error("MetaCannotBeScraped: The meta data for \'{0}\' cannot be collected, falling back to defaults")]
-	MetaCannotBeScraped(ScrapeType),
+	MetaCannotBeScraped(ScrapeType, String),
 
 	/// ScrapeType, Error message, Timestamp until retiming
 	#[error("SourceTimeout: Source \'{0}\' timed out and will not be fetched until <t:{1}>. \nError message: \"{2}\"")]
