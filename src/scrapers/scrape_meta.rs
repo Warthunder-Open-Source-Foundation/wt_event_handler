@@ -1,37 +1,36 @@
 use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;
-use crate::error::{ NewsError};
+use crate::error::NewsError;
+use crate::scrapers::scraper_resources::html_util::{select_attribute, select_first};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 /// Collects embed information from page
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, NewsError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
-			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
-			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(n)".to_owned(), post_url.to_owned());
+			let title_elem = select_first(html, "head>meta:nth-child(5)", post_url)?;
+			let preview_elem = select_first(html, "head>meta:nth-child(8)", post_url)?;
 			(
-				html.select(&Selector::parse("head>meta:nth-child(5)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
+				select_attribute(&title_elem, "content", post_url)?,
 				"".to_string(),
-				html.select(&Selector::parse("head>meta:nth-child(8)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string()
+				select_attribute(&preview_elem, "content", post_url)?
 			)
 		}
 		ScrapeType::Main => {
-			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
-			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(13)".to_owned(), post_url.to_owned());
+			let title_elem = select_first(html, "head>meta:nth-child(13)", post_url)?;
 			(
-				html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
+				select_attribute(&title_elem, "content", post_url)?,
 				scrape_news_image(html),
 				sanitize_html(&get_next_selector(html, "p", ScrapeType::Main, post_url)?)
 			)
 		}
 		ScrapeType::Changelog => {
-			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
-			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(13)".to_owned(), post_url.to_owned());
+			let title_elem = select_first(html, "head>meta:nth-child(13)", post_url)?;
 			(
-				html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
+				select_attribute(&title_elem, "content", post_url)?,
 				scrape_news_image(html),
-				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
+				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_owned()
 			)
 		}
 	};
@@ -41,10 +40,10 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 
 /// Returns sufficiently long string as description for embed
 fn get_next_selector(html: &Html, selector: &str, scrape_type: ScrapeType, post_url: &str) -> Result<String, NewsError> {
-	let selector = Selector::parse(selector).map_err(|_|NewsError::BadSelector(selector.to_owned()))?;
+	let selector = Selector::parse(selector).map_err(|_| NewsError::BadSelector(selector.to_owned()))?;
 	let selected = html.select(&selector);
 	for item in selected {
-		if item.inner_html().len() >= 5 {
+		if item.inner_html().len() >= 10 {
 			return Ok(item.inner_html());
 		}
 	}

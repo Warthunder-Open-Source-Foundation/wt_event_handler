@@ -38,7 +38,7 @@ pub async fn request_html(url: &str) -> Result<Html, NewsError> {
 	info!("Fetching data from {}", &url);
 
 	let client = Client::builder()
-		.timeout(Duration::from_secs(1))
+		.timeout(Duration::from_secs(5))
 		.build()?;
 	let raw_html = client.get(url).send().await?;
 	let text = raw_html.text().await?;
