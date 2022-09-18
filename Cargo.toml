@@ -47,6 +47,8 @@ lazy_static = "^1.4.0"
 thiserror = "^1.0.33"
 sqlx = { version = "^0.6.1", features = ["runtime-tokio-rustls", "sqlite", "chrono", "macros", "offline", "migrate"]}
 rand = "^0.8.5"
+strum = "^0.24.1"
+strum_macros = "^0.24"
 
 actix-cors = "^0.6.1"
 actix-web = "^4.1.0"
