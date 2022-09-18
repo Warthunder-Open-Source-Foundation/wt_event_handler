@@ -19,14 +19,14 @@ pub enum ScrapeType {
 impl ScrapeType {
 	// Used for API calls or similar
 	pub fn infer_from_url(url: &str) -> Self {
-		if url.contains("warthunder.com") {
+		if url.contains("forum.warthunder.com") {
+			Self::Forum
+		} else {
 			if url.contains("changelog") {
 				Self::Changelog
 			} else {
 				Self::Main
 			}
-		} else {
-			Self::Forum
 		}
 	}
 }
