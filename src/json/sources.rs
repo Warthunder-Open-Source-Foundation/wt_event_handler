@@ -76,8 +76,14 @@ impl Sources {
 			  I::Item: ToString
 	{
 		for to_remove in to_remove_urls {
+			let mut removed = false;
 			for source in &mut self.sources {
-				source.tracked_urls.remove(&to_remove.to_string());
+				if source.tracked_urls.remove(&to_remove.to_string()).is_some() {
+					removed = true;
+				}
+			}
+			if !removed {
+				eprintln!("Failed to remove URL: {}", to_remove.to_string());
 			}
 		}
 	}
