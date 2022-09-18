@@ -1,6 +1,5 @@
 use std::sync::atomic::Ordering;
 use sqlx::{Executor, query, Row};
-use tokio::time::Instant;
 use crate::api::database::Database;
 use crate::api::db_error::DatabaseError;
 
@@ -53,7 +52,7 @@ impl Database {
 		self.latest_timestamp.load(Ordering::Relaxed)
 	}
 
-	async fn query_latest_timestamp(&self) -> Result<(i64), DatabaseError> {
+	async fn query_latest_timestamp(&self) -> Result<i64, DatabaseError> {
 		let q = query!(// language=SQL
 			"SELECT fetch_date
 			 FROM sources

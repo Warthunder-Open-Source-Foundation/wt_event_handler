@@ -1,4 +1,4 @@
-use scraper::{Html, Selector};
+use scraper::{Html};
 
 use crate::embed::{EmbedData, EMPTY_IMG};
 use crate::error::NewsError;
@@ -13,8 +13,8 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 			let preview_elem = html.select_first("head>meta:nth-child(8)", post_url)?;
 			(
 				title_elem.select_attribute("content", post_url)?,
-				"".to_string(),
-				title_elem.select_attribute("content", post_url)?
+				String::new(),
+				preview_elem.select_attribute("content", post_url)?
 			)
 		}
 		ScrapeType::Main => {
@@ -84,7 +84,7 @@ fn sanitize_html(html: &str) -> String {
 	};
 
 	let mut in_escape = false;
-	let mut constructed = "".to_owned();
+	let mut constructed = String::new();
 
 	for (i, char) in html.chars().enumerate() {
 		match char {
@@ -116,7 +116,7 @@ fn sanitize_html(html: &str) -> String {
 
 /// Collects meta image to display for embed
 fn scrape_news_image(html: &Html) -> Result<String, NewsError> {
-	let mut actual = "".to_owned();
+	let mut actual = String::new();
 	for item in html.select(&format_selector("meta, img")?) {
 		if let Some(proper_image) = item.value().attr("content") {
 			if proper_image.contains("https://warthunder.com/upload/image//!") && item.value().attr("name") != Some("twitter:image") {

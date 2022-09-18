@@ -1,5 +1,4 @@
 use std::fmt::{Display, Formatter};
-use std::str::FromStr;
 use std::time::Duration;
 
 use reqwest::Client;
@@ -56,13 +55,11 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 			};
 			let sel = format_selector(sel_text)?;
 
-			let date_sel_text = "div.widget__content > ul > li".to_owned();
-
 			let selected = html.select(&sel);
 			let mut res = vec![];
 			for item in selected {
 				if let Ok(url) = item.select_first("a", &scrape_type.to_string())?.select_attribute("href", &scrape_type.to_string()) {
-					res.push(url.to_owned());
+					res.push(url.clone());
 				}
 			}
 			Ok(res)

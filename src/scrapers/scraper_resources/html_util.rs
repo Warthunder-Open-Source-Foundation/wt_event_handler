@@ -12,7 +12,7 @@ impl HtmlUtil for Html {
 	fn select_first(&self, selector: impl IntoSelector, url: &str) -> Result<Element, NewsError> {
 		let parsed = selector.into_selector()?;
 		if let Some(selected) = self.select(&parsed.sel).next() {
-			Ok(selected.value().to_owned())
+			Ok(selected.value().clone())
 		} else {
 			Err(NewsError::SelectedNothing(parsed.css_text, url.to_owned()))
 		}
@@ -23,7 +23,7 @@ impl HtmlUtil for ElementRef<'_> {
 	fn select_first(&self, selector: impl IntoSelector, url: &str) -> Result<Element, NewsError> {
 		let parsed = selector.into_selector()?;
 		if let Some(selected) = self.select(&parsed.sel).next() {
-			Ok(selected.value().to_owned())
+			Ok(selected.value().clone())
 		} else {
 			Err(NewsError::SelectedNothing(parsed.css_text, url.to_owned()))
 		}

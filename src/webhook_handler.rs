@@ -181,8 +181,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_default_pass() {
 		assert_eq!(match_filter("pass", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -194,8 +194,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_default_no_match() {
 		assert_eq!(match_filter("xyz", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -207,8 +207,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_whitelist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Blacklist,
@@ -221,8 +221,8 @@ mod tests {
 	#[should_panic]
 	fn main_test_filter_whitelist_miss() {
 		assert_eq!(match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Whitelist,
@@ -235,8 +235,8 @@ mod tests {
 	#[should_panic]
 	fn main_test_filter_blacklist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,
@@ -248,8 +248,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_blacklist_miss() {
 		assert_eq!(match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,
@@ -263,8 +263,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_default_pass() {
 		assert_eq!(match_filter("pass", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -276,8 +276,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_default_no_match() {
 		assert_eq!(match_filter("xyz", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -289,8 +289,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_whitelist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Blacklist,
@@ -302,8 +302,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_whitelist_miss() {
 		assert_eq!(match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Whitelist,
@@ -315,8 +315,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_blacklist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,
@@ -328,8 +328,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_blacklist_miss() {
 		match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,

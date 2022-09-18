@@ -45,6 +45,7 @@ impl Sources  {
 		}
 	}
 	pub fn id_from_name(name: &str) -> u8 {
+		#[allow(clippy::match_same_arms)]
 		match name {
 			"warthunder_news" => 0,
 			"warthunder_changelog" => 1,

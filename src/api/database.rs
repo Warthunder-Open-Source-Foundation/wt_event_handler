@@ -1,16 +1,15 @@
 use std::str::FromStr;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicI64, AtomicU8};
-use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode};
+use std::sync::atomic::{AtomicI64};
+use sqlx::sqlite::{SqliteConnectOptions};
 use crate::api::db_error::DatabaseError;
 
 use sqlx::{Executor, SqlitePool};
-use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct Database {
 	pub(crate) connection: SqlitePool,
-	pub(crate) latest_timestamp: Arc<(AtomicI64)>,
+	pub(crate) latest_timestamp: Arc<AtomicI64>,
 }
 
 
@@ -25,7 +24,7 @@ impl Database {
 
 		Ok(Self {
 			connection: db,
-			latest_timestamp: Arc::new((AtomicI64::new(0)))
+			latest_timestamp: Arc::new(AtomicI64::new(0))
 		})
 	}
 }
