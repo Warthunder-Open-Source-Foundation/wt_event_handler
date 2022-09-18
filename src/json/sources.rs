@@ -1,8 +1,9 @@
-use std::collections::{HashMap};
+use std::collections::HashMap;
+
 use tracing::{error, warn};
+
 use crate::api::database::Database;
 use crate::error::NewsError;
-
 use crate::scrapers::html_processing::scrape_links;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
@@ -56,7 +57,7 @@ impl Sources {
 				Ok(news_urls) => {
 					for news_url in &news_urls {
 						source.store_recent([&news_url]);
-							db.store_recent([&news_url], source.id).await.unwrap();
+						db.store_recent([&news_url], source.id).await.unwrap();
 					}
 				}
 				Err(e) => {

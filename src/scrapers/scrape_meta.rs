@@ -1,4 +1,4 @@
-use scraper::{Html};
+use scraper::Html;
 
 use crate::embed::{EmbedData, EMPTY_IMG};
 use crate::error::NewsError;

@@ -19,7 +19,7 @@ pub async fn html_processor(source: &Source) -> Result<Vec<EmbedData>, NewsError
 	}
 
 	positions.reverse();
-	for position in positions  {
+	for position in positions {
 		links.remove(position);
 	}
 
@@ -39,7 +39,7 @@ pub async fn get_embed_data(url: &str, scrape_type: ScrapeType) -> Result<EmbedD
 	Ok(match scrape_meta(&post_html, scrape_type, url) {
 		Ok(ok) => ok,
 		Err(e) => {
-			error_webhook(&e, "",true).await;
+			error_webhook(&e, "", true).await;
 			EmbedData::fail_over(url, scrape_type)
 		}
 	})

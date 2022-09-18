@@ -1,6 +1,5 @@
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
-
 pub const EMPTY_IMG: &str = "https://raw.githubusercontent.com/Warthunder-Open-Source-Foundation/wt_event_handler/master/assets/empty.png";
 
 #[derive(Clone, Debug)]

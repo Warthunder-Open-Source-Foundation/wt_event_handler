@@ -1,19 +1,19 @@
-
 #![allow(clippy::unused_async)]
 
 use std::process::exit;
-use actix_web::{get, web, Responder, post};
+
+use actix_web::{get, post, Responder, web};
 use actix_web::error::{ErrorForbidden, ErrorGone};
 use serde::{Deserialize, Serialize};
-use crate::api::database::Database;
-use crate::error::{ship_error_webhook};
-use crate::json::sources::{Sources};
+
 use crate::{BOOT_TIME, SHUTDOWN_KEY};
+use crate::api::database::Database;
+use crate::error::ship_error_webhook;
+use crate::json::sources::Sources;
 
 #[get("/news/latest/{source}")]
 pub async fn greet(source: web::Path<String>, db: web::Data<Database>) -> impl Responder {
 	db.get_latest_news_from_source(Sources::id_from_name(&source)).await.unwrap()
-
 }
 
 #[get("/news/latest")]
@@ -53,6 +53,7 @@ pub struct ManualPost {
 	pub save_to_db: bool,
 	pub url: String,
 }
+
 #[post("/news/post")]
 pub async fn post_manual(post: web::Json<ManualPost>) -> impl Responder {
 	post

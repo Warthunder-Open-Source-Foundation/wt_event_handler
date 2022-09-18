@@ -1,6 +1,6 @@
 use std::fs;
 use std::process::exit;
-use std::time::{Duration};
+use std::time::Duration;
 
 #[cfg(feature = "api")]
 use actix_cors::Cors;
@@ -9,9 +9,9 @@ use actix_web::web::Data;
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
+
 use crate::api::database::Database;
 use crate::api::endpoints::{get_latest_news, get_latest_timestamp, get_uptime, greet, post_manual, shutdown};
-
 use crate::error::{error_webhook, NewsError};
 use crate::json::sources::Sources;
 use crate::scrapers::html_processing::html_processor;
@@ -53,7 +53,7 @@ pub async fn fetch_loop(hooks: bool) {
 	// Spawn API thread
 	#[cfg(feature = "api")]
 	tokio::task::spawn({
-		let cloned_database = Data::new( database.clone());
+		let cloned_database = Data::new(database.clone());
 		info!("Spawned API thread");
 		HttpServer::new(move || {
 			let cors = Cors::default()
@@ -215,5 +215,4 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 			crash_and_burn(e).await;
 		}
 	}
-
 }

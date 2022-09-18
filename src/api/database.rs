@@ -1,10 +1,11 @@
 use std::str::FromStr;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicI64};
-use sqlx::sqlite::{SqliteConnectOptions};
-use crate::api::db_error::DatabaseError;
+use std::sync::atomic::AtomicI64;
 
 use sqlx::{Executor, SqlitePool};
+use sqlx::sqlite::SqliteConnectOptions;
+
+use crate::api::db_error::DatabaseError;
 
 #[derive(Clone)]
 pub struct Database {
@@ -24,7 +25,7 @@ impl Database {
 
 		Ok(Self {
 			connection: db,
-			latest_timestamp: Arc::new(AtomicI64::new(0))
+			latest_timestamp: Arc::new(AtomicI64::new(0)),
 		})
 	}
 }

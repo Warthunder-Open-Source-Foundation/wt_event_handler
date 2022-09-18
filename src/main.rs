@@ -11,17 +11,17 @@
 
 use std::{fs, io};
 use std::io::stdout;
-use std::process::{exit};
+use std::process::exit;
+use std::time::Instant;
 
 use lazy_static::{initialize, lazy_static};
+use rand::Rng;
 use tracing::{Level, warn};
 use tracing_appender::rolling;
-use tracing_subscriber::fmt::writer::MakeWriterExt;
-use crate::error::NewsError;
-use rand::Rng;
-use std::time::Instant;
 use tracing_subscriber::EnvFilter;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 
+use crate::error::NewsError;
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
