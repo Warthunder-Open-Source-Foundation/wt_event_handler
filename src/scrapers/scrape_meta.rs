@@ -2,33 +2,33 @@ use scraper::{Html, Selector};
 
 use crate::embed::EmbedData;
 use crate::error::NewsError;
-use crate::scrapers::scraper_resources::html_util::{select_attribute, select_first};
+use crate::scrapers::scraper_resources::html_util::{ElemUtil, HtmlUtil};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 /// Collects embed information from page
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, NewsError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
-			let title_elem = select_first(html, "head>meta:nth-child(5)", post_url)?;
-			let preview_elem = select_first(html, "head>meta:nth-child(8)", post_url)?;
+			let title_elem = html.select_first("head>meta:nth-child(5)", post_url)?;
+			let preview_elem = html.select_first("head>meta:nth-child(8)", post_url)?;
 			(
-				select_attribute(&title_elem, "content", post_url)?,
+				title_elem.select_attribute("content", post_url)?,
 				"".to_string(),
-				select_attribute(&preview_elem, "content", post_url)?
+				title_elem.select_attribute("content", post_url)?
 			)
 		}
 		ScrapeType::Main => {
-			let title_elem = select_first(html, "head>meta:nth-child(13)", post_url)?;
+			let title_elem = html.select_first("head>meta:nth-child(13)", post_url)?;
 			(
-				select_attribute(&title_elem, "content", post_url)?,
+				title_elem.select_attribute("content", post_url)?,
 				scrape_news_image(html),
 				sanitize_html(&get_next_selector(html, "p", ScrapeType::Main, post_url)?)
 			)
 		}
 		ScrapeType::Changelog => {
-			let title_elem = select_first(html, "head>meta:nth-child(13)", post_url)?;
+			let title_elem = html.select_first("head>meta:nth-child(13)", post_url)?;
 			(
-				select_attribute(&title_elem, "content", post_url)?,
+				title_elem.select_attribute("content", post_url)?,
 				scrape_news_image(html),
 				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_owned()
 			)
