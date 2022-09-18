@@ -1,19 +1,31 @@
-use scraper::{Html, Selector};
+use scraper::{ElementRef, Html, Selector};
 use scraper::node::Element;
 
 use crate::NewsError;
 
 pub trait HtmlUtil {
 	/// Takes simple selector and returns element from it
-	fn select_first(&self, selector: &str, url: &str) -> Result<Element, NewsError>;
+	fn select_first(&self, selector: impl IntoSelector, url: &str) -> Result<Element, NewsError>;
 }
 
 impl HtmlUtil for Html {
-	fn select_first(&self, selector: &str, url: &str) -> Result<Element, NewsError> {
-		if let Some(selected) = self.select(&format_selector(selector)?).next() {
+	fn select_first(&self, selector: impl IntoSelector, url: &str) -> Result<Element, NewsError> {
+		let parsed = selector.into_selector()?;
+		if let Some(selected) = self.select(&parsed.sel).next() {
 			Ok(selected.value().to_owned())
 		} else {
-			Err(NewsError::SelectedNothing(selector.to_owned(), url.to_owned()))
+			Err(NewsError::SelectedNothing(parsed.css_text, url.to_owned()))
+		}
+	}
+}
+
+impl HtmlUtil for ElementRef<'_> {
+	fn select_first(&self, selector: impl IntoSelector, url: &str) -> Result<Element, NewsError> {
+		let parsed = selector.into_selector()?;
+		if let Some(selected) = self.select(&parsed.sel).next() {
+			Ok(selected.value().to_owned())
+		} else {
+			Err(NewsError::SelectedNothing(parsed.css_text, url.to_owned()))
 		}
 	}
 }
@@ -38,8 +50,32 @@ impl ElemUtil for Element {
 pub fn format_selector(sel_text: &str) -> Result<Selector, NewsError> {
 	match Selector::parse(sel_text) {
 		Ok(selector) => Ok(selector),
-		Err(error) => {
+		Err(_) => {
 			Err(NewsError::BadSelector(sel_text.to_owned()))
 		}
+	}
+}
+
+pub struct SelectorWrapper {
+	sel: Selector,
+	css_text: String,
+}
+
+impl SelectorWrapper {
+	pub fn new(sel_text: &str) -> Result<Self, NewsError> {
+		Ok(Self {
+			sel: format_selector(sel_text)?,
+			css_text: sel_text.to_owned(),
+		})
+	}
+}
+
+pub trait IntoSelector {
+	fn into_selector(self) -> Result<SelectorWrapper, NewsError>;
+}
+
+impl IntoSelector for &str {
+	fn into_selector(self) -> Result<SelectorWrapper, NewsError> {
+		SelectorWrapper::new(self)
 	}
 }

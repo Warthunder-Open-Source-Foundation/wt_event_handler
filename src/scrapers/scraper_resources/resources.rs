@@ -9,6 +9,7 @@ use tracing::info;
 
 use crate::error::NewsError;
 use crate::error::NewsError::{BadSelector, MonthParse, SelectedNothing};
+use crate::scrapers::scraper_resources::html_util::{ElemUtil, format_selector, HtmlUtil};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 /// Defines the types of pages where news come from
@@ -55,18 +56,14 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 				// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
 				"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(3) > div > section > div > div.showcase__content-wrapper > div.showcase__item"
 			};
-			let sel = Selector::parse(sel_text).map_err(|_| NewsError::BadSelector(sel_text.to_owned()))?;
+			let sel = format_selector(sel_text)?;
 
 			let date_sel_text = "div.widget__content > ul > li".to_owned();
-			let date_sel = Selector::parse(&date_sel_text).map_err(|_| NewsError::BadSelector(date_sel_text.clone()))?;
 
 			let selected = html.select(&sel);
 			let mut res = vec![];
 			for item in selected {
-				let date_elem = item.select(&date_sel).next().ok_or_else(|| SelectedNothing(date_sel_text.clone(), item.inner_html()))?;
-				let date_str = date_elem.inner_html().trim().to_owned();
-				let split = date_str.split(' ').collect::<Vec<&str>>();
-				if let Some(url) = item.select(&Selector::parse("a").map_err(|_| NewsError::BadSelector(sel_text.to_owned()))?).next().ok_or_else(|| SelectedNothing(date_sel_text.clone(), item.inner_html()))?.value().attr("href") {
+				if let Ok(url) = item.select_first("a", &scrape_type.to_string())?.select_attribute("href", &scrape_type.to_string()) {
 					res.push(url.to_owned());
 				}
 			}

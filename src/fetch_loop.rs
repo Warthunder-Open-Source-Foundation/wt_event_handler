@@ -35,7 +35,7 @@ pub async fn fetch_loop(hooks: bool) {
 	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
-	sources.debug_remove_tracked_urls(&["_"]);
+	sources.debug_remove_tracked_urls(&["_", "https://warthunder.com/en/news/7877-development-project-po-light-tank-ccvl-en"]);
 
 	let mut timeouts = Timeout::new();
 
