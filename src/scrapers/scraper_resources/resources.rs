@@ -16,6 +16,21 @@ pub enum ScrapeType {
 	Changelog,
 }
 
+impl ScrapeType {
+	// Used for API calls or similar
+	pub fn infer_from_url(url: &str) -> Self {
+		if url.contains("warthunder.com") {
+			if url.contains("changelog") {
+				Self::Changelog
+			} else {
+				Self::Main
+			}
+		} else {
+			Self::Forum
+		}
+	}
+}
+
 impl Display for ScrapeType {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		match self {

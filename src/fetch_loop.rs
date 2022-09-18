@@ -35,7 +35,7 @@ pub async fn fetch_loop(hooks: bool) {
 	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
-	sources.debug_remove_tracked_urls(["_", "https://warthunder.com/en/news/7877-development-project-po-light-tank-ccvl-en"]);
+	sources.debug_remove_tracked_urls([""]);
 
 	let mut timeouts = Timeout::new();
 
@@ -99,7 +99,7 @@ pub async fn fetch_loop(hooks: bool) {
 					Ok(news) => {
 						for news_embed in &news {
 							if hooks {
-								source.handle_webhooks(news_embed, true, source.scrape_type).await;
+								news_embed.handle_webhooks(true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
 						}

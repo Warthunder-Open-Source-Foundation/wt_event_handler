@@ -6,10 +6,13 @@ use actix_web::{get, post, Responder, web};
 use actix_web::error::{ErrorForbidden, ErrorGone};
 use serde::{Deserialize, Serialize};
 
-use crate::{BOOT_TIME, SHUTDOWN_KEY};
+use crate::{BOOT_TIME, NewsError, SHUTDOWN_KEY};
 use crate::api::database::Database;
+use crate::api::error::ApiError;
 use crate::error::ship_error_webhook;
 use crate::json::sources::Sources;
+use crate::scrapers::html_processing::get_embed_data;
+use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 #[get("/news/latest/{source}")]
 pub async fn greet(source: web::Path<String>, db: web::Data<Database>) -> impl Responder {
@@ -56,5 +59,8 @@ pub struct ManualPost {
 
 #[post("/news/post")]
 pub async fn post_manual(post: web::Json<ManualPost>) -> impl Responder {
-	post
+	let scrape_type = ScrapeType::infer_from_url(&post.url);
+	let embed = get_embed_data(&post.url, scrape_type).await?;
+	embed.handle_webhooks(true, scrape_type).await;
+	Ok::<&str, ApiError>("")
 }

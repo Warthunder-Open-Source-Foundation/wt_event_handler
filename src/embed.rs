@@ -1,4 +1,8 @@
+use crate::fetch_loop::STATS;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
+use crate::statistics::Incr;
+use crate::WEBHOOK_AUTH;
+use crate::webhook_handler::{deliver_webhook, match_filter};
 
 pub const EMPTY_IMG: &str = "https://raw.githubusercontent.com/Warthunder-Open-Source-Foundation/wt_event_handler/master/assets/empty.png";
 
@@ -12,6 +16,18 @@ pub struct EmbedData {
 }
 
 impl EmbedData {
+	pub async fn handle_webhooks(&self, is_filtered: bool, scrape_type: ScrapeType) {
+		for (i, hook) in WEBHOOK_AUTH.hooks.iter().enumerate() {
+			if is_filtered {
+				if match_filter(&self.url, hook, scrape_type) {
+					deliver_webhook(self.clone(), i).await;
+				}
+			} else {
+				deliver_webhook(self.clone(), i).await;
+			}
+			STATS.lock().await.increment(Incr::PostCounter);
+		}
+	}
 	pub fn new(title: &str, url: &str, img_url: &str, preview_text: &str, scrape_type: ScrapeType) -> Self {
 		let sanitized_img_url = img_url.replace(' ', "%20");
 		Self {
