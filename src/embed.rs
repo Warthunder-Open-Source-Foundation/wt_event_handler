@@ -1,5 +1,8 @@
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
+
+pub const EMPTY_IMG: &str = "https://raw.githubusercontent.com/Warthunder-Open-Source-Foundation/wt_event_handler/master/assets/empty.png";
+
 #[derive(Clone, Debug)]
 pub struct EmbedData {
 	pub scrape_type: ScrapeType,
@@ -34,7 +37,7 @@ impl EmbedData {
 			scrape_type,
 			title: "Failed to collect embed data".to_string(),
 			url: url.to_string(),
-			img_url: "https://raw.githubusercontent.com/Warthunder-Open-Source-Foundation/wt_event_handler/master/assets/empty.png".to_string(),
+			img_url: EMPTY_IMG.to_string(),
 			preview_text: "Failed to collect embed data".to_string(),
 		}
 	}

@@ -2,13 +2,11 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use std::time::Duration;
 
-use chrono::{Month, NaiveDate, NaiveDateTime, NaiveTime};
 use reqwest::Client;
-use scraper::{Html, Selector};
+use scraper::Html;
 use tracing::info;
 
 use crate::error::NewsError;
-use crate::error::NewsError::{BadSelector, MonthParse, SelectedNothing};
 use crate::scrapers::scraper_resources::html_util::{ElemUtil, format_selector, HtmlUtil};
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
@@ -71,22 +69,17 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 		}
 		ScrapeType::Forum => {
 			static SEL_TEXT: &str = "body > main > div > div > div > div:nth-child(2) > div > ol > li";
-			let sel = Selector::parse(SEL_TEXT).map_err(|_| BadSelector(SEL_TEXT.to_owned()))?;
+			let sel = format_selector(SEL_TEXT)?;
 
-			let lower_url_test = "div > h4 > div > a".to_owned();
-			let lower_url = Selector::parse(&lower_url_test).map_err(|_| BadSelector(lower_url_test.clone()))?;
-
-			let date_sel_text: String = "div > div > time".to_owned();
-			let date_sel = Selector::parse(&date_sel_text).map_err(|_| NewsError::BadSelector(date_sel_text.clone()))?;
+			let lower_url_test = "div > h4 > div > a";
+			let lower_url = format_selector(lower_url_test)?;
 
 			let selected = html.select(&sel);
 			let mut res = vec![];
 			for item in selected {
 				if let Some(url_elem) = item.select(&lower_url).next() {
 					if let Some(url) = url_elem.value().attr("href") {
-						if let Some(date_str) = item.select(&date_sel).next().ok_or_else(|| SelectedNothing(date_sel_text.clone(), item.inner_html()))?.value().attr("datetime") {
-							res.push(url.to_owned());
-						}
+						res.push(url.to_owned());
 					}
 				}
 			}

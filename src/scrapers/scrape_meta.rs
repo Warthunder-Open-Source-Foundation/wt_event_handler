@@ -1,8 +1,8 @@
 use scraper::{Html, Selector};
 
-use crate::embed::EmbedData;
+use crate::embed::{EmbedData, EMPTY_IMG};
 use crate::error::NewsError;
-use crate::scrapers::scraper_resources::html_util::{ElemUtil, HtmlUtil};
+use crate::scrapers::scraper_resources::html_util::{ElemUtil, format_selector, HtmlUtil};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 /// Collects embed information from page
@@ -21,7 +21,7 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 			let title_elem = html.select_first("head>meta:nth-child(13)", post_url)?;
 			(
 				title_elem.select_attribute("content", post_url)?,
-				scrape_news_image(html),
+				scrape_news_image(html).unwrap_or(EMPTY_IMG.to_owned()),
 				sanitize_html(&get_next_selector(html, "p", ScrapeType::Main, post_url)?)
 			)
 		}
@@ -29,7 +29,7 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 			let title_elem = html.select_first("head>meta:nth-child(13)", post_url)?;
 			(
 				title_elem.select_attribute("content", post_url)?,
-				scrape_news_image(html),
+				scrape_news_image(html).unwrap_or(EMPTY_IMG.to_owned()),
 				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_owned()
 			)
 		}
@@ -40,7 +40,7 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 
 /// Returns sufficiently long string as description for embed
 fn get_next_selector(html: &Html, selector: &str, scrape_type: ScrapeType, post_url: &str) -> Result<String, NewsError> {
-	let selector = Selector::parse(selector).map_err(|_| NewsError::BadSelector(selector.to_owned()))?;
+	let selector = format_selector(selector)?;
 	let selected = html.select(&selector);
 	for item in selected {
 		if item.inner_html().len() >= 10 {
@@ -115,9 +115,9 @@ fn sanitize_html(html: &str) -> String {
 }
 
 /// Collects meta image to display for embed
-fn scrape_news_image(html: &Html) -> String {
+fn scrape_news_image(html: &Html) -> Result<String, NewsError> {
 	let mut actual = "".to_owned();
-	for item in html.select(&Selector::parse("meta, img").unwrap()) {
+	for item in html.select(&format_selector("meta, img")?) {
 		if let Some(proper_image) = item.value().attr("content") {
 			if proper_image.contains("https://warthunder.com/upload/image//!") && item.value().attr("name") != Some("twitter:image") {
 				actual = proper_image.to_owned();
@@ -130,7 +130,7 @@ fn scrape_news_image(html: &Html) -> String {
 			break;
 		}
 	}
-	actual
+	Ok(actual)
 }
 
 #[cfg(test)]
