@@ -1,8 +1,9 @@
-use std::collections::{HashMap};
+use std::collections::HashMap;
+
 use tracing::{error, warn};
+
 use crate::api::database::Database;
 use crate::error::NewsError;
-
 use crate::scrapers::html_processing::scrape_links;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
@@ -55,8 +56,8 @@ impl Sources {
 			match scrape_links(source).await {
 				Ok(news_urls) => {
 					for news_url in &news_urls {
-						source.store_recent(&[&news_url]);
-							db.store_recent(&[&news_url], source.id).await;
+						source.store_recent([&news_url]);
+						db.store_recent([&news_url], source.id).await.unwrap();
 					}
 				}
 				Err(e) => {
@@ -75,8 +76,14 @@ impl Sources {
 			  I::Item: ToString
 	{
 		for to_remove in to_remove_urls {
+			let mut removed = false;
 			for source in &mut self.sources {
-				source.tracked_urls.remove(&to_remove.to_string());
+				if source.tracked_urls.remove(&to_remove.to_string()).is_some() {
+					removed = true;
+				}
+			}
+			if !removed {
+				eprintln!("Failed to remove URL: {}", to_remove.to_string());
 			}
 		}
 	}

@@ -79,8 +79,8 @@ impl Default for FilterType {
 impl Hooks {
 	pub async fn from_user() -> Self {
 		let mut val = Self {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),

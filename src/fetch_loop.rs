@@ -1,17 +1,17 @@
 use std::fs;
 use std::process::exit;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
+#[cfg(feature = "api")]
 use actix_cors::Cors;
 use actix_web::{App, HttpServer};
 use actix_web::web::Data;
 use lazy_static::lazy_static;
-use tokio::signal;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
+
 use crate::api::database::Database;
 use crate::api::endpoints::{get_latest_news, get_latest_timestamp, get_uptime, greet, post_manual, shutdown};
-
 use crate::error::{error_webhook, NewsError};
 use crate::json::sources::Sources;
 use crate::scrapers::html_processing::html_processor;
@@ -35,7 +35,7 @@ pub async fn fetch_loop(hooks: bool) {
 	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
-	sources.debug_remove_tracked_urls(&["_"]);
+	sources.debug_remove_tracked_urls::<&[&str]>(&[]);
 
 	let mut timeouts = Timeout::new();
 
@@ -53,7 +53,7 @@ pub async fn fetch_loop(hooks: bool) {
 	// Spawn API thread
 	#[cfg(feature = "api")]
 	tokio::task::spawn({
-		let cloned_database = Data::new( database.clone());
+		let cloned_database = Data::new(database.clone());
 		info!("Spawned API thread");
 		HttpServer::new(move || {
 			let cors = Cors::default()
@@ -99,13 +99,13 @@ pub async fn fetch_loop(hooks: bool) {
 					Ok(news) => {
 						for news_embed in &news {
 							if hooks {
-								source.handle_webhooks(news_embed, true, source.scrape_type).await;
+								news_embed.handle_webhooks(true, source.scrape_type).await;
 							}
 							increment(Incr::NewNews).await;
 						}
 
 						source.store_recent(news.iter().map(|new| &new.url));
-						database.store_recent(news.iter().map(|new| &new.url), source.id).await;
+						let _db_insert_result = database.store_recent(news.iter().map(|new| &new.url), source.id).await;
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;
@@ -148,7 +148,7 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 	match e {
 		NewsError::NoUrlOnPost(name, html) => {
 			let now = chrono::Local::now().timestamp();
-			let sanitized_url = name.replace('/', "_").replace(':', "_");
+			let sanitized_url = name.replace(['/', ':'], "_");
 			drop(fs::write(&format!("/log/err_html/{sanitized_url}_{now}.html"), html));
 			time_out(true, "no_url_on_post".to_owned()).await;
 		}
@@ -215,5 +215,4 @@ async fn handle_err(e: NewsError, scrape_type: ScrapeType, source: String, timeo
 			crash_and_burn(e).await;
 		}
 	}
-
 }

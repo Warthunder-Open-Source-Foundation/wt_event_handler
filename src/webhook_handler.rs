@@ -19,22 +19,7 @@ const DEFAULT_KEYWORDS: [&str; 30] = [
 	"issues", "technical", "servers", "christmas", "market", "camouflages"
 ];
 
-impl Source {
-	pub async fn handle_webhooks(&self, content: &EmbedData, is_filtered: bool, scrape_type: ScrapeType) {
-		for (i, hook) in WEBHOOK_AUTH.hooks.iter().enumerate() {
-			if is_filtered {
-				if match_filter(&content.url, hook, scrape_type) {
-					deliver_webhook(content.clone(), i).await;
-				}
-			} else {
-				deliver_webhook(content.clone(), i).await;
-			}
-			STATS.lock().await.increment(Incr::PostCounter);
-		}
-	}
-}
-
-fn match_filter(content: &str, hook: &Hooks, scrape_type: ScrapeType) -> bool {
+pub fn match_filter(content: &str, hook: &Hooks, scrape_type: ScrapeType) -> bool {
 	match scrape_type {
 		ScrapeType::Main | ScrapeType::Changelog => {
 			filter_main(content, hook)
@@ -153,7 +138,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
 		 .image(&content.img_url)
 		 .url(&content.url)
-		 .field("Want these news for your server too?", "https://news.wt.flareflo.dev", true)
+		 .field("Want these news for your server too?", "https://wt.flareflo.dev/news", true)
 		 .footer(|f| {
 			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
 		 })
@@ -181,8 +166,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_default_pass() {
 		assert_eq!(match_filter("pass", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -194,8 +179,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_default_no_match() {
 		assert_eq!(match_filter("xyz", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -207,8 +192,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_whitelist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Blacklist,
@@ -221,8 +206,8 @@ mod tests {
 	#[should_panic]
 	fn main_test_filter_whitelist_miss() {
 		assert_eq!(match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Whitelist,
@@ -235,8 +220,8 @@ mod tests {
 	#[should_panic]
 	fn main_test_filter_blacklist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,
@@ -248,8 +233,8 @@ mod tests {
 	#[test]
 	fn main_test_filter_blacklist_miss() {
 		assert_eq!(match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,
@@ -263,8 +248,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_default_pass() {
 		assert_eq!(match_filter("pass", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -276,8 +261,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_default_no_match() {
 		assert_eq!(match_filter("xyz", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: FilterType::default(),
 			forum_filter: FilterType::default(),
@@ -289,8 +274,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_whitelist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Blacklist,
@@ -302,8 +287,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_whitelist_miss() {
 		assert_eq!(match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Whitelist,
 			forum_filter: Whitelist,
@@ -315,8 +300,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_blacklist_match() {
 		assert_eq!(match_filter("C", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,
@@ -328,8 +313,8 @@ mod tests {
 	#[test]
 	fn forum_test_filter_blacklist_miss() {
 		match_filter("E", &Hooks {
-			name: "".to_string(),
-			token: "".to_string(),
+			name: String::new(),
+			token: String::new(),
 			uid: 0,
 			main_filter: Blacklist,
 			forum_filter: Blacklist,

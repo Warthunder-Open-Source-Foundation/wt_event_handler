@@ -1,6 +1,7 @@
 use std::sync::atomic::Ordering;
+
 use sqlx::{Executor, query, Row};
-use tokio::time::Instant;
+
 use crate::api::database::Database;
 use crate::api::db_error::DatabaseError;
 
@@ -46,19 +47,19 @@ impl Database {
 			FROM sources
 			GROUP BY source
 			HAVING MAX(fetch_date) == fetch_date");
-		Ok(self.connection.fetch_all(q).await?.into_iter().map(|x|x.get(0)).collect())
+		Ok(self.connection.fetch_all(q).await?.into_iter().map(|x| x.get(0)).collect())
 	}
 
-	pub fn get_latest_timestamp(&self) ->i64 {
+	pub fn get_latest_timestamp(&self) -> i64 {
 		self.latest_timestamp.load(Ordering::Relaxed)
 	}
 
-	async fn query_latest_timestamp(&self) -> Result<(i64), DatabaseError> {
+	async fn query_latest_timestamp(&self) -> Result<i64, DatabaseError> {
 		let q = query!(// language=SQL
 			"SELECT fetch_date
 			 FROM sources
 			 ORDER BY fetch_date DESC ");
-		let res = 	self.connection.fetch_one(q).await?;
+		let res = self.connection.fetch_one(q).await?;
 		Ok(res.get(0))
 	}
 }

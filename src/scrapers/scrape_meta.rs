@@ -1,37 +1,36 @@
-use scraper::{Html, Selector};
+use scraper::Html;
 
-use crate::embed::EmbedData;
-use crate::error::{ NewsError};
+use crate::embed::{EmbedData, EMPTY_IMG};
+use crate::error::NewsError;
+use crate::scrapers::scraper_resources::html_util::{ElemUtil, format_selector, HtmlUtil};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
 
 /// Collects embed information from page
 pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Result<EmbedData, NewsError> {
 	let (title, img_url, preview_text) = match scrape_type {
 		ScrapeType::Forum => {
-			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
-			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(n)".to_owned(), post_url.to_owned());
+			let title_elem = html.select_first("head>meta:nth-child(5)", post_url)?;
+			let preview_elem = html.select_first("head>meta:nth-child(8)", post_url)?;
 			(
-				html.select(&Selector::parse("head>meta:nth-child(5)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
-				"".to_string(),
-				html.select(&Selector::parse("head>meta:nth-child(8)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string()
+				title_elem.select_attribute("content", post_url)?,
+				String::new(),
+				preview_elem.select_attribute("content", post_url)?
 			)
 		}
 		ScrapeType::Main => {
-			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
-			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(13)".to_owned(), post_url.to_owned());
+			let title_elem = html.select_first("head>meta:nth-child(13)", post_url)?;
 			(
-				html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
-				scrape_news_image(html),
+				title_elem.select_attribute("content", post_url)?,
+				scrape_news_image(html).unwrap_or(EMPTY_IMG.to_owned()),
 				sanitize_html(&get_next_selector(html, "p", ScrapeType::Main, post_url)?)
 			)
 		}
 		ScrapeType::Changelog => {
-			let fail = |e| NewsError::BadSelector(format!("{e:?}"));
-			let fail_select_anything = || NewsError::SelectedNothing("head>meta:nth-child(13)".to_owned(), post_url.to_owned());
+			let title_elem = html.select_first("head>meta:nth-child(13)", post_url)?;
 			(
-				html.select(&Selector::parse("head>meta:nth-child(13)").map_err(|e| fail(e))?).next().ok_or(fail_select_anything())?.value().attr("content").ok_or(fail_select_anything())?.to_string(),
-				scrape_news_image(html),
-				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_string()
+				title_elem.select_attribute("content", post_url)?,
+				scrape_news_image(html).unwrap_or(EMPTY_IMG.to_owned()),
+				"The current provided changelog reflects the major changes within the game as part of this Update. Some updates, additions and fixes may not be listed in the provided notes. War Thunder is constantly improving and specific fixes may be implemented without the client being updated.".to_owned()
 			)
 		}
 	};
@@ -41,10 +40,10 @@ pub fn scrape_meta(html: &Html, scrape_type: ScrapeType, post_url: &str) -> Resu
 
 /// Returns sufficiently long string as description for embed
 fn get_next_selector(html: &Html, selector: &str, scrape_type: ScrapeType, post_url: &str) -> Result<String, NewsError> {
-	let selector = Selector::parse(selector).map_err(|_|NewsError::BadSelector(selector.to_owned()))?;
+	let selector = format_selector(selector)?;
 	let selected = html.select(&selector);
 	for item in selected {
-		if item.inner_html().len() >= 5 {
+		if item.inner_html().len() >= 10 {
 			return Ok(item.inner_html());
 		}
 	}
@@ -85,7 +84,7 @@ fn sanitize_html(html: &str) -> String {
 	};
 
 	let mut in_escape = false;
-	let mut constructed = "".to_owned();
+	let mut constructed = String::new();
 
 	for (i, char) in html.chars().enumerate() {
 		match char {
@@ -116,9 +115,9 @@ fn sanitize_html(html: &str) -> String {
 }
 
 /// Collects meta image to display for embed
-fn scrape_news_image(html: &Html) -> String {
-	let mut actual = "".to_owned();
-	for item in html.select(&Selector::parse("meta, img").unwrap()) {
+fn scrape_news_image(html: &Html) -> Result<String, NewsError> {
+	let mut actual = String::new();
+	for item in html.select(&format_selector("meta, img")?) {
 		if let Some(proper_image) = item.value().attr("content") {
 			if proper_image.contains("https://warthunder.com/upload/image//!") && item.value().attr("name") != Some("twitter:image") {
 				actual = proper_image.to_owned();
@@ -131,7 +130,7 @@ fn scrape_news_image(html: &Html) -> String {
 			break;
 		}
 	}
-	actual
+	Ok(actual)
 }
 
 #[cfg(test)]

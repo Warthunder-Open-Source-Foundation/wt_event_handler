@@ -1,22 +1,27 @@
 #![feature(if_let_guard)]
 #![feature(once_cell)]
-#![allow(clippy::module_name_repetitions)]
 #![feature(async_closure)]
 #![feature(type_ascription)]
 
+// Reason: Keeps type name collisions at bay
+#![allow(clippy::module_name_repetitions)]
+
+// Reason: Just makes unwrap_or calls much more verbose than they need to be
+#![allow(clippy::or_fun_call)]
+
 use std::{fs, io};
 use std::io::stdout;
-use std::process::{exit};
+use std::process::exit;
+use std::time::Instant;
 
 use lazy_static::{initialize, lazy_static};
+use rand::Rng;
 use tracing::{Level, warn};
 use tracing_appender::rolling;
-use tracing_subscriber::fmt::writer::MakeWriterExt;
-use crate::error::NewsError;
-use rand::Rng;
-use std::time::Instant;
 use tracing_subscriber::EnvFilter;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 
+use crate::error::NewsError;
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
 use crate::json::webhooks::WebhookAuth;
@@ -33,7 +38,6 @@ mod timeout;
 mod statistics;
 mod api;
 
-const RECENT_PATH: &str = "assets/sources.json";
 const TOKEN_PATH: &str = "assets/discord_token.json";
 
 
