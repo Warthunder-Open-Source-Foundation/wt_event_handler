@@ -138,7 +138,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
 		 .image(&content.img_url)
 		 .url(&content.url)
-		 .field("Want these news for your server too?", "https://news.wt.flareflo.dev", true)
+		 .field("Want these news for your server too?", "https://wt.flareflo.dev/news", true)
 		 .footer(|f| {
 			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
 		 })
