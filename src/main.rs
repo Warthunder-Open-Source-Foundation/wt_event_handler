@@ -1,8 +1,3 @@
-#![feature(if_let_guard)]
-#![feature(once_cell)]
-#![feature(async_closure)]
-#![feature(type_ascription)]
-
 // Reason: Keeps type name collisions at bay
 #![allow(clippy::module_name_repetitions)]
 

@@ -24,8 +24,6 @@ opt-level = 3
 debug = true
 debug-assertions = false
 overflow-checks = true
-incremental = true
-codegen-units = 4
 
 # Use this for performing "regular" runs, but closer to what a production run would be like, without 2 minutes of linking
 [profile.benchmark]
