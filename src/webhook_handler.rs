@@ -146,7 +146,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 	});
 
 	webhook.execute(my_http_client, false, |w| {
-		w.content(&format!("[{}]()", &content.url));
+		w.content(&format!("[{}]({})", &content.title, &content.url));
 		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();

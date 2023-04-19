@@ -9,14 +9,14 @@
 // Reason: Just makes unwrap_or calls much more verbose than they need to be
 #![allow(clippy::or_fun_call)]
 
-use std::{fs, io};
+use std::{env, fs, io};
 use std::io::stdout;
 use std::process::exit;
 use std::time::Instant;
 
 use lazy_static::{initialize, lazy_static};
 use rand::Rng;
-use tracing::{Level, warn};
+use tracing::{info, Level, warn};
 use tracing_appender::rolling;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
@@ -74,13 +74,20 @@ async fn main() -> Result<(), NewsError> {
 	let mut line = String::new();
 	let mut hooks = true;
 
-	println!("Please select a start profile:\n\
+	let mut args = env::args();
+	if let Some(first) = args.skip(1).next() {
+		line = first;
+		println!("Launching automatically with option {}", &line)
+	} else {
+		println!("Please select a start profile:\n\
 	1. Regular initialization\n\
 	2. Boot without sending hooks\n\
 	3. Add new webhook-client\n\
 	4. Remove a webhook\n\
 	5. Test webhook client / channel");
-	io::stdin().read_line(&mut line).expect("failed to read from stdin");
+
+		io::stdin().read_line(&mut line).expect("failed to read from stdin");
+	}
 
 	// LOGGING CONVENTION
 	// Trace - unused

@@ -6,7 +6,7 @@ use serenity::utils::Color;
 use tracing::{error, warn};
 
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
-use crate::WEBHOOK_AUTH;
+use crate::{BOOT_TIME, WEBHOOK_AUTH};
 
 #[derive(Debug, Clone, Copy)]
 /// Counts statistics during runtime
@@ -26,12 +26,14 @@ impl Display for Statistics {
 					New news: {}\n\
 					Issues handled: {}\n\
 					Sources timed out: {}
+					Uptime: {:?},
 					",
 			   self.fetch_counter,
 			   self.post_counter,
 			   self.new_news,
 			   self.errors,
 			   self.timeouts,
+				BOOT_TIME.elapsed()
 		)
 	}
 }
