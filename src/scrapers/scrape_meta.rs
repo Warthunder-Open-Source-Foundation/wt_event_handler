@@ -155,6 +155,14 @@ mod tests {
 		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Changelog, &url.to_owned()));
 	}
 
+	#[tokio::test]
+	async fn test_embed_data_fixed_url() {
+		let url = "https://warthunder.com/en/news/8199-it-s-fixed-73-en";
+		let html = request_html(url).await.unwrap();
+
+		eprintln!("{:#?}", scrape_meta(&html, ScrapeType::Main, &url.to_owned()));
+	}
+
 	#[test]
 	fn test_html_sanitization() {
 		static RAW: &str = r#"Together with <a href="https://warthunder.com/en/news/7583-development-dagor-engine-6-5-zoom-in-enhance-it-en">texture upscaling</a> and <a href="https://warthunder.com/en/news/7585-development-dagor-engine-6-5-new-surface-rendering-en">new surface rendering options</a>, the new version of the War Thunder graphic engine brings numerous minor features and improvements. Meet new visuals coming soon in the “Wind of Change” update!"#;
