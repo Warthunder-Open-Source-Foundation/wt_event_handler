@@ -54,4 +54,5 @@ actix-web = "^4.1.0"
 tracing = "^0.1.36"
 tracing-appender = "^0.2.2"
 tracing-subscriber = {version  = "^0.3.15", features = ["tracing-log", "env-filter", "fmt", "std"]}
+humantime = "2.1.0"
 
