@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use humantime::format_duration;
 
 use serenity::http::Http;
 use serenity::model::channel::Embed;
@@ -33,7 +34,7 @@ impl Display for Statistics {
 			   self.new_news,
 			   self.errors,
 			   self.timeouts,
-				BOOT_TIME.elapsed()
+			   format_duration(BOOT_TIME.elapsed())
 		)
 	}
 }
@@ -87,12 +88,12 @@ impl Statistics {
 
 		let embed = Embed::fake(|e| {
 			e.title(format!("Statistics for the past {} hours", STAT_COOLDOWN_HOURS))
-			 .color(Color::from_rgb(116, 16, 210))
-			 .field("Numbers", format!("{self}"), false)
-			 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
-			 .footer(|f| {
-				 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-			 })
+				.color(Color::from_rgb(116, 16, 210))
+				.field("Numbers", format!("{self}"), false)
+				.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
+				.footer(|f| {
+					f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
+				})
 		});
 
 		webhook.execute(my_http_client, false, |w| {

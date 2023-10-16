@@ -155,6 +155,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 
 // Tests  -----------------------------------------------------------------------
 
+#[cfg(test)]
 mod tests {
 	#[allow(unused_imports)]
 	use crate::json::webhooks::FilterType::{Blacklist, Whitelist};

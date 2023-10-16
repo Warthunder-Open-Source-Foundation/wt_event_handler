@@ -78,6 +78,7 @@ impl Sources {
 		for to_remove in to_remove_urls {
 			let mut removed = false;
 			for source in &mut self.sources {
+				eprintln!("Removed {}", to_remove.to_string());
 				if source.tracked_urls.remove(&to_remove.to_string()).is_some() {
 					removed = true;
 				}
