@@ -131,29 +131,23 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		Ok(hook) => hook,
 	};
 
-	let main = Embed::fake(|e| {
+	let embed = Embed::fake(|e| {
 		e.title(&content.title)
 		 .color(Color::from_rgb(116, 16, 210))
 		 .description(&content.preview_text)
 		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
 		 .image(&content.img_url)
 		 .url(&content.url)
-
+		 .field("Want these news for your server too?", "https://wt.flareflo.dev/news", true)
+		 .footer(|f| {
+			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
+		 })
 		 .timestamp(Timestamp::now())
-	});
-
-	let show_other = Embed::fake(|e|{
-		e.title("Add bot to your own server")
-			.color(Color::from_rgb(116, 16, 210))
-			.url("https://wt.flareflo.dev/news")
-			.footer(|f| {
-				f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-			})
 	});
 
 	webhook.execute(my_http_client, false, |w| {
 		w.content(&format!("[{}]({})", &content.title, &content.url));
-		w.embeds(vec![main, show_other]);
+		w.embeds(vec![embed]);
 		w
 	}).await.unwrap();
 	warn!("Posted webhook for {}", WEBHOOK_AUTH.hooks[pos].name);
