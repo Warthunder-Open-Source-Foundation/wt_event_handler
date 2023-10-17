@@ -27,7 +27,7 @@ impl Display for Statistics {
 					New news: {}\n\
 					Issues handled: {}\n\
 					Sources timed out: {}
-					Uptime: {:?},
+					Uptime: {},
 					",
 			   self.fetch_counter,
 			   self.post_counter,
