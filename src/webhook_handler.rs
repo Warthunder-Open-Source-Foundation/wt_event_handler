@@ -5,11 +5,8 @@ use serenity::utils::Color;
 use tracing::{error, warn};
 
 use crate::embed::EmbedData;
-use crate::fetch_loop::STATS;
-use crate::json::sources::Source;
 use crate::json::webhooks::{FilterType, Hooks};
 use crate::scrapers::scraper_resources::resources::ScrapeType;
-use crate::statistics::Incr;
 use crate::WEBHOOK_AUTH;
 
 const DEFAULT_KEYWORDS: [&str; 30] = [

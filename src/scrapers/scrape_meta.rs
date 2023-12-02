@@ -126,10 +126,15 @@ fn scrape_news_image(html: &Html) -> Result<String, NewsError> {
 		}
 
 		if let Some(proper_image) = item.value().attr("src") {
+			// Tracking pixels which are styled to be invisible should be ignored!
+			if item.value().attrs().find(|e|e.0 == "style" && e.1.contains("display: none")).is_some() {
+				continue;
+			}
 			actual = proper_image.to_owned();
 			break;
 		}
 	}
+	println!("{}", actual);
 	Ok(actual)
 }
 
