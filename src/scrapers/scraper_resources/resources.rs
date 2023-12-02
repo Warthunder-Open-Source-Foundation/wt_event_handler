@@ -63,10 +63,10 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 		ScrapeType::Changelog | ScrapeType::Main => {
 			let sel_text = if scrape_type == ScrapeType::Main {
 				// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
-				"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(2) > div > section > div > div.showcase__content-wrapper > div.showcase__item"
+				"div.showcase__item"
 			} else {
 				// ---------------------------------------------------------↓ I dont make the rules ¯\_(ツ)_/¯
-				"#bodyRoot > div.content > div:nth-child(2) > div:nth-child(3) > div > section > div > div.showcase__content-wrapper > div.showcase__item"
+				"div.showcase__item"
 			};
 			let sel = format_selector(sel_text)?;
 
@@ -75,6 +75,7 @@ pub fn get_listed_links(scrape_type: ScrapeType, html: &Html) -> Result<Vec<Stri
 			for item in selected {
 				if let Ok(url) = item.select_first("a", &scrape_type.to_string())?.select_attribute("href", &scrape_type.to_string()) {
 					res.push(url.clone());
+				} else {
 				}
 			}
 			Ok(res)
