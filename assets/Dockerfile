@@ -1,13 +1,13 @@
-FROM archlinux
-RUN pacman -Syu --noconfirm rustup git base-devel
-RUN pacman --noconfirm -Scc
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+FROM docker.io/clux/muslrust:stable as builder
 RUN rustup install stable --profile minimal
+WORKDIR /build
 RUN git clone https://github.com/Warthunder-Open-Source-Foundation/wt_event_handler.git
-WORKDIR ./wt_event_handler
+WORKDIR /build/wt_event_handler
 RUN cargo build --release
-RUN mv target/release/wt_event_handler wt_event_handler
-RUN rm -rf target
 
+FROM alpine
+WORKDIR /running
+COPY --from=builder /build/wt_event_handler/target/x86_64-unknown-linux-musl/release/wt_event_handler .
+RUN mkdir assets
 COPY discord_token.json ./assets
 CMD ./wt_event_handler 1
