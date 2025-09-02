@@ -11,11 +11,11 @@ use std::time::Instant;
 
 use lazy_static::{initialize, lazy_static};
 use rand::Rng;
-use tracing::{info, Level, warn};
+use tracing::{Level, warn};
 use tracing_appender::rolling;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
-
+use uptime_kuma_pusher::UptimePusher;
 use crate::error::NewsError;
 use crate::fetch_loop::fetch_loop;
 use crate::json::webhooks::CrashHook;
@@ -31,7 +31,6 @@ mod embed;
 mod error;
 mod timeout;
 mod statistics;
-mod api;
 
 const TOKEN_PATH: &str = "assets/discord_token.json";
 
@@ -69,7 +68,7 @@ async fn main() -> Result<(), NewsError> {
 	let mut line = String::new();
 	let mut hooks = true;
 
-	let mut args = env::args();
+	let args = env::args();
 	if let Some(first) = args.skip(1).next() {
 		line = first;
 		println!("Launching automatically with option {}", &line)
@@ -98,8 +97,7 @@ async fn main() -> Result<(), NewsError> {
 	let all_files = debug_file.and(warn_file);
 
 	let env_filter = EnvFilter::from_default_env()
-		.add_directive(Level::INFO.into())
-		.add_directive("sqlx=warn".parse().unwrap());
+		.add_directive(Level::INFO.into());
 
 
 	tracing_subscriber::fmt()
@@ -111,6 +109,7 @@ async fn main() -> Result<(), NewsError> {
 		.with_ansi(false)
 		.init();
 
+	UptimePusher::new(&env::var("UPTIME_KUMA_URL").expect("UPTIME_KUMA_URL to be set"), true).spawn_background();
 	match line.trim() {
 		"1" => {}
 		"2" => { hooks = false; }

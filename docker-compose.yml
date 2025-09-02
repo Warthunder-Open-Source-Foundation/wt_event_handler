@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: ".env"
+    volumes:
+      - ./assets:/usr/src/app/assets
+      - ./log:/usr/src/app/log
+    restart: unless-stopped

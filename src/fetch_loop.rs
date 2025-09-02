@@ -2,16 +2,10 @@ use std::fs;
 use std::process::exit;
 use std::time::Duration;
 
-#[cfg(feature = "api")]
-use actix_cors::Cors;
-use actix_web::{App, HttpServer};
-use actix_web::web::Data;
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
 use tracing::{error, info, warn};
 
-use crate::api::database::Database;
-use crate::api::endpoints::{get_latest_news, get_latest_timestamp, get_uptime, greet, post_manual, shutdown};
 use crate::error::{error_webhook, NewsError};
 use crate::json::sources::Sources;
 use crate::scrapers::html_processing::html_processor;
@@ -31,8 +25,7 @@ lazy_static! {
 }
 
 pub async fn fetch_loop(hooks: bool) {
-	let database = Database::new().await.expect("Cannot initiate DB");
-	let mut sources = Sources::build(&database).await.expect("I fucked up my soup");
+	let mut sources = Sources::build().await.expect("I fucked up my soup");
 
 	#[cfg(debug_assertions)]
 	sources.debug_remove_tracked_urls::<&[&str]>(&[]);
@@ -48,31 +41,6 @@ pub async fn fetch_loop(hooks: bool) {
 			stats.post().await;
 			stats.reset();
 		}
-	});
-
-	// Spawn API thread
-	#[cfg(feature = "api")]
-	tokio::task::spawn({
-		let cloned_database = Data::new(database.clone());
-		info!("Spawned API thread");
-		HttpServer::new(move || {
-			let cors = Cors::default()
-				.allow_any_origin()
-				.allowed_methods(vec!["GET", "POST"]);
-
-			App::new()
-				.wrap(cors)
-				.app_data(Data::clone(&cloned_database))
-				.service(greet)
-				.service(get_latest_news)
-				.service(shutdown)
-				.service(get_latest_timestamp)
-				.service(get_uptime)
-				.service(post_manual)
-		})
-			.bind(("0.0.0.0", 8082))
-			.expect("Cant bind local host on port 8080")
-			.run()
 	});
 
 	// Responsible for shutting down tokio-parent / sibling processes
@@ -105,7 +73,6 @@ pub async fn fetch_loop(hooks: bool) {
 						}
 
 						source.store_recent(news.iter().map(|new| &new.url));
-						let _db_insert_result = database.store_recent(news.iter().map(|new| &new.url), source.id).await;
 					}
 					Err(e) => {
 						increment(Incr::Errors).await;

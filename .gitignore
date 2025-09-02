@@ -2,7 +2,7 @@
 Cargo.lock
 .idea
 /.idea
-
+.env
 
 /assets/discord_token.json
 
