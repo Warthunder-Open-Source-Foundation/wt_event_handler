@@ -2,7 +2,7 @@ FROM docker.io/rust:1.86 as builder
 
 WORKDIR /usr/src/app
 
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 COPY ./src ./src
 
 RUN cargo build --release
