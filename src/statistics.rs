@@ -1,10 +1,11 @@
 use std::fmt::{Display, Formatter};
 use humantime::format_duration;
 
+use serenity::builder::{CreateEmbed, CreateEmbedFooter, ExecuteWebhook};
 use serenity::http::Http;
-use serenity::model::channel::Embed;
-use serenity::utils::Color;
+use serenity::model::colour::Color;
 use tracing::{error, warn};
+
 
 use crate::fetch_loop::{STAT_COOLDOWN_HOURS, STATS};
 use crate::{BOOT_TIME, WEBHOOK_AUTH};
@@ -78,7 +79,7 @@ impl Statistics {
 	pub async fn post(&mut self) {
 		let my_http_client = Http::new(&WEBHOOK_AUTH.statistics_hook.token);
 
-		let webhook = match my_http_client.get_webhook_with_token(WEBHOOK_AUTH.statistics_hook.uid, &WEBHOOK_AUTH.statistics_hook.token).await {
+		let webhook = match my_http_client.get_webhook_with_token(WEBHOOK_AUTH.statistics_hook.uid.into(), &WEBHOOK_AUTH.statistics_hook.token).await {
 			Err(why) => {
 				error!("{why}");
 				std::panic::panic_any(why)
@@ -86,20 +87,19 @@ impl Statistics {
 			Ok(hook) => hook,
 		};
 
-		let embed = Embed::fake(|e| {
-			e.title(format!("Statistics for the past {} hours", STAT_COOLDOWN_HOURS))
-				.color(Color::from_rgb(116, 16, 210))
-				.field("Numbers", format!("{self}"), false)
-				.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
-				.footer(|f| {
-					f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-				})
-		});
+		let embed = CreateEmbed::new()
+			.title(format!("Statistics for the past {} hours", STAT_COOLDOWN_HOURS))
+			.color(Color::from_rgb(116, 16, 210))
+			.field("Numbers", format!("{self}"), false)
+			.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
+			.footer(
+				CreateEmbedFooter::new("Report bugs/issues: FlareFlo🦆#2800")
+					.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png")
+			);
 
-		webhook.execute(my_http_client, false, |w| {
-			w.embeds(vec![embed]);
-			w
-		}).await.unwrap();
+		let builder = ExecuteWebhook::new().embed(embed);
+
+		webhook.execute(&my_http_client, false, builder).await.unwrap();
 
 		warn!("Posted statistics");
 	}

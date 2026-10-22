@@ -2,7 +2,7 @@
 name = "wt_event_handler"
 version = "0.1.2"
 edition = "2021"
-rust-version = "1.64"
+rust-version = "1.74"
 license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -25,19 +25,19 @@ debug-assertions = false
 overflow-checks = true
 
 [dependencies]
-scraper = "^0.13.0"
-reqwest = "^0.11.11"
-tokio = { version = "^1.20.1", features = ["rt-multi-thread", "signal"] }
-serenity = "^0.11.5"
-serde = "^1.0.144"
-serde_json = "^1.0.85"
-chrono = "^0.4.22"
-lazy_static = "^1.4.0"
-thiserror = "^1.0.33"
-rand = "^0.8.5"
+scraper = "0.29"
+reqwest = { version = "0.13.5", features = ["json"] }
+tokio = { version = "1", features = ["rt-multi-thread", "signal"] }
+serenity = "0.12"
+serde = "1.0"
+serde_json = "1.0"
+chrono = "0.4"
+lazy_static = "1.5"
+thiserror = "2.0"
+rand = "0.10.3"
 
-tracing = "^0.1.36"
-tracing-appender = "^0.2.2"
-tracing-subscriber = {version  = "^0.3.15", features = ["tracing-log", "env-filter", "fmt", "std"]}
-humantime = "2.1.0"
-uptime_kuma_pusher = "0.3.0"
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["tracing-log", "env-filter", "fmt", "std"] }
+humantime = "2.1"
+uptime_kuma_pusher = { git = "https://github.com/FlareFlo/uptime_kuma_pusher.git" }

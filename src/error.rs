@@ -1,11 +1,12 @@
 use std::fmt::Debug;
 
+use serenity::builder::{CreateEmbed, CreateEmbedFooter, ExecuteWebhook};
 use serenity::http::Http;
 use serenity::model;
-use serenity::model::prelude::Embed;
-use serenity::utils::Color;
+use serenity::model::colour::Color;
 use thiserror::Error as ThisError;
 use tracing::{error, warn};
+
 
 use crate::PANIC_INFO;
 use crate::scrapers::scraper_resources::resources::ScrapeType;
@@ -64,7 +65,7 @@ pub async fn ship_error_webhook<T>(input: String, extra_text: &T, can_recover: b
 {
 	let my_http_client = Http::new(&PANIC_INFO.token);
 
-	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid, &PANIC_INFO.token).await {
+	let webhook = match my_http_client.get_webhook_with_token(PANIC_INFO.uid.into(), &PANIC_INFO.token).await {
 		Err(why) => {
 			error!("{why}");
 			std::panic::panic_any(why)
@@ -72,27 +73,23 @@ pub async fn ship_error_webhook<T>(input: String, extra_text: &T, can_recover: b
 		Ok(hook) => hook,
 	};
 
-	let embed = Embed::fake(|e| {
-		let e = e.title(if can_recover {
+	let mut embed = CreateEmbed::new()
+		.title(if can_recover {
 			"A recoverable error occurred"
 		} else {
 			"A non-recoverable error occurred"
-		}
-		)
-				 .field("Core error information", input, false)
-				 .color(Color::from_rgb(116, 16, 210))
-				 .timestamp(model::Timestamp::now())
-				 .footer(|f| {
-					 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-				 });
-		if extra_text.to_string() != "" {
-			e.field("Hint / details", extra_text.to_string(), false);
-		};
-		e
-	});
+		})
+		.field("Core error information", input, false)
+		.color(Color::from_rgb(116, 16, 210))
+		.timestamp(model::Timestamp::now())
+		.footer(
+			CreateEmbedFooter::new("Report bugs/issues: FlareFlo🦆#2800")
+				.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png")
+		);
+	if extra_text.to_string() != "" {
+		embed = embed.field("Hint / details", extra_text.to_string(), false);
+	};
 
-	webhook.execute(my_http_client, false, |w| {
-		w.embeds(vec![embed]);
-		w
-	}).await.unwrap();
+	let builder = ExecuteWebhook::new().embed(embed);
+	webhook.execute(&my_http_client, false, builder).await.unwrap();
 }

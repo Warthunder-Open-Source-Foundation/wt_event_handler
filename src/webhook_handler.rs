@@ -1,8 +1,9 @@
+use serenity::builder::{CreateEmbed, CreateEmbedFooter, ExecuteWebhook};
 use serenity::http::Http;
-use serenity::model::channel::Embed;
+use serenity::model::colour::Color;
 use serenity::model::Timestamp;
-use serenity::utils::Color;
 use tracing::{error, warn};
+
 
 use crate::embed::EmbedData;
 use crate::json::webhooks::{FilterType, Hooks};
@@ -120,7 +121,7 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 
 	let my_http_client = Http::new(token);
 
-	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
+	let webhook = match my_http_client.get_webhook_with_token((*uid).into(), token).await {
 		Err(why) => {
 			error!("{why}");
 			std::panic::panic_any(why)
@@ -128,25 +129,25 @@ pub async fn deliver_webhook(content: EmbedData, pos: usize) {
 		Ok(hook) => hook,
 	};
 
-	let embed = Embed::fake(|e| {
-		e.title(&content.title)
-		 .color(Color::from_rgb(116, 16, 210))
-		 .description(&content.preview_text)
-		 .thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
-		 .image(&content.img_url)
-		 .url(&content.url)
-		 .field("Want these news for your server too?", "https://wt.flareflo.dev/news", true)
-		 .footer(|f| {
-			 f.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png").text("Report bugs/issues: FlareFlo🦆#2800")
-		 })
-		 .timestamp(Timestamp::now())
-	});
+	let embed = CreateEmbed::new()
+		.title(&content.title)
+		.color(Color::from_rgb(116, 16, 210))
+		.description(&content.preview_text)
+		.thumbnail("https://avatars.githubusercontent.com/u/97326911?s=40&v=4")
+		.image(&content.img_url)
+		.url(&content.url)
+		.field("Want these news for your server too?", "https://wt.flareflo.dev/news", true)
+		.footer(
+			CreateEmbedFooter::new("Report bugs/issues: FlareFlo🦆#2800")
+				.icon_url("https://warthunder.com/i/favicons/mstile-70x70.png")
+		)
+		.timestamp(Timestamp::now());
 
-	webhook.execute(my_http_client, false, |w| {
-		w.content(&format!("[{}]({})", &content.title, &content.url));
-		w.embeds(vec![embed]);
-		w
-	}).await.unwrap();
+	let builder = ExecuteWebhook::new()
+		.content(format!("[{}]({})", &content.title, &content.url))
+		.embed(embed);
+
+	webhook.execute(&my_http_client, false, builder).await.unwrap();
 	warn!("Posted webhook for {}", WEBHOOK_AUTH.hooks[pos].name);
 }
 

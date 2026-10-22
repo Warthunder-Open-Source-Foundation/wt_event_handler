@@ -10,7 +10,8 @@ use std::process::exit;
 use std::time::Instant;
 
 use lazy_static::{initialize, lazy_static};
-use rand::Rng;
+use rand::RngExt;
+use rand::distr::Alphanumeric;
 use tracing::{Level, warn};
 use tracing_appender::rolling;
 use tracing_subscriber::EnvFilter;
@@ -45,8 +46,8 @@ lazy_static! {
 		WEBHOOK_AUTH.crash_hook[0].clone()
 	};
 	pub static ref SHUTDOWN_KEY: String =  {
-		rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
+		rand::rng()
+        .sample_iter(&Alphanumeric)
         .take(20)
         .map(char::from)
         .collect()

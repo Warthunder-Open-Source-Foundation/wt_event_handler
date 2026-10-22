@@ -1,7 +1,9 @@
 use std::io;
 use std::process::exit;
 
+use serenity::builder::ExecuteWebhook;
 use serenity::http::Http;
+
 use tracing::error;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
@@ -170,7 +172,7 @@ async fn send_test_hook(hook: &Hooks) {
 
 	let my_http_client = Http::new(token);
 
-	let webhook = match my_http_client.get_webhook_with_token(*uid, token).await {
+	let webhook = match my_http_client.get_webhook_with_token((*uid).into(), token).await {
 		Err(why) => {
 			error!("{why}");
 			std::panic::panic_any(why)
@@ -178,9 +180,6 @@ async fn send_test_hook(hook: &Hooks) {
 		Ok(hook) => hook,
 	};
 
-
-	webhook.execute(my_http_client, false, |w| {
-		w.content(&format!("Webhook {} was successfully created", &hook.name));
-		w
-	}).await.unwrap();
+	let builder = ExecuteWebhook::new().content(format!("Webhook {} was successfully created", &hook.name));
+	webhook.execute(&my_http_client, false, builder).await.unwrap();
 }
